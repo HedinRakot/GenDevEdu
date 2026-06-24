@@ -47,7 +47,7 @@ async function request<T>(path: string, opts: RequestOptions = {}): Promise<T> {
       headers,
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
-  } catch (e) {
+  } catch {
     throw new ApiError(0, "Netzwerkfehler. Bitte erneut versuchen.");
   }
 

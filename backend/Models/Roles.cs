@@ -9,6 +9,11 @@ public static class Roles
     public static readonly string[] All = { Learner, Author, Admin };
 }
 
+public static class Policies
+{
+    public const string AuthorOrAdmin = "AuthorOrAdmin";
+}
+
 public static class CourseStatus
 {
     public const string Draft = "Draft";

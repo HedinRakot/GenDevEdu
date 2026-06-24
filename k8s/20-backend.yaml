@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: backend-secrets
+  namespace: devedu
+type: Opaque
+stringData:
+  # Dev-only signing key. Rotate for anything beyond local use.
+  Jwt__Key: "dev-super-secret-signing-key-change-me-please-32+chars"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: devedu
+  labels: { app: backend }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: backend }
+  template:
+    metadata:
+      labels: { app: backend }
+    spec:
+      containers:
+        - name: backend
+          image: localhost:5000/devedu/backend:local
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ASPNETCORE_URLS
+              value: "http://+:8080"
+            - name: Mongo__ConnectionString
+              value: "mongodb://mongo:27017"
+            - name: Jwt__Issuer
+              value: "devedu"
+            - name: Jwt__Key
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: Jwt__Key
+          readinessProbe:
+            httpGet: { path: /health, port: 8080 }
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 30        # tolerate cold start + mongo wait
+          livenessProbe:
+            httpGet: { path: /health, port: 8080 }
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          resources:
+            requests: { cpu: "100m", memory: "256Mi" }
+            limits: { cpu: "1", memory: "512Mi" }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: devedu
+  labels: { app: backend }
+spec:
+  selector: { app: backend }
+  ports:
+    - port: 8080
+      targetPort: 8080

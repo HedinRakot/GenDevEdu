@@ -1,0 +1,12 @@
+{
+  "name": "devedu-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Playwright end-to-end tests for DevEdu (MVP)",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.48.0"
+  }
+}
