@@ -4,7 +4,7 @@
     Deploy DevEdu to a local Kind cluster using Podman.
 
 .DESCRIPTION
-    Builds backend + frontend images with Podman, pushes them to a local
+    Builds the backend image with Podman, pushes it to a local
     registry container, creates (or reuses) a Kind cluster with an nginx
     ingress controller, and applies all k8s manifests.
 
@@ -27,7 +27,7 @@
 
 .PARAMETER Forward
     After deploying, open a new PowerShell window that forwards
-    localhost:8080 -> frontend service. On Windows + Podman, WSL2 port
+    localhost:8080 -> backend service (API). On Windows + Podman, WSL2 port
     mapping does not reach the Windows host automatically — this is the
     reliable alternative.
 
@@ -55,7 +55,8 @@ $REG_NAME     = "kind-registry"
 $REG_PORT     = 5000          # host port for the registry (push from host)
 $HOST_HTTP    = 8080          # host port mapped to nginx ingress (>1024 avoids Windows admin requirement)
 $BACKEND_IMG  = "localhost:${REG_PORT}/devedu/backend:local"
-$FRONTEND_IMG = "localhost:${REG_PORT}/devedu/frontend:local"
+$RUNNER_IMG   = "localhost/devedu/csharp-runner:local"          # in den Sidecar-Store geladen, NICHT in die Registry
+$SIDECAR_IMG  = "localhost:${REG_PORT}/devedu/podman-sidecar:local"
 $SCRIPT_DIR   = $PSScriptRoot
 
 # Kind reads this env var to choose Podman as the container runtime
@@ -241,16 +242,30 @@ if (-not $NoBuild) {
     & podman build -t $BACKEND_IMG "$SCRIPT_DIR\backend"
     if ($LASTEXITCODE -ne 0) { Fail "Backend image build failed." }
 
-    Write-Step "Building frontend image..."
-    & podman build -t $FRONTEND_IMG "$SCRIPT_DIR\frontend"
-    if ($LASTEXITCODE -ne 0) { Fail "Frontend image build failed." }
-
-    Write-Step "Pushing images to localhost:$REG_PORT..."
+    Write-Step "Pushing image to localhost:$REG_PORT..."
     & podman push --tls-verify=false $BACKEND_IMG
     if ($LASTEXITCODE -ne 0) { Fail "Backend image push failed." }
-    & podman push --tls-verify=false $FRONTEND_IMG
-    if ($LASTEXITCODE -ne 0) { Fail "Frontend image push failed." }
-    Write-Ok "Images pushed."
+    Write-Ok "Image pushed."
+
+    # ── F7: Sandbox-Runner + Podman-Sidecar ──────────────────────────────────
+    # Der Runner wird NICHT in die Registry gepusht; er wird als Tarball in den
+    # (getrennten) Image-Store des Sidecars geladen. Der Sidecar trägt den Tarball.
+    Write-Step "Building C# sandbox runner image..."
+    & podman build -t $RUNNER_IMG "$SCRIPT_DIR\sandbox\csharp-runner"
+    if ($LASTEXITCODE -ne 0) { Fail "Runner image build failed." }
+
+    Write-Step "Exporting runner image into the sidecar build context..."
+    & podman save -o "$SCRIPT_DIR\sandbox\podman-sidecar\csharp-runner.tar" $RUNNER_IMG
+    if ($LASTEXITCODE -ne 0) { Fail "podman save (runner) failed." }
+
+    Write-Step "Building Podman sidecar image..."
+    & podman build -t $SIDECAR_IMG "$SCRIPT_DIR\sandbox\podman-sidecar"
+    if ($LASTEXITCODE -ne 0) { Fail "Sidecar image build failed." }
+
+    Write-Step "Pushing sidecar image to localhost:$REG_PORT..."
+    & podman push --tls-verify=false $SIDECAR_IMG
+    if ($LASTEXITCODE -ne 0) { Fail "Sidecar image push failed." }
+    Write-Ok "Sandbox images built and pushed."
 }
 
 if ($BuildOnly) {
@@ -286,7 +301,6 @@ foreach ($part in $mongoParts[1..($mongoParts.Length - 1)]) {
 }
 
 Invoke-Kubectl apply -f "$SCRIPT_DIR\k8s\20-backend.yaml"
-Invoke-Kubectl apply -f "$SCRIPT_DIR\k8s\30-frontend.yaml"
 
 # 40-ingress.yaml uses ingressClassName: traefik (k3s-specific).
 # We apply an equivalent manifest with ingressClassName: nginx instead.
@@ -308,20 +322,20 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: frontend
+                name: backend
                 port:
-                  number: 80
+                  number: 8080
 "@
 
 Write-Ok "All manifests applied."
 
 # Force a rollout so pods pick up freshly pushed images (imagePullPolicy: Always)
 Write-Step "Triggering rolling restart..."
-& kubectl -n $NS rollout restart deployment/backend deployment/frontend 2>&1 | Out-Null
+& kubectl -n $NS rollout restart deployment/backend 2>&1 | Out-Null
 
 # ── wait for rollouts ─────────────────────────────────────────────────────────
 Write-Step "Waiting for rollouts to complete (180 s each)..."
-foreach ($dep in @("mongo", "backend", "frontend")) {
+foreach ($dep in @("mongo", "backend")) {
     Write-Host "    deployment/$dep ..." -ForegroundColor Gray
     & kubectl -n $NS rollout status "deployment/$dep" --timeout=180s
     if ($LASTEXITCODE -ne 0) {
@@ -339,10 +353,10 @@ Write-Step "Pod overview:"
 $FWD_PORT = 8080
 
 if ($Forward) {
-    Write-Step "Starting port-forward: localhost:$FWD_PORT -> frontend:80 ..."
-    $fwdArgs = "-NoExit -Command `"kubectl -n $NS port-forward svc/frontend ${FWD_PORT}:80`""
+    Write-Step "Starting port-forward: localhost:$FWD_PORT -> backend:8080 ..."
+    $fwdArgs = "-NoExit -Command `"kubectl -n $NS port-forward svc/backend ${FWD_PORT}:8080`""
     Start-Process powershell -ArgumentList $fwdArgs
-    Write-Ok "Port-forward running in a new window."
+    Write-Ok "Port-forward running in a new window. Verify: http://localhost:${FWD_PORT}/health"
 }
 
 # ── done ──────────────────────────────────────────────────────────────────────
@@ -351,24 +365,35 @@ Write-Host @"
 Deployed.
 
   On Windows + Podman, WSL2 does not forward Kind ports to localhost.
-  Use port-forward to access the app (no admin needed):
+  Use port-forward to access the API (no admin needed):
 
-      kubectl -n devedu port-forward svc/frontend 8080:80
+      kubectl -n devedu port-forward svc/backend 8080:8080
 
-  Then open: http://devedu.localhost:8080
-  (add to hosts if needed: 127.0.0.1  devedu.localhost)
+  port-forward tunnels straight to the backend Service (the ingress/host
+  'devedu.localhost' is bypassed), so the host is plain 'localhost':
+
+      Reachability check : http://localhost:8080/health   -> {"status":"ok"}
+      API base URL       : http://localhost:8080           (endpoints under /api/...)
+      e.g.                 http://localhost:8080/api/courses
+
+  Note: there is no route at bare '/api' on older builds — it now returns a
+  200 info payload, but only after you rebuild the image (run WITHOUT -NoBuild).
 
   Or run this script with -Forward to open the tunnel automatically:
       .\deploy-kind.ps1 -NoBuild -Forward
 
-Seed logins:
-    author@devedu.local  / Passw0rd!   (Author)
-    learner@devedu.local / Passw0rd!   (Learner)
+  Web UI: run the Expo app with 'npx expo start --web' (mobile/ directory).
+
+Auth (Clerk):
+    Register in-app (email + password, email-code verification).
+    Roles live in Clerk public_metadata.role: 'instructor' (Author) / 'admin'; unset = Learner.
+    Assign: clerk api /users/<id>/metadata -X PATCH -d '{"public_metadata":{"role":"instructor"}}'
+    (under Git Bash prefix MSYS_NO_PATHCONV=1). Re-login after a role change.
+    See README -> "Auth & Rollen (Clerk)".
 
 Useful commands:
     kubectl -n devedu get pods
     kubectl -n devedu logs deploy/backend
-    kubectl -n devedu logs deploy/frontend
     kubectl -n devedu logs deploy/mongo
     .\deploy-kind.ps1 -NoBuild         # re-apply manifests, skip build
     .\deploy-kind.ps1 -BuildOnly       # build images only

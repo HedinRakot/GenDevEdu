@@ -7,6 +7,27 @@ type: Opaque
 stringData:
   # Dev-only signing key. Rotate for anything beyond local use.
   Jwt__Key: "dev-super-secret-signing-key-change-me-please-32+chars"
+  # Clerk Backend API secret (dev instance) for the admin role-management feature.
+  # DEV-ONLY — externalize / rotate before any non-local use.
+  Clerk__SecretKey: "sk_test_TJFRiu83yDPfjPtPOVot2WelPk19OnjSI1PVEGcBKW"
+  # Clerk webhook signing secret (Svix, "whsec_…") for POST /api/webhooks/clerk.
+  # Paste the secret from Clerk Dashboard → Webhooks → <endpoint> → Signing Secret.
+  # Empty = signature verification is SKIPPED (dev only — never leave empty in prod).
+  Clerk__WebhookSecret: ""
+---
+# F7: persistenter Store für den Podman-Sidecar, damit das ~4.6 GB Runner-Image
+# NICHT bei jedem Pod-Start neu geladen wird. storageClassName bewusst weggelassen
+# ⇒ Default-StorageClass des Clusters (Kind: "standard", k3s: "local-path").
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: podman-store
+  namespace: devedu
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 8Gi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -22,6 +43,11 @@ spec:
     metadata:
       labels: { app: backend }
     spec:
+      # fsGroup 1000 ⇒ der Podman-Sidecar (uid 1000) darf in den PVC-Store schreiben.
+      # OnRootMismatch vermeidet rekursives chown des großen Stores bei jedem Mount.
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: backend
           image: localhost:5000/devedu/backend:local
@@ -40,6 +66,28 @@ spec:
                 secretKeyRef:
                   name: backend-secrets
                   key: Jwt__Key
+            - name: Clerk__SecretKey
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: Clerk__SecretKey
+            - name: Clerk__WebhookSecret
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: Clerk__WebhookSecret
+            # ── F7: Code-Sandbox (rootless Podman-Sidecar) ──
+            - name: Sandbox__PodmanSocketUri
+              value: "unix:///podman/podman.sock"
+            - name: Sandbox__RunnerImage
+              value: "localhost/devedu/csharp-runner:local"
+            - name: Sandbox__ScratchDir
+              value: "/sandbox"
+          volumeMounts:
+            - name: podman-sock
+              mountPath: /podman
+            - name: sandbox-scratch
+              mountPath: /sandbox
           readinessProbe:
             httpGet: { path: /health, port: 8080 }
             initialDelaySeconds: 5
@@ -52,6 +100,51 @@ spec:
           resources:
             requests: { cpu: "100m", memory: "256Mi" }
             limits: { cpu: "1", memory: "512Mi" }
+
+        # ── F7: rootless Podman-Sidecar ──────────────────────────────────────
+        # Exponiert einen Docker-kompatiblen Socket; das Backend startet darüber
+        # kurzlebige Sandbox-Container (podman run --network none --memory … etc.).
+        # Das Memory-Limit hier deckelt das AGGREGAT aller verschachtelten
+        # Lerner-Container (MaxConcurrentRuns=1 × 256m ⇒ 512Mi reicht).
+        - name: podman
+          image: localhost:5000/devedu/podman-sidecar:local
+          imagePullPolicy: Always
+          # Rootless: kleinere Angriffsfläche. Falls rootless im Cluster zickt
+          # (cgroup-v2-Delegation / userns), als Fallback `privileged: true` setzen.
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+          env:
+            - name: STORAGE_DRIVER
+              value: "vfs"        # vfs braucht kein /dev/fuse → robust rootless in k8s
+          volumeMounts:
+            - name: podman-sock
+              mountPath: /podman
+            - name: sandbox-scratch
+              mountPath: /sandbox
+            - name: podman-storage
+              mountPath: /home/podman/.local/share/containers
+          # Pod erst Ready, wenn der Docker-kompatible Socket steht ⇒ kein Submit
+          # ins „Ready aber Socket noch nicht da"-Fenster. failureThreshold großzügig,
+          # damit der allererste Runner-Image-Load (leerer Store) toleriert wird.
+          readinessProbe:
+            exec:
+              command: ["test", "-S", "/podman/podman.sock"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 60
+          resources:
+            requests: { cpu: "250m", memory: "256Mi" }
+            limits: { cpu: "1500m", memory: "512Mi" }
+
+      volumes:
+        - name: podman-sock
+          emptyDir: {}
+        - name: sandbox-scratch
+          emptyDir: {}
+        - name: podman-storage
+          persistentVolumeClaim:
+            claimName: podman-store
 ---
 apiVersion: v1
 kind: Service

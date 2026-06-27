@@ -6,7 +6,7 @@ public record CreateEnrollmentRequest(string? CourseId);
 
 public record EnrollmentDto(string Id, string CourseId, string Status, DateTime StartedAt);
 
-public record ProgressDto(string CourseId, List<string> CompletedTopicIds, List<string> CompletedChapterIds);
+public record ProgressDto(string CourseId, List<string> CompletedChapterContentIds);
 
 public record ErrorResponse(
     string Error,

@@ -1,3 +1,4 @@
+
 # PRD – DevEdu (Schulungs-Applikation)
 
 ## Kontext
@@ -17,11 +18,12 @@ einen **Status**.
 
 | Bereich | Entscheidung |
 |---|---|
-| Plattform | Web-App, später React Native (Mobile) |
-| Frontend | React + Tailwind CSS |
+| Plattform | Unified Expo App – Web-Browser, iOS, Android aus einer Codebasis |
+| Frontend | React Native + Expo (react-native-web übersetzt RN-Primitives für den Browser) |
 | Backend | .NET 10 (ASP.NET Core Web API) |
 | Datenbank | MongoDB |
-| Nutzerrollen | Lerner + Autoren, mit Login & Fortschrittsverfolgung |
+| Auth | Clerk (cloud, JWKS-gesichert) – ersetzt eigenes JWT + Duende Identity Server |
+| Nutzerrollen | Lerner + Autoren + Admin, Rollenverwaltung via Clerk `publicMetadata` |
 | Fragetypen | Single/Multiple Choice, Wahr/Falsch, Code-Aufgaben |
 | Code-Auswertung | Automatisch via Tests in isolierter Sandbox |
 
@@ -29,32 +31,56 @@ einen **Status**.
 
 | # | Feature | Priorität | Status | Abhängig von |
 |---|---|---|---|---|
-| F1 | Authentifizierung & Rollen | P0 | Geplant | – |
-| F2 | Inhalts-Domänenmodell & Speicherung | P0 | Geplant | – |
-| F3 | Autoren-Bereich (Inhalts-CRUD/CMS) | P0 | Geplant | F1, F2 |
-| F4 | Lernansicht (Kurs durcharbeiten) | P0 | Geplant | F2 |
-| F5 | Quiz: Choice & Wahr/Falsch | P0 | Geplant | F2, F4 |
-| F6 | Fortschrittsverfolgung | P1 | Geplant | F4, F5 |
-| F7 | Code-Aufgaben & Sandbox-Auswertung | P1 | Geplant | F5 |
-| F8 | Kapitel-Abschlussquiz & Bewertung | P1 | Geplant | F5, F6 |
-| F9 | Lerner-Dashboard & Statistiken | P2 | Geplant | F6 |
+| F1 | Authentifizierung & Rollen | P0 | Implementiert | – |
+| F2 | Inhalts-Domänenmodell & Speicherung | P0 | Implementiert | – |
+| F3 | Autoren-Bereich (Inhalts-CRUD/CMS) | P0 | Implementiert | F1, F2 |
+| F4 | Lernansicht (Kurs durcharbeiten) | P0 | Implementiert | F2 |
+| F5 | Quiz: Choice & Wahr/Falsch | P0 | Implementiert | F2, F4 |
+| F6 | Fortschrittsverfolgung | P1 | Implementiert | F4, F5 |
+| F7 | Code-Aufgaben & Sandbox-Auswertung | P1 | Implementiert | F5 |
+| F8 | Kapitel-Abschlussquiz & Bewertung | P1 | Implementiert | F5, F6 |
+| F9 | Lerner-Dashboard & Statistiken | P2 | Implementiert | F6 |
 | F10 | Zertifikate / Abzeichen | P2 | Geplant | F8 |
 | F11 | Katalog: Suche, Filter, Tags | P2 | Geplant | F2 |
-| F12 | Mobile-App (React Native) | P2 | Geplant | F1–F8 |
+| F12 | Unified Expo App (Web + iOS + Android) | P1 | In Arbeit | F1–F5 |
 | F13 | Erweiterungen (i18n, Diskussionen, Lernpfade) | P2 | Backlog | – |
+
+> **Audit-Stand (2026-06-26):**
+> - **F1** Rollen jetzt end-to-end funktionsfähig: Session-Token trägt `role` aus Clerk `public_metadata.role`, Backend mappt auf .NET-Rollen, UI-Gating für den Author-Tab greift. Rollenvergabe aktuell manuell (Clerk-Dashboard/CLI), In-App Admin-UI offen.
+> - **F5** Quiz wird serverseitig ausgewertet (`POST /api/questions/{id}/attempt`) inkl. Score, Erklärung und Attempt-Speicherung; „Wahr/Falsch" ist ein eigener Fragetyp (`TrueFalse`) mit dedizierter Autor- und Lern-UI, serverseitig wie OneChoice über zwei Antworten (Wahr/Falsch) ausgewertet.
+> - **F6** Dashboard zeigt echten Fortschritt aus `GET /api/me/progress` (abgeschlossene Inhalte + Kurse) statt Platzhalter.
+> - **F7** Code-Aufgaben implementiert: Fragetyp `Code`, async `POST /api/code-submissions` → Queue → `CodeExecutionWorker` → Polling via `GET /api/code-submissions/{id}`. Eigene Sandbox über einen **rootless Podman-Sidecar** (hinter `ISandboxRunner`, gehärtet via `--network none`/Memory/CPU/PIDs-Limits, read-only FS, non-root). MVP-Sprache C#; bestandene Aufgabe schreibt einen `Attempt` (F6). Container-Isolation ist dev-only — Prod-Härtung (gVisor/Jobs) dokumentiert.
+> - **F8** Kapitel-Abschlussquiz implementiert: dediziertes Quiz je Kapitel (`Chapter.ChapterQuizId`), gebündelte Abgabe via `POST /api/chapters/{id}/quiz/attempt` mit aggregiertem Score, Bestehensgrenze (`PassThresholdPercent`) und Versuchslimit (`MaxAttempts`, je Versuch ein `ChapterQuizAttempt`). Autoren legen/ersetzen Quizze im Author-Bereich an (`PUT/DELETE /api/chapters/{id}/quiz`, nur auto-bewertbare Fragetypen). Bestandenes Quiz fließt in den Kapitel-Abschluss (`Progress.PassedChapterQuizIds`, Basis für F10).
+> - **F9** Lerner-Dashboard vertieft: `GET /api/me/stats` aggregiert (reiner `StatsCalculator`) Kurse aktiv/abgeschlossen, Fortschritt je Kurs (%), Quiz-Trefferquote, Kapitel-Quizze bestanden und gelöste Code-Aufgaben; das `DashboardScreen` zeigt Kennzahl-Kacheln + Kurs-Fortschrittsbalken.
+> - **Offen:** Passwort-Reset-Flow (toter Link entfernt), In-App Admin-UI; F10–F11 wie markiert geplant.
 
 ---
 
 ## F1 – Authentifizierung & Rollen `P0`
 
-**Ziel:** Nutzer registrieren/anmelden; rollenbasierter Zugriff.
+**Ziel:** Nutzer registrieren/anmelden; rollenbasierter Zugriff — plattformübergreifend (Web, iOS, Android).
 
-- Rollen: **Lerner**, **Autor**, **Admin** (RBAC; ein Nutzer kann mehrere Rollen haben).
-- JWT-basiert (Access + Refresh Token), Passwort-Hashing (ASP.NET Core PasswordHasher).
-- Endpunkte: `POST /api/auth/register | /login | /refresh`.
+**Auth-Strategie: Clerk**
+- Registrierung, Login, Session-Management und Token-Refresh werden vollständig von **Clerk** übernommen.
+- SDKs: `@clerk/clerk-expo` für React Native/Expo Web (identische `useAuth()` / `useUser()`-Hooks auf allen Plattformen).
+- Das Backend validiert eingehende JWTs ausschließlich über Clerks **JWKS-Endpunkt** — es erzeugt keine eigenen Tokens mehr.
+- Kein eigener `/auth/register` oder `/auth/login`-Endpunkt; das Backend stellt nur noch `POST /api/users/sync` bereit (Clerk-Webhook, legt bei Neuregistrierung einen Nutzer-Datensatz in MongoDB an).
+
+**Rollen** werden über `publicMetadata.role` in Clerk gesetzt:
+| Clerk-Rolle | App-Rolle |
+|---|---|
+| `learner` | Lerner |
+| `instructor` | Autor |
+| `admin` | Admin |
+
+**Backend-JWT-Validierung:**
+- Issuer: Clerk Frontend API URL des Projekts
+- Signatur: JWKS (`https://[clerk-domain]/.well-known/jwks.json`)
+- Rolle wird aus dem `metadata.role`-Claim extrahiert
 
 **Akzeptanzkriterien**
-- Registrierung/Login funktionieren; geschützte Endpunkte verlangen gültiges Token.
+- Registrierung/Login über Clerk-UI funktionieren auf Web und mobil.
+- Geschützte Backend-Endpunkte verlangen gültiges Clerk-JWT (401 sonst).
 - Autoren-Endpunkte sind für Lerner gesperrt (403).
 
 ---
@@ -101,6 +127,8 @@ Kurs (Course)
 - Endpunkte: `POST /api/courses`, `PUT /api/courses/{id}`,
   `POST /api/courses/{id}/chapters`, `POST /api/chapters/{id}/topics`,
   `POST /api/topics/{id}/examples`, `POST /api/{topics|chapters}/{id}/questions`.
+- Löschen (Autor/Admin): `DELETE /api/courses/{id}`, `DELETE /api/chapters/{id}`,
+  `DELETE /api/content/{id}` — kaskadiert abhängige QuestionLists/Attempts/Progress/Enrollments.
 - Frontend: Editor mit Vorschau, Markdown/Code-Blöcke.
 
 **Akzeptanzkriterien**
@@ -192,9 +220,26 @@ Gemeinsame Frage-Felder: `id, scope (Topic/Chapter), refId, prompt (Markdown), e
 
 - Kursliste mit Filter (Tags, Level), Volltextsuche.
 
-## F12 – Mobile-App (React Native) `P2`
+## F12 – Unified Expo App (Web + iOS + Android) `P1`
 
-- Wiederverwendung des API-/Logik-Layers (Hooks) aus dem Web-Frontend.
+**Ziel:** Eine einzige React Native / Expo-Codebasis liefert gleichzeitig die Web-App (im Browser via `react-native-web`) und die nativen Apps (iOS/Android).
+
+- Das bisherige Vite/Tailwind-Frontend (`frontend/`) wird durch die Expo Web-Build aus `mobile/` abgelöst.
+- Auf breiten Viewports (≥ 768 px) erscheint eine Sidebar-Navigation statt Bottom Tabs.
+- **Author CMS** (Kurs erstellen/bearbeiten, Kapitel/Themen-CRUD) wird als neue Screens in `mobile/src/screens/author/` implementiert — Feature-Parität zum abgelösten Vite-Frontend.
+- Bereits vorhandene Screens: Kursliste, Kursdetail, Lektion, Glossar, KI-Chat, Snippets, Einstellungen, Dashboard.
+
+**Fehlende Screens (TODO):**
+| Screen | Priorität |
+|---|---|
+| Author CMS: Kurs erstellen/publizieren | P0 |
+| Enrollment | P0 |
+| Quiz-Antworten absenden | P1 |
+
+**Akzeptanzkriterien**
+- `npx expo start --web` liefert dieselbe Funktionalität wie das bisherige Vite-Frontend.
+- Expo Go auf iOS/Android: Login, Kursnavigation, Lektionen, Quiz funktionieren.
+- Der Vite-Frontend-Build wird im k8s-Deployment durch den Expo-Web-Build ersetzt.
 
 ## F13 – Erweiterungen (Backlog) `P2`
 
@@ -207,15 +252,16 @@ Gemeinsame Frage-Felder: `id, scope (Topic/Chapter), refId, prompt (Markdown), e
 **Backend (.NET 10):** ASP.NET Core Web API; Schichtung `Api → Application → Domain → Infrastructure`;
 MongoDB.Driver mit Repository-Pattern; FluentValidation; Hintergrundjobs (Channel-Queue/Worker) für F7.
 
-**Frontend (React + Tailwind):** Vite, React Router, TanStack Query, Monaco Editor (Code),
-react-markdown. Logik in Hooks/API-Layer kapseln → spätere React-Native-Wiederverwendung (F12).
+**Frontend (React Native + Expo):** Expo 54, React Native 0.81, react-native-web (Browser), TanStack Query, i18next, react-native-markdown-display. Logik vollständig in Hooks/API-Layer — plattformübergreifend nutzbar. Responsive Layouts via `useWindowDimensions()` (Sidebar ab 768 px).
 
 ## Offene Punkte
 
 - Berechtigungsmodell-Details (private Lerner-Notizen?).
 - Draft/Published-Granularität (ganzer Kurs vs. einzelne Elemente).
-- F7-Sandbox: eigene Docker-Lösung vs. Judge0.
-- F8-Bewertung: Punkte, Bestehensgrenze, Wiederholbarkeit.
+- ~~F7-Sandbox: eigene Docker-Lösung vs. Judge0.~~ → Erledigt: eigene Lösung über rootless **Podman**-Sidecar (hinter `ISandboxRunner`, austauschbar). Prod-Härtung (gVisor/k8s-Jobs) offen.
+- ~~F8-Bewertung: Punkte, Bestehensgrenze, Wiederholbarkeit.~~ → Erledigt: aggregierter %-Score, konfigurierbare `PassThresholdPercent` + `MaxAttempts` je Kapitel; in-place Frage-Edit bewusst weggelassen (Anlegen + Ersetzen).
+- ~~Typ-Alignment: Mobile-Typen (`Texte`, `ChapterContent`, Mehrsprachigkeit per Enum) vs. Web-Typen (`ContentBlock`, flache Strings) — müssen auf Backend-API-Response-Shape vereinheitlicht werden.~~ → Erledigt.
+- Clerk-Setup: Publishable Key + JWKS-URL nach Projekt-Erstellung in `mobile/.env` und Backend-Config eintragen.
 
 ## Empfohlene Reihenfolge
 

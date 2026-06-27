@@ -28,10 +28,9 @@ public class EnrollmentService
             return ServiceResult<EnrollmentDto>.Ok(
                 new EnrollmentDto(existing.Id, existing.CourseId, existing.Status, existing.StartedAt));
 
-        var enrollment = new Enrollment { UserId = userId, CourseId = req.CourseId, Status = "Active" };
+        var enrollment = new Enrollment { UserId = userId, CourseId = req.CourseId };
         await _db.Enrollments.InsertOneAsync(enrollment);
 
-        // Ensure a progress doc exists.
         var progress = await _db.Progress
             .Find(p => p.UserId == userId && p.CourseId == req.CourseId)
             .FirstOrDefaultAsync();
@@ -46,17 +45,18 @@ public class EnrollmentService
     {
         var items = await _db.Progress.Find(p => p.UserId == userId).ToListAsync();
         return items
-            .Select(p => new ProgressDto(p.CourseId, p.CompletedTopicIds, p.CompletedChapterIds))
+            .Select(p => new ProgressDto(p.CourseId, p.CompletedChapterContentIds))
             .ToList();
     }
 
-    public async Task<ServiceResult<ProgressDto>> CompleteTopicAsync(string topicId, string userId)
+    public async Task<ServiceResult<ProgressDto>> CompleteChapterContentAsync(
+        string chapterContentId, string userId)
     {
         var course = await _db.Courses
-            .Find(c => c.Chapters.Any(ch => ch.Topics.Any(t => t.Id == topicId)))
+            .Find(c => c.Chapters.Any(ch => ch.ChapterContent.Any(cc => cc.Id == chapterContentId)))
             .FirstOrDefaultAsync();
         if (course is null)
-            return ServiceResult<ProgressDto>.NotFound("Topic not found.");
+            return ServiceResult<ProgressDto>.NotFound("ChapterContent not found.");
 
         var progress = await _db.Progress
             .Find(p => p.UserId == userId && p.CourseId == course.Id)
@@ -68,24 +68,13 @@ public class EnrollmentService
             await _db.Progress.InsertOneAsync(progress);
         }
 
-        if (!progress.CompletedTopicIds.Contains(topicId))
-            progress.CompletedTopicIds.Add(topicId);
-
-        // Mark chapter complete if all its topics are done.
-        foreach (var chapter in course.Chapters)
-        {
-            var topicIds = chapter.Topics.Select(t => t.Id).ToList();
-            if (topicIds.Count > 0 && topicIds.All(id => progress.CompletedTopicIds.Contains(id)))
-            {
-                if (!progress.CompletedChapterIds.Contains(chapter.Id))
-                    progress.CompletedChapterIds.Add(chapter.Id);
-            }
-        }
+        if (!progress.CompletedChapterContentIds.Contains(chapterContentId))
+            progress.CompletedChapterContentIds.Add(chapterContentId);
 
         progress.LastVisited = DateTime.UtcNow;
         await _db.Progress.ReplaceOneAsync(p => p.Id == progress.Id, progress);
 
         return ServiceResult<ProgressDto>.Ok(
-            new ProgressDto(progress.CourseId, progress.CompletedTopicIds, progress.CompletedChapterIds));
+            new ProgressDto(progress.CourseId, progress.CompletedChapterContentIds));
     }
 }

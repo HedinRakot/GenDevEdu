@@ -1,0 +1,268 @@
+{
+  "common": {
+    "loading": "Laden...",
+    "error": "Ein Fehler ist aufgetreten",
+    "retry": "Erneut versuchen",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "close": "Schließen",
+    "confirm": "Bestätigen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "done": "Fertig",
+    "search": "Suchen",
+    "noResults": "Keine Ergebnisse"
+  },
+  "auth": {
+    "login": "Anmelden",
+    "logout": "Abmelden",
+    "email": "E-Mail-Adresse",
+    "password": "Passwort",
+    "forgotPassword": "Passwort vergessen?",
+    "emailPlaceholder": "E-Mail-Adresse",
+    "passwordPlaceholder": "Passwort",
+    "loginButton": "Anmelden",
+    "loginError": "Anmeldung fehlgeschlagen. Bitte E-Mail und Passwort prüfen.",
+    "networkError": "Keine Netzwerkverbindung. Bitte prüfe deine Verbindung.",
+    "logoutConfirm": "Möchtest du dich wirklich abmelden?",
+    "welcome": "Willkommen zurück!",
+    "tagline": "Softwareentwicklung lernen",
+    "fieldsRequired": "Bitte E-Mail und Passwort eingeben.",
+    "signUpPrompt": "Noch kein Konto?",
+    "signUpLink": "Registrieren",
+    "signUpTitle": "Konto erstellen",
+    "signUpButton": "Registrieren",
+    "confirmPassword": "Passwort bestätigen",
+    "confirmPasswordPlaceholder": "Passwort bestätigen",
+    "passwordMismatch": "Passwörter stimmen nicht überein.",
+    "signUpError": "Registrierung fehlgeschlagen. Bitte versuche es erneut.",
+    "verifyEmailTitle": "E-Mail bestätigen",
+    "verifyEmailInfo": "Wir haben einen Code an {{email}} gesendet.",
+    "verificationCode": "Bestätigungscode",
+    "verificationCodePlaceholder": "6-stelliger Code",
+    "verifyButton": "Bestätigen",
+    "verifyError": "Ungültiger Code. Bitte erneut versuchen.",
+    "loginPrompt": "Bereits registriert?",
+    "loginLink": "Anmelden",
+    "forgotPasswordTitle": "Passwort zurücksetzen",
+    "forgotPasswordInfo": "Gib deine E-Mail-Adresse ein. Wir senden dir einen Code zum Zurücksetzen.",
+    "sendResetCodeButton": "Code senden",
+    "resetCodeSentInfo": "Wir haben einen Code an {{email}} gesendet. Gib ihn ein und wähle ein neues Passwort.",
+    "newPasswordPlaceholder": "Neues Passwort",
+    "resetPasswordButton": "Passwort zurücksetzen",
+    "resetPasswordError": "Zurücksetzen fehlgeschlagen. Bitte versuche es erneut.",
+    "backToLogin": "Zurück zur Anmeldung"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "courses": "Kurse",
+    "chat": "KI-Chat",
+    "snippets": "Snippets",
+    "author": "Erstellen",
+    "admin": "Admin",
+    "settings": "Einstellungen"
+  },
+  "admin": {
+    "title": "Nutzerverwaltung",
+    "subtitle": "Rollen vergeben",
+    "you": "Du",
+    "loadError": "Nutzer konnten nicht geladen werden.",
+    "updateError": "Rolle konnte nicht geändert werden.",
+    "empty": "Keine Nutzer gefunden.",
+    "roles": {
+      "learner": "Learner",
+      "instructor": "Author",
+      "admin": "Admin"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Willkommen!",
+    "greeting": "Hallo, {{name}}! 👋",
+    "subtitle": "Mach weiter so!",
+    "streak": {
+      "title": "Lern-Streak",
+      "subtitle": "So viele Tage in Folge gelernt",
+      "current": "Aktuell",
+      "best": "Rekord",
+      "days": "{{count}} Tag",
+      "days_plural": "{{count}} Tage",
+      "longest": "Rekord: {{count}} Tage",
+      "keepGoing": "Weiter so! Du machst das super.",
+      "startStreak": "Starte deinen Streak heute!"
+    },
+    "progress": {
+      "title": "Gesamtfortschritt",
+      "lessons": "Lektionen",
+      "completed": "{{completed}} von {{total}} Lektionen",
+      "percent": "{{percent}}% abgeschlossen",
+      "itemsCompletedLabel": "Inhalte abgeschlossen",
+      "coursesEnrolled": "in {{count}} Kursen",
+      "empty": "Starte einen Kurs, um deinen Fortschritt zu sehen."
+    },
+    "stats": {
+      "title": "Statistik",
+      "activeCourses": "Laufende Kurse",
+      "completedCourses": "Abgeschlossen",
+      "accuracy": "Quiz-Trefferquote",
+      "quizzesPassed": "Kapitel-Quizze",
+      "codeSolved": "Code gelöst",
+      "done": "Fertig",
+      "empty": "Noch keine Aktivität. Starte einen Kurs!"
+    },
+    "challenge": {
+      "label": "Daily Challenge",
+      "start": "Challenge öffnen",
+      "review": "Nochmal ansehen",
+      "done": "Erledigt",
+      "hint": "Hinweis-Code",
+      "markDone": "Als erledigt markieren",
+      "alreadyDone": "Bereits erledigt"
+    },
+    "notes": {
+      "title": "Meine Notizen",
+      "empty": "Noch keine Notizen. Erstelle deine erste Notiz!",
+      "addNote": "Neue Notiz",
+      "editNote": "Notiz bearbeiten",
+      "noteTitlePlaceholder": "Titel eingeben...",
+      "noteContentPlaceholder": "Notiz hier eingeben...",
+      "deleteTitle": "Notiz löschen",
+      "deleteConfirm": "Notiz wirklich löschen?",
+      "saved": "Notiz gespeichert"
+    }
+  },
+  "courses": {
+    "title": "Kurse",
+    "subtitle": "Dein Lernpfad",
+    "allCourses": "Alle Kurse",
+    "inProgress": "In Bearbeitung",
+    "completed": "Abgeschlossen",
+    "beginner": "Anfänger",
+    "intermediate": "Fortgeschritten",
+    "advanced": "Experte",
+    "lessons": "{{count}} Lektion",
+    "lessons_plural": "{{count}} Lektionen",
+    "hours": "{{count}} Stunde",
+    "hours_plural": "{{count}} Stunden",
+    "startCourse": "Kurs starten",
+    "continueCourse": "Weiterlernen",
+    "markComplete": "Als abgeschlossen markieren",
+    "markIncomplete": "Als offen markieren",
+    "objectives": "Lernziele",
+    "prerequisites": "Voraussetzungen",
+    "chapters": "Kapitel",
+    "offlineAvailable": "Offline verfügbar",
+    "lastUpdated": "Zuletzt aktualisiert: {{date}}"
+  },
+  "chat": {
+    "title": "KI-Tutor",
+    "subtitle": "Powered by Gemini",
+    "placeholder": "Stell eine Frage zur Softwareentwicklung...",
+    "send": "Senden",
+    "clearHistory": "Chat löschen",
+    "clearConfirm": "Chat-Verlauf wirklich löschen?",
+    "thinking": "Denke nach...",
+    "errorSending": "Nachricht konnte nicht gesendet werden.",
+    "apiKeyMissing": "Kein Gemini API-Key konfiguriert. Bitte env.ts anpassen.",
+    "emptyState": "Hallo! Ich bin dein KI-Tutor. Frag mich alles zur Softwareentwicklung!"
+  },
+  "quiz": {
+    "check": "Antwort prüfen",
+    "correct": "Richtig!",
+    "tryAgain": "Leider falsch.",
+    "true": "Wahr",
+    "false": "Falsch",
+    "selectAnswer": "Bitte wähle mindestens eine Antwort.",
+    "markLessonComplete": "✓ Abschnitt abschließen",
+    "chapterCompleteTitle": "🎉 Kapitel abgeschlossen!",
+    "chapterCompleteBody": "Großartig! Du hast alle Inhalte dieses Kapitels abgeschlossen.",
+    "code": {
+      "submit": "Code testen",
+      "grading": "Wird bewertet…",
+      "placeholder": "Schreibe deinen Code hier…",
+      "error": "Fehler beim Ausführen des Codes.",
+      "allTestsPassed": "Alle Tests bestanden!",
+      "testsFailed": "Einige Tests sind fehlgeschlagen.",
+      "passedOf": "{{passed}} von {{total}} Tests bestanden",
+      "compileError": "Kompilierungsfehler",
+      "testN": "Test {{n}}",
+      "hidden": "versteckt",
+      "expected": "Erwartet",
+      "actual": "Erhalten"
+    }
+  },
+  "chapterQuiz": {
+    "start": "Abschlussquiz starten",
+    "submit": "Quiz abgeben",
+    "passed": "Bestanden!",
+    "failed": "Nicht bestanden",
+    "scoreOf": "{{correct}}/{{total}} richtig ({{percent}} %)",
+    "passThreshold": "Bestehensgrenze: {{percent}} %",
+    "attemptsUsed": "Versuch {{used}}/{{max}}",
+    "noAttemptsLeft": "Keine Versuche mehr übrig.",
+    "retry": "Erneut versuchen"
+  },
+  "glossary": {
+    "title": "Glossar",
+    "subtitle": "Fachbegriffe nachschlagen",
+    "searchPlaceholder": "Begriff oder Schlüsselwort...",
+    "allCategories": "Alle",
+    "totalEntries": "{{count}} Einträge"
+  },
+  "snippets": {
+    "title": "Snippets",
+    "subtitle": "Deine gespeicherten Code-Schnipsel & Antworten",
+    "searchPlaceholder": "Snippet durchsuchen...",
+    "empty": "Noch keine Snippets. Markiere Chat-Antworten oder Lektionen mit ★ um sie hier zu speichern.",
+    "saved": "Snippet gespeichert ✓",
+    "alreadyExists": "Snippet ist bereits gespeichert.",
+    "delete": "Snippet löschen",
+    "deleteConfirm": "Dieses Snippet wirklich löschen?",
+    "source": {
+      "chat": "Chat",
+      "lesson": "Lektion",
+      "manual": "Manuell"
+    }
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "language": {
+      "title": "Sprache",
+      "de": "Deutsch",
+      "en": "English",
+      "ru": "Русский"
+    },
+    "appearance": {
+      "title": "Darstellung",
+      "darkMode": "Dark Mode",
+      "darkModeSubtitle": "Dunkles Farbschema aktivieren",
+      "followSystem": "System-Theme verwenden",
+      "followSystemSubtitle": "Folgt der Systemeinstellung deines Geräts"
+    },
+    "notifications": {
+      "title": "Benachrichtigungen",
+      "streakReminder": "Tägliche Erinnerung",
+      "streakReminderSubtitle": "Erinnert dich abends an deinen Streak",
+      "permissionDenied": "Berechtigung für Benachrichtigungen wurde verweigert."
+    },
+    "tools": {
+      "title": "Lerntools"
+    },
+    "account": {
+      "title": "Konto",
+      "profile": "Profil",
+      "logoutButton": "Abmelden"
+    },
+    "about": {
+      "title": "Über die App",
+      "version": "Version {{version}}",
+      "appName": "EduCode"
+    }
+  },
+  "notifications": {
+    "streakTitle": "🔥 Halte deinen Streak!",
+    "streakBody": "Du hast heute noch nicht gelernt – wie wäre es mit der Daily Challenge?"
+  }
+}

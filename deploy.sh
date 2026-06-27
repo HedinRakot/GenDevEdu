@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
-# deploy.sh — build, push and deploy DevEdu (MVP) to the local k3s cluster.
+# deploy.sh — build, push and deploy DevEdu to the local k3s cluster.
 #
-# Steps: build backend + frontend images -> push to localhost:5000 -> apply k8s
+# Steps: build backend image -> push to localhost:5000 -> apply k8s
 # manifests -> wait for rollouts. Uses `sudo k3s kubectl` (kubeconfig is root-only).
 #
 # Flags:
@@ -14,7 +14,8 @@ cd "$(dirname "$0")"
 
 REGISTRY="localhost:5000"
 BACKEND_IMAGE="${REGISTRY}/devedu/backend:local"
-FRONTEND_IMAGE="${REGISTRY}/devedu/frontend:local"
+RUNNER_IMAGE="localhost/devedu/csharp-runner:local"      # loaded into the sidecar store, NOT pushed
+SIDECAR_IMAGE="${REGISTRY}/devedu/podman-sidecar:local"
 NS="devedu"
 
 DO_BUILD=1
@@ -42,11 +43,20 @@ fi
 if [ "$DO_BUILD" -eq 1 ]; then
   note "Building backend image: $BACKEND_IMAGE"
   docker build -t "$BACKEND_IMAGE" ./backend
-  note "Building frontend image: $FRONTEND_IMAGE"
-  docker build -t "$FRONTEND_IMAGE" ./frontend
-  note "Pushing images to $REGISTRY"
+  note "Pushing image to $REGISTRY"
   docker push "$BACKEND_IMAGE"
-  docker push "$FRONTEND_IMAGE"
+
+  # --- F7: sandbox runner + podman sidecar ---
+  # Runner is NOT pushed; it ships as a tarball inside the sidecar image and is
+  # loaded into the sidecar's (separate) podman store at startup.
+  note "Building C# sandbox runner image: $RUNNER_IMAGE"
+  docker build -t "$RUNNER_IMAGE" ./sandbox/csharp-runner
+  note "Exporting runner image into the sidecar build context"
+  docker save -o ./sandbox/podman-sidecar/csharp-runner.tar "$RUNNER_IMAGE"
+  note "Building podman sidecar image: $SIDECAR_IMAGE"
+  docker build -t "$SIDECAR_IMAGE" ./sandbox/podman-sidecar
+  note "Pushing sidecar image to $REGISTRY"
+  docker push "$SIDECAR_IMAGE"
 fi
 
 [ "$DO_DEPLOY" -eq 0 ] && { note "Build-only mode; done."; exit 0; }
@@ -57,22 +67,23 @@ sudo k3s kubectl apply -f k8s/
 
 # Force a fresh pull of the :local tag even if the deployment spec is unchanged.
 note "Restarting deployments to pull the latest images."
-sudo k3s kubectl -n "$NS" rollout restart deployment/backend deployment/frontend || true
+sudo k3s kubectl -n "$NS" rollout restart deployment/backend || true
 
 note "Waiting for rollouts..."
 sudo k3s kubectl -n "$NS" rollout status deployment/mongo    --timeout=180s
 sudo k3s kubectl -n "$NS" rollout status deployment/backend  --timeout=180s
-sudo k3s kubectl -n "$NS" rollout status deployment/frontend --timeout=180s
 
 note "Pods:"
 sudo k3s kubectl -n "$NS" get pods -o wide
 
 cat <<EOF
 
-✅ Deployed. Open: http://devedu.localhost
+✅ Deployed. Backend-API: http://devedu.localhost/api
 
 If the hostname does not resolve, add this line to /etc/hosts:
     127.0.0.1   devedu.localhost
+
+Web-UI: run 'npx expo start --web' in the mobile/ directory.
 
 Seed logins:  author@devedu.local / Passw0rd!   (Author)
               learner@devedu.local / Passw0rd!  (Learner)

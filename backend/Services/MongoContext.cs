@@ -21,9 +21,10 @@ public class MongoContext
 
     public IMongoCollection<User> Users => Database.GetCollection<User>("users");
     public IMongoCollection<Course> Courses => Database.GetCollection<Course>("courses");
-    public IMongoCollection<Question> Questions => Database.GetCollection<Question>("questions");
+    public IMongoCollection<QuestionList> QuestionLists => Database.GetCollection<QuestionList>("questionlists");
     public IMongoCollection<Enrollment> Enrollments => Database.GetCollection<Enrollment>("enrollments");
     public IMongoCollection<Progress> Progress => Database.GetCollection<Progress>("progress");
-    public IMongoCollection<RefreshToken> RefreshTokens => Database.GetCollection<RefreshToken>("refreshTokens");
     public IMongoCollection<Attempt> Attempts => Database.GetCollection<Attempt>("attempts");
+    public IMongoCollection<CodeSubmission> CodeSubmissions => Database.GetCollection<CodeSubmission>("codesubmissions");
+    public IMongoCollection<ChapterQuizAttempt> ChapterQuizAttempts => Database.GetCollection<ChapterQuizAttempt>("chapterquizattempts");
 }

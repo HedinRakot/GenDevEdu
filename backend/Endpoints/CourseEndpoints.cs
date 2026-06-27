@@ -9,37 +9,54 @@ public static class CourseEndpoints
 {
     public static void MapCourseEndpoints(this IEndpointRouteBuilder app)
     {
-        // ---- read (any authenticated user) ----
-        app.MapGet("/api/courses", async (ClaimsPrincipal user, CourseService svc) =>
-        {
-            var list = await svc.ListAsync(user.UserId(), user.Roles());
-            return Results.Ok(list);
-        }).RequireAuthorization();
+        // ── Lesezugriff (alle authentifizierten Nutzer) ───────────────────────
 
-        app.MapGet("/api/courses/{id}", async (string id, ClaimsPrincipal user, CourseService svc) =>
-            (await svc.GetTreeAsync(id, user.UserId(), user.Roles())).ToHttp())
+        app.MapGet("/api/courses", async (ClaimsPrincipal user, CourseService svc) =>
+            Results.Ok(await svc.ListAsync(user.UserId(), user.Roles())))
             .RequireAuthorization();
 
-        // ---- author-only writes ----
-        var author = app.MapGroup("")
-            .RequireAuthorization(Policies.AuthorOrAdmin);
+        app.MapGet("/api/courses/{id}/chapters",
+            async (string id, ClaimsPrincipal user, CourseService svc) =>
+                (await svc.GetChaptersAsync(id, user.UserId(), user.Roles())).ToHttp())
+            .RequireAuthorization();
 
-        author.MapPost("/api/courses", async (CreateCourseRequest req, ClaimsPrincipal user, CourseService svc) =>
-            (await svc.CreateAsync(req, user.UserId())).ToHttp());
+        app.MapGet("/api/chapters/{id}/content",
+            async (string id, ClaimsPrincipal user, CourseService svc) =>
+                (await svc.GetChapterContentAsync(id, user.UserId(), user.Roles())).ToHttp())
+            .RequireAuthorization();
 
-        author.MapPut("/api/courses/{id}", async (string id, UpdateCourseRequest req, ClaimsPrincipal user, CourseService svc) =>
-            (await svc.UpdateAsync(id, req, user.UserId(), user.IsAdmin())).ToHttp());
+        // ── Author/Admin-Schreibzugriff ───────────────────────────────────────
 
-        author.MapPost("/api/courses/{id}/publish", async (string id, ClaimsPrincipal user, CourseService svc) =>
-            (await svc.PublishAsync(id, user.UserId(), user.IsAdmin())).ToHttp());
+        var author = app.MapGroup("").RequireAuthorization(Policies.AuthorOrAdmin);
 
-        author.MapPost("/api/courses/{id}/chapters", async (string id, CreateChapterRequest req, ClaimsPrincipal user, CourseService svc) =>
-            (await svc.AddChapterAsync(id, req, user.UserId(), user.IsAdmin())).ToHttp());
+        author.MapPost("/api/courses",
+            async (CreateCourseRequest req, ClaimsPrincipal user, CourseService svc) =>
+                (await svc.CreateAsync(req, user.UserId())).ToHttp());
 
-        author.MapPost("/api/chapters/{id}/topics", async (string id, CreateTopicRequest req, ClaimsPrincipal user, CourseService svc) =>
-            (await svc.AddTopicAsync(id, req, user.UserId(), user.IsAdmin())).ToHttp());
+        author.MapPost("/api/courses/{id}/publish",
+            async (string id, ClaimsPrincipal user, CourseService svc) =>
+                (await svc.PublishAsync(id, user.UserId(), user.IsAdmin())).ToHttp());
 
-        author.MapPost("/api/topics/{id}/examples", async (string id, CreateExampleRequest req, ClaimsPrincipal user, CourseService svc) =>
-            (await svc.AddExampleAsync(id, req, user.UserId(), user.IsAdmin())).ToHttp());
+        author.MapPost("/api/courses/{id}/chapters",
+            async (string id, CreateChapterRequest req, ClaimsPrincipal user, CourseService svc) =>
+                (await svc.AddChapterAsync(id, req, user.UserId(), user.IsAdmin())).ToHttp());
+
+        author.MapPost("/api/chapters/{id}/content",
+            async (string id, CreateChapterContentRequest req, ClaimsPrincipal user, CourseService svc) =>
+                (await svc.AddChapterContentAsync(id, req, user.UserId(), user.IsAdmin())).ToHttp());
+
+        // ── Löschen (Author/Admin) ────────────────────────────────────────────
+
+        author.MapDelete("/api/courses/{id}",
+            async (string id, ClaimsPrincipal user, CourseService svc) =>
+                (await svc.DeleteCourseAsync(id, user.UserId(), user.IsAdmin())).ToHttpNoContent());
+
+        author.MapDelete("/api/chapters/{id}",
+            async (string id, ClaimsPrincipal user, CourseService svc) =>
+                (await svc.DeleteChapterAsync(id, user.UserId(), user.IsAdmin())).ToHttpNoContent());
+
+        author.MapDelete("/api/content/{id}",
+            async (string id, ClaimsPrincipal user, CourseService svc) =>
+                (await svc.DeleteChapterContentAsync(id, user.UserId(), user.IsAdmin())).ToHttpNoContent());
     }
 }

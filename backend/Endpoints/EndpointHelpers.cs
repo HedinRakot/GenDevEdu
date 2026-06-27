@@ -33,4 +33,11 @@ public static class EndpointHelpers
             _ => Results.StatusCode(StatusCodes.Status500InternalServerError),
         };
     }
+
+    /// <summary>
+    /// Like <see cref="ToHttp{T}"/> but returns 204 No Content on success — for
+    /// DELETE endpoints where the body carries no useful payload.
+    /// </summary>
+    public static IResult ToHttpNoContent<T>(this ServiceResult<T> result) =>
+        result.IsOk ? Results.NoContent() : result.ToHttp();
 }

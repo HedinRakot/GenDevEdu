@@ -1,13 +1,18 @@
 namespace DevEdu.Api.Dtos;
 
-public record RegisterRequest(string? Email, string? DisplayName, string? Password, string? Role);
-
-public record LoginRequest(string? Email, string? Password);
-
-public record RefreshRequest(string? RefreshToken);
-
 public record UserDto(string Id, string Email, string DisplayName, List<string> Roles);
 
-public record AuthResponse(string Token, string RefreshToken, UserDto User);
+// ─── Clerk Webhook ────────────────────────────────────────────────────────────
 
-public record TokenPairDto(string Token, string RefreshToken);
+public record ClerkWebhookPayload(string Type, ClerkWebhookUserData Data);
+
+public record ClerkWebhookUserData(
+    string Id,
+    string? First_name,
+    string? Last_name,
+    List<ClerkEmailAddress>? Email_addresses,
+    ClerkPublicMetadata? Public_metadata);
+
+public record ClerkEmailAddress(string Email_address, bool Primary);
+
+public record ClerkPublicMetadata(string? Role);

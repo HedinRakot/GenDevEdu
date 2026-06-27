@@ -1,0 +1,268 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Try again",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "done": "Done",
+    "search": "Search",
+    "noResults": "No results"
+  },
+  "auth": {
+    "login": "Sign In",
+    "logout": "Sign Out",
+    "email": "Email Address",
+    "password": "Password",
+    "forgotPassword": "Forgot password?",
+    "emailPlaceholder": "Email address",
+    "passwordPlaceholder": "Password",
+    "loginButton": "Sign in",
+    "loginError": "Login failed. Please check your email and password.",
+    "networkError": "No network connection. Please check your internet.",
+    "logoutConfirm": "Are you sure you want to sign out?",
+    "welcome": "Welcome back!",
+    "tagline": "Learn software development",
+    "fieldsRequired": "Please enter email and password.",
+    "signUpPrompt": "Don't have an account?",
+    "signUpLink": "Sign up",
+    "signUpTitle": "Create account",
+    "signUpButton": "Sign up",
+    "confirmPassword": "Confirm password",
+    "confirmPasswordPlaceholder": "Confirm password",
+    "passwordMismatch": "Passwords do not match.",
+    "signUpError": "Sign up failed. Please try again.",
+    "verifyEmailTitle": "Verify your email",
+    "verifyEmailInfo": "We sent a code to {{email}}.",
+    "verificationCode": "Verification code",
+    "verificationCodePlaceholder": "6-digit code",
+    "verifyButton": "Verify",
+    "verifyError": "Invalid code. Please try again.",
+    "loginPrompt": "Already have an account?",
+    "loginLink": "Sign in",
+    "forgotPasswordTitle": "Reset password",
+    "forgotPasswordInfo": "Enter your email address. We'll send you a code to reset your password.",
+    "sendResetCodeButton": "Send code",
+    "resetCodeSentInfo": "We sent a code to {{email}}. Enter it and choose a new password.",
+    "newPasswordPlaceholder": "New password",
+    "resetPasswordButton": "Reset password",
+    "resetPasswordError": "Reset failed. Please try again.",
+    "backToLogin": "Back to sign in"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "courses": "Courses",
+    "chat": "AI Chat",
+    "snippets": "Snippets",
+    "author": "Create",
+    "admin": "Admin",
+    "settings": "Settings"
+  },
+  "admin": {
+    "title": "User management",
+    "subtitle": "Assign roles",
+    "you": "You",
+    "loadError": "Could not load users.",
+    "updateError": "Could not change role.",
+    "empty": "No users found.",
+    "roles": {
+      "learner": "Learner",
+      "instructor": "Author",
+      "admin": "Admin"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome!",
+    "greeting": "Hello, {{name}}! 👋",
+    "subtitle": "Keep it up!",
+    "streak": {
+      "title": "Learning Streak",
+      "subtitle": "Days you learned in a row",
+      "current": "Current",
+      "best": "Best",
+      "days": "{{count}} day",
+      "days_plural": "{{count}} days",
+      "longest": "Record: {{count}} days",
+      "keepGoing": "Keep going! You're doing great.",
+      "startStreak": "Start your streak today!"
+    },
+    "progress": {
+      "title": "Overall Progress",
+      "lessons": "lessons",
+      "completed": "{{completed}} of {{total}} lessons",
+      "percent": "{{percent}}% complete",
+      "itemsCompletedLabel": "items completed",
+      "coursesEnrolled": "across {{count}} courses",
+      "empty": "Start a course to see your progress."
+    },
+    "stats": {
+      "title": "Statistics",
+      "activeCourses": "Active courses",
+      "completedCourses": "Completed",
+      "accuracy": "Quiz accuracy",
+      "quizzesPassed": "Chapter quizzes",
+      "codeSolved": "Code solved",
+      "done": "Done",
+      "empty": "No activity yet. Start a course!"
+    },
+    "challenge": {
+      "label": "Daily Challenge",
+      "start": "Open challenge",
+      "review": "Review",
+      "done": "Done",
+      "hint": "Hint code",
+      "markDone": "Mark as done",
+      "alreadyDone": "Already done"
+    },
+    "notes": {
+      "title": "My Notes",
+      "empty": "No notes yet. Create your first note!",
+      "addNote": "New Note",
+      "editNote": "Edit Note",
+      "noteTitlePlaceholder": "Enter title...",
+      "noteContentPlaceholder": "Enter your note here...",
+      "deleteTitle": "Delete note",
+      "deleteConfirm": "Delete this note?",
+      "saved": "Note saved"
+    }
+  },
+  "courses": {
+    "title": "Courses",
+    "subtitle": "Your Learning Path",
+    "allCourses": "All Courses",
+    "inProgress": "In Progress",
+    "completed": "Completed",
+    "beginner": "Beginner",
+    "intermediate": "Intermediate",
+    "advanced": "Advanced",
+    "lessons": "{{count}} lesson",
+    "lessons_plural": "{{count}} lessons",
+    "hours": "{{count}} hour",
+    "hours_plural": "{{count}} hours",
+    "startCourse": "Start Course",
+    "continueCourse": "Continue Learning",
+    "markComplete": "Mark as Complete",
+    "markIncomplete": "Mark as Incomplete",
+    "objectives": "Learning Objectives",
+    "prerequisites": "Prerequisites",
+    "chapters": "Chapters",
+    "offlineAvailable": "Available Offline",
+    "lastUpdated": "Last updated: {{date}}"
+  },
+  "chat": {
+    "title": "AI Tutor",
+    "subtitle": "Powered by Gemini",
+    "placeholder": "Ask a question about software development...",
+    "send": "Send",
+    "clearHistory": "Clear Chat",
+    "clearConfirm": "Delete the entire chat history?",
+    "thinking": "Thinking...",
+    "errorSending": "Failed to send message.",
+    "apiKeyMissing": "No Gemini API key configured. Please update env.ts.",
+    "emptyState": "Hi! I'm your AI tutor. Ask me anything about software development!"
+  },
+  "quiz": {
+    "check": "Check answer",
+    "correct": "Correct!",
+    "tryAgain": "Not quite right.",
+    "true": "True",
+    "false": "False",
+    "markLessonComplete": "✓ Mark section complete",
+    "selectAnswer": "Please select at least one answer.",
+    "chapterCompleteTitle": "🎉 Chapter complete!",
+    "chapterCompleteBody": "Great job! You answered all questions correctly.",
+    "code": {
+      "submit": "Run code",
+      "grading": "Grading…",
+      "placeholder": "Write your code here…",
+      "error": "Error while running the code.",
+      "allTestsPassed": "All tests passed!",
+      "testsFailed": "Some tests failed.",
+      "passedOf": "{{passed}} of {{total}} tests passed",
+      "compileError": "Compile error",
+      "testN": "Test {{n}}",
+      "hidden": "hidden",
+      "expected": "Expected",
+      "actual": "Actual"
+    }
+  },
+  "chapterQuiz": {
+    "start": "Start chapter quiz",
+    "submit": "Submit quiz",
+    "passed": "Passed!",
+    "failed": "Not passed",
+    "scoreOf": "{{correct}}/{{total}} correct ({{percent}} %)",
+    "passThreshold": "Pass mark: {{percent}} %",
+    "attemptsUsed": "Attempt {{used}}/{{max}}",
+    "noAttemptsLeft": "No attempts left.",
+    "retry": "Try again"
+  },
+  "glossary": {
+    "title": "Glossary",
+    "subtitle": "Look up technical terms",
+    "searchPlaceholder": "Term or keyword...",
+    "allCategories": "All",
+    "totalEntries": "{{count}} entries"
+  },
+  "snippets": {
+    "title": "Snippets",
+    "subtitle": "Your saved code snippets & answers",
+    "searchPlaceholder": "Search snippets...",
+    "empty": "No snippets yet. Tap ★ on chat replies or lessons to save them here.",
+    "saved": "Snippet saved ✓",
+    "alreadyExists": "Snippet already saved.",
+    "delete": "Delete snippet",
+    "deleteConfirm": "Delete this snippet?",
+    "source": {
+      "chat": "Chat",
+      "lesson": "Lesson",
+      "manual": "Manual"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "language": {
+      "title": "Language",
+      "de": "Deutsch",
+      "en": "English",
+      "ru": "Русский"
+    },
+    "appearance": {
+      "title": "Appearance",
+      "darkMode": "Dark Mode",
+      "darkModeSubtitle": "Enable dark color scheme",
+      "followSystem": "Use system theme",
+      "followSystemSubtitle": "Follow your device's setting"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "streakReminder": "Daily reminder",
+      "streakReminderSubtitle": "Evening reminder for your streak",
+      "permissionDenied": "Notification permission was denied."
+    },
+    "tools": {
+      "title": "Learning Tools"
+    },
+    "account": {
+      "title": "Account",
+      "profile": "Profile",
+      "logoutButton": "Sign Out"
+    },
+    "about": {
+      "title": "About",
+      "version": "Version {{version}}",
+      "appName": "EduCode"
+    }
+  },
+  "notifications": {
+    "streakTitle": "🔥 Keep your streak alive!",
+    "streakBody": "You haven't learned today – how about today's daily challenge?"
+  }
+}

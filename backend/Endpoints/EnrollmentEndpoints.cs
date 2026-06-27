@@ -18,9 +18,15 @@ public static class EnrollmentEndpoints
                 Results.Ok(await svc.GetProgressAsync(user.UserId())))
             .RequireAuthorization();
 
-        app.MapPost("/api/topics/{id}/complete",
+        // F9: aggregierte Lerner-Statistiken
+        app.MapGet("/api/me/stats",
+            async (ClaimsPrincipal user, StatsService svc) =>
+                Results.Ok(await svc.GetStatsAsync(user.UserId())))
+            .RequireAuthorization();
+
+        app.MapPost("/api/content/{id}/complete",
             async (string id, ClaimsPrincipal user, EnrollmentService svc) =>
-                (await svc.CompleteTopicAsync(id, user.UserId())).ToHttp())
+                (await svc.CompleteChapterContentAsync(id, user.UserId())).ToHttp())
             .RequireAuthorization();
     }
 }

@@ -55,6 +55,16 @@ Create body example: `{ type, scope, prompt, explanation, points, difficulty, op
   - TrueFalse: `{ value: bool }`
   - → `200 { isCorrect, score, explanation? }`
 
+## Code tasks (F7)
+Question `type: Code` carries `code: { language, starterCode, timeLimitMs, memoryLimitMb, testCases: [{ id, hidden, input, expectedOutput }], solutionCode? }`.
+`solutionCode` and the `input`/`expectedOutput` of hidden test cases are **omitted in learner responses** (only authors/admins see them).
+
+Async grading (submit → poll):
+- `POST /api/code-submissions` (Learner) — `{ questionId, code }` → `202 { id, status }` (Location: `/api/code-submissions/{id}`)
+- `GET /api/code-submissions/{id}` (owner/author/admin) → `{ id, questionId, status: "Queued"|"Running"|"Completed"|"Error", outcome, passedCount, totalCount, durationMs, compileError?, errorMessage?, testResults: [{ testCaseId, hidden, passed, outcome, durationMs, input?, expectedOutput?, actualOutput?, stderr? }] }`
+  - For learners, hidden test results expose only `passed`/`outcome`/`durationMs`; I/O fields are null.
+  - On `Completed`, the backend records an `Attempt` (`isCorrect` = all tests passed) so the task counts toward F6 progress.
+
 ## Errors
 `400` validation, `401` unauthenticated, `403` wrong role, `404` not found. Body `{ error, details? }`.
 

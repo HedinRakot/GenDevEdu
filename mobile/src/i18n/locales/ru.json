@@ -1,0 +1,254 @@
+{
+  "common": {
+    "loading": "Загрузка...",
+    "error": "Произошла ошибка",
+    "retry": "Повторить",
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "delete": "Удалить",
+    "edit": "Изменить",
+    "close": "Закрыть",
+    "confirm": "Подтвердить",
+    "back": "Назад",
+    "next": "Далее",
+    "done": "Готово",
+    "search": "Поиск",
+    "noResults": "Нет результатов"
+  },
+  "auth": {
+    "login": "Войти",
+    "logout": "Выйти",
+    "email": "Адрес электронной почты",
+    "password": "Пароль",
+    "forgotPassword": "Забыли пароль?",
+    "loginButton": "Войти через Identity Server",
+    "loginError": "Ошибка входа. Попробуйте ещё раз.",
+    "networkError": "Нет соединения. Проверьте подключение к сети.",
+    "logoutConfirm": "Вы уверены, что хотите выйти?",
+    "welcome": "С возвращением!",
+    "tagline": "Изучай разработку ПО",
+    "oidcDescription": "Вы будете перенаправлены на наш Identity Server для безопасного входа.",
+    "fieldsRequired": "Введите e-mail и пароль.",
+    "mockBadge": "🔧 Mock-режим – подойдут любые данные",
+    "confirmPasswordPlaceholder": "Подтвердите пароль",
+    "passwordMismatch": "Пароли не совпадают.",
+    "verificationCodePlaceholder": "6-значный код",
+    "forgotPasswordTitle": "Сброс пароля",
+    "forgotPasswordInfo": "Введите адрес электронной почты. Мы отправим вам код для сброса пароля.",
+    "sendResetCodeButton": "Отправить код",
+    "resetCodeSentInfo": "Мы отправили код на {{email}}. Введите его и выберите новый пароль.",
+    "newPasswordPlaceholder": "Новый пароль",
+    "resetPasswordButton": "Сбросить пароль",
+    "resetPasswordError": "Не удалось сбросить пароль. Попробуйте ещё раз.",
+    "backToLogin": "Назад ко входу"
+  },
+  "navigation": {
+    "dashboard": "Главная",
+    "courses": "Курсы",
+    "chat": "ИИ-чат",
+    "snippets": "Сниппеты",
+    "author": "Создать",
+    "admin": "Админ",
+    "settings": "Настройки"
+  },
+  "admin": {
+    "title": "Управление пользователями",
+    "subtitle": "Назначение ролей",
+    "you": "Вы",
+    "loadError": "Не удалось загрузить пользователей.",
+    "updateError": "Не удалось изменить роль.",
+    "empty": "Пользователи не найдены.",
+    "roles": {
+      "learner": "Ученик",
+      "instructor": "Автор",
+      "admin": "Админ"
+    }
+  },
+  "dashboard": {
+    "title": "Главная",
+    "welcome": "Добро пожаловать!",
+    "greeting": "Привет, {{name}}! 👋",
+    "subtitle": "Так держать!",
+    "streak": {
+      "title": "Серия обучения",
+      "subtitle": "Дней подряд с обучением",
+      "current": "Сейчас",
+      "best": "Рекорд",
+      "days": "{{count}} день",
+      "days_plural": "{{count}} дней",
+      "longest": "Рекорд: {{count}} дней",
+      "keepGoing": "Молодец! Так держать!",
+      "startStreak": "Начни серию сегодня!"
+    },
+    "progress": {
+      "title": "Общий прогресс",
+      "lessons": "уроков",
+      "completed": "{{completed}} из {{total}} уроков",
+      "percent": "{{percent}}% завершено",
+      "itemsCompletedLabel": "материалов завершено",
+      "coursesEnrolled": "в {{count}} курсах",
+      "empty": "Начните курс, чтобы увидеть прогресс."
+    },
+    "stats": {
+      "title": "Статистика",
+      "activeCourses": "Активные курсы",
+      "completedCourses": "Завершено",
+      "accuracy": "Точность тестов",
+      "quizzesPassed": "Тесты глав",
+      "codeSolved": "Код решено",
+      "done": "Готово",
+      "empty": "Пока нет активности. Начните курс!"
+    },
+    "challenge": {
+      "label": "Daily Challenge",
+      "start": "Открыть задание",
+      "review": "Посмотреть",
+      "done": "Готово",
+      "hint": "Подсказка",
+      "markDone": "Отметить как выполненное",
+      "alreadyDone": "Уже выполнено"
+    },
+    "notes": {
+      "title": "Мои заметки",
+      "empty": "Заметок пока нет. Создайте первую заметку!",
+      "addNote": "Новая заметка",
+      "editNote": "Редактировать заметку",
+      "noteTitlePlaceholder": "Введите заголовок...",
+      "noteContentPlaceholder": "Введите заметку здесь...",
+      "deleteTitle": "Удалить заметку",
+      "deleteConfirm": "Удалить эту заметку?",
+      "saved": "Заметка сохранена"
+    }
+  },
+  "courses": {
+    "title": "Курсы",
+    "subtitle": "Ваш путь обучения",
+    "allCourses": "Все курсы",
+    "inProgress": "В процессе",
+    "completed": "Завершённые",
+    "beginner": "Начинающий",
+    "intermediate": "Средний",
+    "advanced": "Продвинутый",
+    "lessons": "{{count}} урок",
+    "lessons_plural": "{{count}} уроков",
+    "hours": "{{count}} час",
+    "hours_plural": "{{count}} часов",
+    "startCourse": "Начать курс",
+    "continueCourse": "Продолжить обучение",
+    "markComplete": "Отметить как выполненное",
+    "markIncomplete": "Отметить как незавершённое",
+    "objectives": "Цели обучения",
+    "prerequisites": "Предварительные требования",
+    "chapters": "Главы",
+    "offlineAvailable": "Доступно офлайн",
+    "lastUpdated": "Последнее обновление: {{date}}"
+  },
+  "chat": {
+    "title": "ИИ-репетитор",
+    "subtitle": "Powered by Gemini",
+    "placeholder": "Задайте вопрос о разработке ПО...",
+    "send": "Отправить",
+    "clearHistory": "Очистить чат",
+    "clearConfirm": "Удалить всю историю чата?",
+    "thinking": "Думаю...",
+    "errorSending": "Не удалось отправить сообщение.",
+    "apiKeyMissing": "API-ключ Gemini не настроен. Обновите env.ts.",
+    "emptyState": "Привет! Я ваш ИИ-репетитор. Спросите меня всё о разработке ПО!"
+  },
+  "quiz": {
+    "check": "Проверить ответ",
+    "correct": "Правильно!",
+    "tryAgain": "Не совсем верно.",
+    "true": "Верно",
+    "false": "Неверно",
+    "selectAnswer": "Выберите хотя бы один ответ.",
+    "chapterCompleteTitle": "🎉 Глава пройдена!",
+    "chapterCompleteBody": "Отлично! Все ответы правильные.",
+    "code": {
+      "submit": "Запустить код",
+      "grading": "Проверка…",
+      "placeholder": "Напишите свой код здесь…",
+      "error": "Ошибка при выполнении кода.",
+      "allTestsPassed": "Все тесты пройдены!",
+      "testsFailed": "Некоторые тесты не пройдены.",
+      "passedOf": "Пройдено тестов: {{passed}} из {{total}}",
+      "compileError": "Ошибка компиляции",
+      "testN": "Тест {{n}}",
+      "hidden": "скрытый",
+      "expected": "Ожидалось",
+      "actual": "Получено"
+    }
+  },
+  "chapterQuiz": {
+    "start": "Начать тест главы",
+    "submit": "Отправить тест",
+    "passed": "Сдано!",
+    "failed": "Не сдано",
+    "scoreOf": "{{correct}}/{{total}} верно ({{percent}} %)",
+    "passThreshold": "Порог сдачи: {{percent}} %",
+    "attemptsUsed": "Попытка {{used}}/{{max}}",
+    "noAttemptsLeft": "Попыток не осталось.",
+    "retry": "Ещё раз"
+  },
+  "glossary": {
+    "title": "Глоссарий",
+    "subtitle": "Поиск технических терминов",
+    "searchPlaceholder": "Термин или ключевое слово...",
+    "allCategories": "Все",
+    "totalEntries": "{{count}} записей"
+  },
+  "snippets": {
+    "title": "Сниппеты",
+    "subtitle": "Сохранённые фрагменты кода и ответы",
+    "searchPlaceholder": "Поиск сниппетов...",
+    "empty": "Сниппетов пока нет. Нажмите ★ на ответе чата или уроке, чтобы сохранить сюда.",
+    "saved": "Сниппет сохранён ✓",
+    "alreadyExists": "Сниппет уже сохранён.",
+    "delete": "Удалить сниппет",
+    "deleteConfirm": "Удалить этот сниппет?",
+    "source": {
+      "chat": "Чат",
+      "lesson": "Урок",
+      "manual": "Вручную"
+    }
+  },
+  "settings": {
+    "title": "Настройки",
+    "language": {
+      "title": "Язык",
+      "de": "Deutsch",
+      "en": "English",
+      "ru": "Русский"
+    },
+    "appearance": {
+      "title": "Внешний вид",
+      "darkMode": "Тёмный режим",
+      "darkModeSubtitle": "Включить тёмную цветовую схему",
+      "followSystem": "Использовать тему системы",
+      "followSystemSubtitle": "Следует настройке устройства"
+    },
+    "notifications": {
+      "title": "Уведомления",
+      "streakReminder": "Ежедневное напоминание",
+      "streakReminderSubtitle": "Вечернее напоминание о серии обучения",
+      "permissionDenied": "Разрешение на уведомления отклонено."
+    },
+    "tools": {
+      "title": "Учебные инструменты"
+    },
+    "account": {
+      "title": "Аккаунт",
+      "profile": "Профиль",
+      "logoutButton": "Выйти"
+    },
+    "about": {
+      "title": "О приложении",
+      "version": "Версия {{version}}",
+      "appName": "EduCode"
+    }
+  },
+  "notifications": {
+    "streakTitle": "🔥 Сохрани свою серию!",
+    "streakBody": "Сегодня вы ещё не учились — как насчёт ежедневного задания?"
+  }
+}

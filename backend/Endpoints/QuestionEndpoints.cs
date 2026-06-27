@@ -9,22 +9,26 @@ public static class QuestionEndpoints
 {
     public static void MapQuestionEndpoints(this IEndpointRouteBuilder app)
     {
-        // ---- author-only: create questions ----
-        var author = app.MapGroup("")
-            .RequireAuthorization(Policies.AuthorOrAdmin);
+        // ── Lesezugriff ───────────────────────────────────────────────────────
 
-        author.MapPost("/api/topics/{id}/questions",
-            async (string id, CreateQuestionRequest req, ClaimsPrincipal user, QuestionService svc) =>
-                (await svc.AddTopicQuestionAsync(id, req, user.UserId(), user.IsAdmin())).ToHttp());
+        app.MapGet("/api/questionlists/{id}",
+            async (string id, ClaimsPrincipal user, QuestionService svc) =>
+                (await svc.GetQuestionListAsync(id, user.UserId(), user.Roles())).ToHttp())
+            .RequireAuthorization();
 
-        author.MapPost("/api/chapters/{id}/questions",
-            async (string id, CreateQuestionRequest req, ClaimsPrincipal user, QuestionService svc) =>
-                (await svc.AddChapterQuestionAsync(id, req, user.UserId(), user.IsAdmin())).ToHttp());
+        // ── Attempt einreichen ────────────────────────────────────────────────
 
-        // ---- learner: submit attempt ----
-        app.MapPost("/api/questions/{id}/attempts",
-            async (string id, AttemptRequest req, ClaimsPrincipal user, QuestionService svc) =>
+        app.MapPost("/api/questions/{id}/attempt",
+            async (string id, SubmitAttemptRequest req, ClaimsPrincipal user, QuestionService svc) =>
                 (await svc.GradeAttemptAsync(id, req, user.UserId())).ToHttp())
             .RequireAuthorization();
+
+        // ── Author/Admin ──────────────────────────────────────────────────────
+
+        var author = app.MapGroup("").RequireAuthorization(Policies.AuthorOrAdmin);
+
+        author.MapPost("/api/questionlists",
+            async (CreateQuestionListRequest req, ClaimsPrincipal user, QuestionService svc) =>
+                (await svc.CreateQuestionListAsync(req, user.UserId(), user.IsAdmin())).ToHttp());
     }
 }

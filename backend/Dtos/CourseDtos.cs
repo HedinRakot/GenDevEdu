@@ -1,58 +1,78 @@
+using DevEdu.Api.Models;
+
 namespace DevEdu.Api.Dtos;
 
-// ---- responses ----
+// ─── Hilftypen ────────────────────────────────────────────────────────────────
 
-public record CourseSummaryDto(
-    string Id,
-    string Title,
-    string Slug,
-    string Description,
-    List<string> Tags,
-    string Level,
-    string Status);
+public record TextItemDto(string Text, int Language);
 
-public record ContentBlockDto(string Kind, string Text, string? Language);
+// ─── Kursliste (GET /api/courses) ────────────────────────────────────────────
 
-public record ExampleDto(
-    string Id,
-    string Title,
-    List<ContentBlockDto> ContentBlocks,
-    string? Language,
-    int Order);
+public record CourseDto(string ElementId, string Name, Texte Titel, string Status);
 
-public record TopicDto(
-    string Id,
-    string Title,
-    int Order,
-    List<ExampleDto> Examples,
-    List<object> Questions);
+// ─── Kapitel-Liste (GET /api/courses/{id}/chapters) ──────────────────────────
 
-public record ChapterDto(
-    string Id,
-    string Title,
-    int Order,
-    string Description,
-    List<TopicDto> Topics,
-    List<object> Questions);
+public record ChapterListModel(
+    string CourseId,
+    string CourseName,
+    List<ChapterResponseDto> Chapters);
 
-public record CourseTreeDto(
-    string Id,
-    string Title,
-    string Slug,
-    string Description,
-    List<string> Tags,
-    string Level,
-    string Status,
-    List<ChapterDto> Chapters);
+public record ChapterResponseDto(
+    string ElementId,
+    string Name,
+    string CourseId,
+    Texte Titel,
+    int SortOrder,
+    bool Show,
+    int Rank,
+    bool Completed,
+    List<object> Questions,
+    List<object> ChapterContent,
+    bool HasQuiz = false,
+    int PassThresholdPercent = 0,
+    int MaxAttempts = 0,
+    bool QuizPassed = false);
 
-// ---- requests ----
+// ─── Kapitelinhalte (GET /api/chapters/{id}/content) ─────────────────────────
 
-public record CreateCourseRequest(string? Title, string? Description, List<string>? Tags, string? Level);
+public record ChapterContentListModel(
+    string CourseId,
+    string ChapterId,
+    string ChapterName,
+    List<ChapterContentDto> ChapterContent);
 
-public record UpdateCourseRequest(string? Title, string? Description, List<string>? Tags, string? Level);
+public record ChapterContentDto(
+    string ElementId,
+    string Name,
+    string CourseId,
+    string ChapterId,
+    Texte Titel,
+    int ContentType,
+    string LessonText,
+    Texte LessonTexte,
+    string VideoUrl,
+    string QuestionListId,
+    int SortOrder,
+    List<object> QuestionLists,
+    double AverageRank,
+    int MaxRank,
+    bool Completed);
 
-public record CreateChapterRequest(string? Title, string? Description, int Order);
+// ─── Requests (Author) ───────────────────────────────────────────────────────
 
-public record CreateTopicRequest(string? Title, int Order);
+public record CreateCourseRequest(string? Name, List<TextItemDto>? TitelItems);
 
-public record CreateExampleRequest(string? Title, List<ContentBlockDto>? ContentBlocks, string? Language, int Order);
+public record CreateChapterRequest(
+    string? Name,
+    List<TextItemDto>? TitelItems,
+    int SortOrder = 0,
+    bool Show = true);
+
+public record CreateChapterContentRequest(
+    string? Name,
+    List<TextItemDto>? TitelItems,
+    int ContentType = 0,
+    string? LessonText = null,
+    List<TextItemDto>? LessonTexteItems = null,
+    string? VideoUrl = null,
+    int SortOrder = 0);

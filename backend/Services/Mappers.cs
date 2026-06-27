@@ -5,77 +5,150 @@ namespace DevEdu.Api.Services;
 
 public static class Mappers
 {
-    public static CourseSummaryDto ToSummary(Course c) =>
-        new(c.Id, c.Title, c.Slug, c.Description, c.Tags, c.Level, c.Status);
+    // ─── Course ──────────────────────────────────────────────────────────────
 
-    public static ContentBlockDto ToBlockDto(ContentBlock b) =>
-        new(b.Kind, b.Text, b.Language);
+    public static CourseDto ToCourseDto(Course c) =>
+        new(c.ElementId, c.Name, c.Titel, c.Status);
 
-    public static ExampleDto ToExampleDto(Example e) =>
-        new(e.Id, e.Title, e.ContentBlocks.Select(ToBlockDto).ToList(), e.Language, e.Order);
+    public static ChapterResponseDto ToChapterResponseDto(Chapter ch) =>
+        new(ch.ElementId, ch.Name, ch.CourseId, ch.Titel, ch.SortOrder, ch.Show,
+            Rank: 0, Completed: false,
+            Questions: new List<object>(),
+            ChapterContent: new List<object>(),
+            HasQuiz: !string.IsNullOrEmpty(ch.ChapterQuizId),
+            PassThresholdPercent: ch.PassThresholdPercent,
+            MaxAttempts: ch.MaxAttempts);
 
-    public static QuestionAuthorDto ToAuthorQuestion(Question q)
-    {
-        var options = IsChoice(q.Type) ? q.Options.Select(o => new OptionDto(o.Id, o.Text)).ToList() : null;
-        return new QuestionAuthorDto(
-            q.Id, q.Scope, q.Type, q.Prompt, q.Explanation, q.Points, q.Difficulty,
-            options,
-            q.Type == QuestionType.SingleChoice ? q.CorrectOptionId : null,
-            q.Type == QuestionType.MultipleChoice ? q.CorrectOptionIds : null,
-            q.Type == QuestionType.TrueFalse ? q.CorrectAnswer : null);
-    }
+    public static ChapterContentDto ToChapterContentDto(ChapterContent cc) =>
+        new(cc.ElementId, cc.Name, cc.CourseId, cc.ChapterId, cc.Titel,
+            (int)cc.ContentType, cc.LessonText, cc.LessonTexte,
+            cc.VideoUrl, cc.QuestionListId, cc.SortOrder,
+            QuestionLists: new List<object>(),
+            cc.AverageRank, cc.MaxRank, Completed: false);
 
-    public static QuestionLearnerDto ToLearnerQuestion(Question q)
-    {
-        var options = IsChoice(q.Type) ? q.Options.Select(o => new OptionDto(o.Id, o.Text)).ToList() : null;
-        // Note: explanation is intentionally NOT exposed in the course-tree learner view;
-        // it is only returned after an attempt. Pass null here.
-        return new QuestionLearnerDto(q.Id, q.Scope, q.Type, q.Prompt, null, q.Points, q.Difficulty, options);
-    }
+    // ─── Questions ────────────────────────────────────────────────────────────
 
-    /// <summary>
-    /// Builds the full course tree. When <paramref name="includeAnswers"/> is true,
-    /// questions include correct-answer fields (Author view); otherwise they are stripped (Learner view).
-    /// </summary>
-    public static CourseTreeDto ToTree(Course c, List<Question> questions, bool includeAnswers)
-    {
-        object MapQuestion(Question q) =>
-            includeAnswers ? ToAuthorQuestion(q) : ToLearnerQuestion(q);
+    // Solange nicht aufgelöst wird (Learner vor dem Absenden), dürfen weder die
+    // Korrektheit, der Erklär-Kommentar noch der Referenz-Antwortwert mitgeliefert
+    // werden – die Auswertung läuft serverseitig über POST /api/questions/{id}/attempt.
+    public static AnswerResponseDto ToAnswerDto(Answer a, bool reveal) =>
+        new(a.Id, reveal && a.IsCorrect, a.Titel, reveal ? a.Comment : string.Empty);
 
-        var chapters = c.Chapters
-            .OrderBy(ch => ch.Order)
-            .Select(ch =>
+    public static QuestionResponseDto ToQuestionDto(Question q, bool revealAnswers) =>
+        new(q.ElementId, q.Name, q.Titel,
+            (int)q.QuestionType,
+            q.Answers.Select(a => ToAnswerDto(a, revealAnswers)).ToList(),
+            revealAnswers ? q.AnswerValue : string.Empty,
+            q.Code is null ? null : ToCodeQuestionDto(q.Code, revealAnswers));
+
+    public static QuestionListResponseModel ToQuestionListModel(QuestionList ql, bool revealAnswers) =>
+        new(ql.Questions.Select(q => ToQuestionDto(q, revealAnswers)).ToList());
+
+    // ─── Code-Aufgaben ─────────────────────────────────────────────────────────
+
+    // SolutionCode ist autor-intern; versteckte Testfälle dürfen Lernern weder
+    // Input noch ExpectedOutput zeigen. reveal == Autor/Admin.
+    public static CodeQuestionResponseDto ToCodeQuestionDto(CodeQuestion code, bool reveal) =>
+        new((int)code.Language, code.StarterCode, code.TimeLimitMs, code.MemoryLimitMb,
+            code.TestCases.Select(tc => new CodeTestCasePreviewDto(
+                tc.Id, tc.Hidden,
+                tc.Hidden && !reveal ? null : tc.Input,
+                tc.Hidden && !reveal ? null : tc.ExpectedOutput)).ToList(),
+            reveal ? code.SolutionCode : null);
+
+    public static CodeSubmissionResultDto ToCodeSubmissionDto(CodeSubmission sub, bool reveal) =>
+        new(sub.Id, sub.QuestionId, sub.Status.ToString(), sub.Outcome.ToString(),
+            sub.PassedCount, sub.TotalCount, sub.DurationMs, sub.CompileError, sub.ErrorMessage,
+            sub.TestResults.Select(r =>
             {
-                var chapterQuestions = questions
-                    .Where(q => q.Scope == QuestionScope.Chapter && q.ChapterId == ch.Id)
-                    .Select(MapQuestion)
-                    .ToList();
+                bool hide = r.Hidden && !reveal;
+                return new CodeTestCaseResultDto(
+                    r.TestCaseId, r.Hidden, r.Passed, r.Outcome.ToString(), r.DurationMs,
+                    hide ? null : r.Input,
+                    hide ? null : r.ExpectedOutput,
+                    hide ? null : r.ActualOutput,
+                    hide ? null : r.Stderr);
+            }).ToList());
 
-                var topics = ch.Topics
-                    .OrderBy(t => t.Order)
-                    .Select(t =>
+    // ─── Kapitel-Abschlussquiz (F8) ────────────────────────────────────────────
+
+    public static ChapterQuizDto ToChapterQuizDto(
+        QuestionList ql, Chapter chapter, bool reveal,
+        int attemptsUsed, int? bestPercent, bool passed) =>
+        new(chapter.Id,
+            chapter.PassThresholdPercent,
+            chapter.MaxAttempts,
+            ql.Questions.Select(q => ToQuestionDto(q, reveal)).ToList(),
+            attemptsUsed,
+            bestPercent,
+            passed,
+            AttemptsExhausted: chapter.MaxAttempts > 0 && attemptsUsed >= chapter.MaxAttempts);
+
+    public static ChapterQuizResultDto ToChapterQuizResultDto(
+        QuestionList ql, Chapter chapter, int correctCount, int percent, bool passed,
+        int attemptNo, int attemptsRemaining) =>
+        new(correctCount,
+            ql.Questions.Count,
+            percent,
+            passed,
+            attemptNo,
+            chapter.MaxAttempts,
+            attemptsRemaining,
+            // Nach der Abgabe werden die korrekten Antworten + Erklärungen aufgedeckt.
+            ql.Questions.Select(q => ToQuestionDto(q, revealAnswers: true)).ToList());
+
+    // ─── Helpers ─────────────────────────────────────────────────────────────
+
+    // Baut eine Answer/Question aus einem Author-Create-Request (geteilt von
+    // QuestionService und ChapterQuizService).
+    public static Answer ToAnswer(CreateAnswerRequest ar) => new()
+    {
+        IsCorrect = ar.IsCorrect,
+        Titel = BuildTexte(ar.TitelItems, string.Empty),
+        Comment = ar.Comment ?? string.Empty,
+    };
+
+    public static Question ToQuestion(CreateQuestionRequest qr)
+    {
+        var qId = Guid.NewGuid().ToString("N");
+        var type = (MobileQuestionType)qr.QuestionType;
+        return new Question
+        {
+            Id = qId,
+            ElementId = qId,
+            Name = qr.Name ?? string.Empty,
+            Titel = BuildTexte(qr.TitelItems, qr.Name ?? string.Empty),
+            QuestionType = type,
+            Answers = (qr.Answers ?? new()).Select(ToAnswer).ToList(),
+            AnswerValue = qr.AnswerValue ?? string.Empty,
+            Code = type == MobileQuestionType.Code && qr.Code is not null
+                ? new CodeQuestion
+                {
+                    Language = (CodeLanguage)qr.Code.Language,
+                    StarterCode = qr.Code.StarterCode ?? string.Empty,
+                    SolutionCode = qr.Code.SolutionCode ?? string.Empty,
+                    TimeLimitMs = qr.Code.TimeLimitMs ?? 5000,
+                    MemoryLimitMb = qr.Code.MemoryLimitMb ?? 256,
+                    TestCases = (qr.Code.TestCases ?? new()).Select(tc => new CodeTestCase
                     {
-                        var topicQuestions = questions
-                            .Where(q => q.Scope == QuestionScope.Topic && q.TopicId == t.Id)
-                            .Select(MapQuestion)
-                            .ToList();
-
-                        var examples = t.Examples
-                            .OrderBy(e => e.Order)
-                            .Select(ToExampleDto)
-                            .ToList();
-
-                        return new TopicDto(t.Id, t.Title, t.Order, examples, topicQuestions);
-                    })
-                    .ToList();
-
-                return new ChapterDto(ch.Id, ch.Title, ch.Order, ch.Description, topics, chapterQuestions);
-            })
-            .ToList();
-
-        return new CourseTreeDto(c.Id, c.Title, c.Slug, c.Description, c.Tags, c.Level, c.Status, chapters);
+                        Input = tc.Input ?? string.Empty,
+                        ExpectedOutput = tc.ExpectedOutput ?? string.Empty,
+                        Hidden = tc.Hidden,
+                    }).ToList(),
+                }
+                : null,
+        };
     }
 
-    private static bool IsChoice(string type) =>
-        type == QuestionType.SingleChoice || type == QuestionType.MultipleChoice;
+    public static Texte BuildTexte(List<TextItemDto>? items, string fallbackName) =>
+        new()
+        {
+            Items = items?.Select(i => new TextItem { Text = i.Text, Language = i.Language }).ToList()
+                    ?? new List<TextItem> { new() { Text = fallbackName, Language = 1 } }
+        };
+
+    public static string PrimaryText(Texte t) =>
+        t.Items.FirstOrDefault(i => i.Language == 1)?.Text   // German preferred
+        ?? t.Items.FirstOrDefault()?.Text
+        ?? string.Empty;
 }
