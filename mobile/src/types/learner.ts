@@ -16,6 +16,15 @@ export interface CourseStat {
   completed: boolean;
 }
 
+export interface Certificate {
+  id: string;
+  courseId: string;
+  courseName: string;
+  learnerName: string;
+  verificationCode: string;
+  issuedAt: string;
+}
+
 export interface LearnerStats {
   activeCourses: number;
   completedCourses: number;

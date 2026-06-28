@@ -8,6 +8,8 @@ export interface TextItemDto {
 export interface CreateCourseRequest {
   name: string;
   titelItems: TextItemDto[];
+  tags?: string[];
+  level?: string;
 }
 
 export interface CreateChapterRequest {

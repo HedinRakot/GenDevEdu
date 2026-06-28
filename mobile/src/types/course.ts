@@ -212,6 +212,9 @@ export interface ChapterQuizResult {
 export interface Course extends EntityBase {
   titel: Texte;
   chapters: Chapter[];
+  // F11: Katalog
+  tags: string[];
+  level: string; // "" | Beginner | Intermediate | Advanced
 }
 
 // ─── API-Response-Modelle ────────────────────────────────────────────────────

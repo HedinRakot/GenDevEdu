@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   fetchCourses,
+  fetchCourseTags,
+  type CourseFilter,
   fetchChapterList,
   fetchChapterContent,
   fetchQuestions,
@@ -11,6 +13,7 @@ import {
   enrollInCourse,
   getProgress,
   getStats,
+  getCertificates,
   createCourse,
   publishCourse,
   addChapter,
@@ -48,11 +51,19 @@ export const courseKeys = {
 
 // ─── Learner: Read ────────────────────────────────────────────────────────────
 
-export function useCourses() {
+export function useCourses(params?: CourseFilter) {
   return useQuery({
-    queryKey: courseKeys.lists(),
-    queryFn: fetchCourses,
+    queryKey: [...courseKeys.lists(), params ?? {}] as const,
+    queryFn: () => fetchCourses(params),
     staleTime: 1000 * 60 * 15,
+  });
+}
+
+export function useCourseTags() {
+  return useQuery({
+    queryKey: [...courseKeys.all, 'tags'] as const,
+    queryFn: fetchCourseTags,
+    staleTime: 1000 * 60 * 30,
   });
 }
 
@@ -101,6 +112,14 @@ export function useStats() {
   });
 }
 
+export function useCertificates() {
+  return useQuery({
+    queryKey: ['certificates'] as const,
+    queryFn: getCertificates,
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
 export function useEnrollment() {
   return useMutation({ mutationFn: enrollInCourse });
 }
@@ -112,6 +131,8 @@ export function useCompleteContent() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: courseKeys.all });
       qc.invalidateQueries({ queryKey: courseKeys.progress });
+      qc.invalidateQueries({ queryKey: ['stats'] });
+      qc.invalidateQueries({ queryKey: ['certificates'] });
     },
   });
 }
@@ -187,6 +208,8 @@ export function useSubmitChapterQuiz(chapterId: string) {
       qc.invalidateQueries({ queryKey: courseKeys.chapterQuiz(chapterId) });
       qc.invalidateQueries({ queryKey: courseKeys.progress });
       qc.invalidateQueries({ queryKey: courseKeys.all });
+      qc.invalidateQueries({ queryKey: ['stats'] });
+      qc.invalidateQueries({ queryKey: ['certificates'] });
     },
   });
 }

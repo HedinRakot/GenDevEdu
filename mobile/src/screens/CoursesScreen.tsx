@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -12,7 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 
-import { useCourses } from '@/hooks/useCourses';
+import { useCourses, useCourseTags } from '@/hooks/useCourses';
 import { useTheme } from '@/context/ThemeContext';
 import { translate } from '@/utils/textUtils';
 import type { CoursesStackParamList } from '@/navigation/CoursesStack';
@@ -20,6 +21,13 @@ import type { Course } from '@/types/course';
 import { FontSize, FontWeight, Radius, Shadow, Spacing } from '@/config/theme';
 
 type NavProp = NativeStackNavigationProp<CoursesStackParamList, 'CoursesList'>;
+
+const LEVELS = ['Beginner', 'Intermediate', 'Advanced'] as const;
+const LEVEL_LABEL: Record<string, string> = {
+  Beginner: 'courses.beginner',
+  Intermediate: 'courses.intermediate',
+  Advanced: 'courses.advanced',
+};
 
 function CourseCard({ course, onPress }: { course: Course; onPress: () => void }) {
   const { t } = useTranslation();
@@ -41,13 +49,22 @@ function CourseCard({ course, onPress }: { course: Course; onPress: () => void }
               {course.elementId.includes('js') ? '📜' : '🔷'}
             </Text>
           </View>
+          {!!course.level && (
+            <View style={[styles.levelBadge, { backgroundColor: colors.primarySurface }]}>
+              <Text style={[styles.levelBadgeText, { color: colors.primary }]}>
+                {t(LEVEL_LABEL[course.level] ?? course.level)}
+              </Text>
+            </View>
+          )}
         </View>
         <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>
           {title || course.name}
         </Text>
-        <Text style={[styles.cardDescription, { color: colors.textSecondary }]} numberOfLines={2}>
-          {t('courses.allCourses')}
-        </Text>
+        {course.tags.length > 0 && (
+          <Text style={[styles.cardTags, { color: colors.textTertiary }]} numberOfLines={1}>
+            {course.tags.map((tg) => `#${tg}`).join('  ')}
+          </Text>
+        )}
         <Text style={[styles.startButtonText, { color: colors.primary }]}>
           {t('courses.startCourse')} →
         </Text>
@@ -56,22 +73,62 @@ function CourseCard({ course, onPress }: { course: Course; onPress: () => void }
   );
 }
 
+function Chip({
+  label,
+  active,
+  onPress,
+  testID,
+}: {
+  label: string;
+  active: boolean;
+  onPress: () => void;
+  testID?: string;
+}) {
+  const { colors } = useTheme();
+  return (
+    <TouchableOpacity
+      testID={testID}
+      onPress={onPress}
+      style={[
+        styles.chip,
+        {
+          backgroundColor: active ? colors.primary : colors.surface,
+          borderColor: active ? colors.primary : colors.border,
+        },
+      ]}
+    >
+      <Text style={[styles.chipText, { color: active ? colors.textInverted : colors.textSecondary }]}>
+        {label}
+      </Text>
+    </TouchableOpacity>
+  );
+}
+
 export function CoursesScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const navigation = useNavigation<NavProp>();
-  const { data: courses, isLoading, error, refetch } = useCourses();
 
-  if (isLoading) {
-    return (
-      <SafeAreaView style={[styles.centered, { backgroundColor: colors.background }]}>
-        <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
-          {t('common.loading')}
-        </Text>
-      </SafeAreaView>
-    );
-  }
+  const [search, setSearch] = useState('');
+  const [debounced, setDebounced] = useState('');
+  const [level, setLevel] = useState<string | null>(null);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
+  useEffect(() => {
+    const id = setTimeout(() => setDebounced(search), 300);
+    return () => clearTimeout(id);
+  }, [search]);
+
+  const filter = useMemo(
+    () => ({ search: debounced, level: level ?? undefined, tags: selectedTags }),
+    [debounced, level, selectedTags],
+  );
+
+  const { data: courses, isLoading, error, refetch } = useCourses(filter);
+  const { data: tags } = useCourseTags();
+
+  const toggleTag = (tag: string) =>
+    setSelectedTags((prev) => (prev.includes(tag) ? prev.filter((x) => x !== tag) : [...prev, tag]));
 
   if (error) {
     return (
@@ -91,10 +148,11 @@ export function CoursesScreen() {
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
       <FlatList
-        data={courses}
+        data={courses ?? []}
         keyExtractor={(item) => item.elementId}
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
           <View style={styles.listHeader}>
             <Text style={[styles.screenTitle, { color: colors.textPrimary }]}>
@@ -103,14 +161,48 @@ export function CoursesScreen() {
             <Text style={[styles.screenSubtitle, { color: colors.textSecondary }]}>
               {t('courses.subtitle')}
             </Text>
-            <TouchableOpacity
-              style={[styles.glossaryBtn, { backgroundColor: colors.primarySurface }]}
-              onPress={() => navigation.navigate('Glossary')}
-            >
-              <Text style={[styles.glossaryBtnText, { color: colors.primary }]}>
-                📖 {t('glossary.title')}
-              </Text>
-            </TouchableOpacity>
+
+            {/* Suche */}
+            <View style={[styles.searchBox, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              <Text style={styles.searchIcon}>🔍</Text>
+              <TextInput
+                style={[styles.searchInput, { color: colors.textPrimary }]}
+                value={search}
+                onChangeText={setSearch}
+                placeholder={t('courses.searchPlaceholder')}
+                placeholderTextColor={colors.textTertiary}
+                autoCorrect={false}
+                autoCapitalize="none"
+              />
+              {search.length > 0 && (
+                <TouchableOpacity onPress={() => setSearch('')}>
+                  <Text style={[styles.clear, { color: colors.textTertiary }]}>✕</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+
+            {/* Level-Filter */}
+            <View style={styles.chipRow}>
+              <Chip testID="level-all" label={t('courses.allLevels')} active={level === null} onPress={() => setLevel(null)} />
+              {LEVELS.map((lv) => (
+                <Chip
+                  key={lv}
+                  testID={`level-${lv}`}
+                  label={t(LEVEL_LABEL[lv])}
+                  active={level === lv}
+                  onPress={() => setLevel((cur) => (cur === lv ? null : lv))}
+                />
+              ))}
+            </View>
+
+            {/* Tag-Filter */}
+            {!!tags && tags.length > 0 && (
+              <View style={styles.chipRow}>
+                {tags.map((tag) => (
+                  <Chip key={tag} label={`#${tag}`} active={selectedTags.includes(tag)} onPress={() => toggleTag(tag)} />
+                ))}
+              </View>
+            )}
           </View>
         }
         renderItem={({ item }) => (
@@ -120,6 +212,13 @@ export function CoursesScreen() {
           />
         )}
         ItemSeparatorComponent={() => <View style={{ height: Spacing.md }} />}
+        ListEmptyComponent={
+          isLoading ? (
+            <ActivityIndicator color={colors.primary} style={{ marginTop: Spacing.xl }} />
+          ) : (
+            <Text style={[styles.empty, { color: colors.textSecondary }]}>{t('courses.noResults')}</Text>
+          )
+        }
       />
     </SafeAreaView>
   );
@@ -130,17 +229,25 @@ const styles = StyleSheet.create({
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: Spacing.md },
   list: { padding: Spacing.lg, paddingBottom: Spacing.xxxl },
 
-  listHeader: { marginBottom: Spacing.lg },
+  listHeader: { marginBottom: Spacing.lg, gap: Spacing.md },
   screenTitle: { fontSize: FontSize.xxxl, fontWeight: FontWeight.extrabold },
   screenSubtitle: { fontSize: FontSize.md, marginTop: 4 },
-  glossaryBtn: {
-    alignSelf: 'flex-start',
-    marginTop: Spacing.md,
+
+  searchBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: Radius.md,
+    borderWidth: 1,
     paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderRadius: Radius.full,
+    gap: Spacing.sm,
   },
-  glossaryBtnText: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
+  searchIcon: { fontSize: 16 },
+  searchInput: { flex: 1, paddingVertical: Spacing.sm, fontSize: FontSize.md },
+  clear: { fontSize: FontSize.md, paddingHorizontal: Spacing.xs },
+
+  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
+  chip: { borderWidth: 1.5, borderRadius: Radius.full, paddingHorizontal: Spacing.md, paddingVertical: 6 },
+  chipText: { fontSize: FontSize.xs, fontWeight: FontWeight.semibold },
 
   card: { borderRadius: Radius.xl, overflow: 'hidden', flexDirection: 'row', ...Shadow.md },
   stripe: { width: 6 },
@@ -159,11 +266,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cardIcon: { fontSize: 22 },
+  levelBadge: { paddingHorizontal: Spacing.sm, paddingVertical: 4, borderRadius: Radius.full },
+  levelBadgeText: { fontSize: FontSize.xs, fontWeight: FontWeight.bold },
   cardTitle: { fontSize: FontSize.lg, fontWeight: FontWeight.bold, marginBottom: 4 },
-  cardDescription: { fontSize: FontSize.sm, lineHeight: 20, marginBottom: Spacing.sm },
+  cardTags: { fontSize: FontSize.xs, marginBottom: Spacing.sm },
   startButtonText: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
 
-  loadingText: { fontSize: FontSize.md },
+  empty: { fontSize: FontSize.md, textAlign: 'center', marginTop: Spacing.xl },
   errorEmoji: { fontSize: 48 },
   errorText: { fontSize: FontSize.md },
   retryButton: { borderRadius: Radius.md, paddingHorizontal: Spacing.lg, paddingVertical: Spacing.sm },

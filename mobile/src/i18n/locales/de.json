@@ -112,6 +112,12 @@
       "done": "Fertig",
       "empty": "Noch keine Aktivität. Starte einen Kurs!"
     },
+    "certificates": {
+      "title": "Zertifikate",
+      "issuedOn": "Ausgestellt am {{date}}",
+      "code": "Code",
+      "empty": "Noch keine Zertifikate. Schließe einen Kurs vollständig ab!"
+    },
     "challenge": {
       "label": "Daily Challenge",
       "start": "Challenge öffnen",
@@ -137,6 +143,9 @@
     "title": "Kurse",
     "subtitle": "Dein Lernpfad",
     "allCourses": "Alle Kurse",
+    "searchPlaceholder": "Kurse suchen…",
+    "allLevels": "Alle Level",
+    "noResults": "Keine Kurse gefunden.",
     "inProgress": "In Bearbeitung",
     "completed": "Abgeschlossen",
     "beginner": "Anfänger",

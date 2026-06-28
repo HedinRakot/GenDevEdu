@@ -45,6 +45,21 @@ public class Attempt
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
 
+/// <summary>Zertifikat für einen abgeschlossenen Kurs (F10). Namen sind Snapshots.</summary>
+public class Certificate
+{
+    [BsonId]
+    [BsonRepresentation(BsonType.String)]
+    public string Id { get; set; } = Guid.NewGuid().ToString("N");
+
+    public string UserId { get; set; } = string.Empty;
+    public string CourseId { get; set; } = string.Empty;
+    public string CourseName { get; set; } = string.Empty;     // Snapshot bei Ausstellung
+    public string LearnerName { get; set; } = string.Empty;    // Snapshot bei Ausstellung
+    public string VerificationCode { get; set; } = string.Empty;
+    public DateTime IssuedAt { get; set; } = DateTime.UtcNow;
+}
+
 /// <summary>Ein vollständiger Versuch eines Kapitel-Abschlussquiz (F8).</summary>
 public class ChapterQuizAttempt
 {

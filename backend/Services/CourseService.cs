@@ -12,17 +12,32 @@ public class CourseService
 
     // ─── Read ─────────────────────────────────────────────────────────────────
 
-    public async Task<List<CourseDto>> ListAsync(string userId, IReadOnlySet<string> roles)
+    public async Task<List<CourseDto>> ListAsync(
+        string userId, IReadOnlySet<string> roles,
+        string? search = null, List<string>? tags = null, string? level = null)
     {
         var all = await _db.Courses.Find(FilterDefinition<Course>.Empty).ToListAsync();
 
         bool isAdmin = roles.Contains(Roles.Admin);
         bool isAuthor = roles.Contains(Roles.Author);
 
-        return all
-            .Where(c => c.Status == CourseStatus.Published || isAdmin || (isAuthor && c.AuthorId == userId))
+        var visible = all
+            .Where(c => c.Status == CourseStatus.Published || isAdmin || (isAuthor && c.AuthorId == userId));
+
+        return CourseCatalog.Filter(visible, search, tags, level)
             .OrderBy(c => c.Name)
             .Select(Mappers.ToCourseDto)
+            .ToList();
+    }
+
+    /// <summary>Distinkte Tags aller veröffentlichten Kurse (für die Filter-Chips).</summary>
+    public async Task<List<string>> GetTagsAsync()
+    {
+        var published = await _db.Courses.Find(c => c.Status == CourseStatus.Published).ToListAsync();
+        return published
+            .SelectMany(c => c.Tags)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(t => t)
             .ToList();
     }
 
@@ -42,21 +57,16 @@ public class CourseService
         var progress = await _db.Progress
             .Find(p => p.UserId == userId && p.CourseId == course.Id)
             .FirstOrDefaultAsync();
-        var completedIds = progress?.CompletedChapterContentIds ?? new List<string>();
-        var passedQuizIds = progress?.PassedChapterQuizIds ?? new List<string>();
+        var completedIds = (progress?.CompletedChapterContentIds ?? new()).ToHashSet();
+        var passedQuizIds = (progress?.PassedChapterQuizIds ?? new()).ToHashSet();
 
         var chapters = course.Chapters
             .OrderBy(ch => ch.SortOrder)
-            .Select(ch =>
+            .Select(ch => Mappers.ToChapterResponseDto(ch) with
             {
-                bool hasQuiz = !string.IsNullOrEmpty(ch.ChapterQuizId);
-                bool quizPassed = passedQuizIds.Contains(ch.Id);
-                bool contentDone = ch.ChapterContent.All(cc => completedIds.Contains(cc.ElementId));
-                bool hasAny = ch.ChapterContent.Count > 0 || hasQuiz;
-                // F8: Kapitel gilt erst als abgeschlossen, wenn alle Inhalte fertig sind
-                // UND (falls vorhanden) das Abschlussquiz bestanden ist.
-                bool completed = hasAny && contentDone && (!hasQuiz || quizPassed);
-                return Mappers.ToChapterResponseDto(ch) with { Completed = completed, QuizPassed = quizPassed };
+                // F8: geteilte Abschluss-Logik (CourseCompletion).
+                Completed = CourseCompletion.IsChapterComplete(ch, completedIds, passedQuizIds),
+                QuizPassed = passedQuizIds.Contains(ch.Id),
             })
             .ToList();
 
@@ -105,6 +115,12 @@ public class CourseService
             Titel = Mappers.BuildTexte(req.TitelItems, req.Name),
             AuthorId = authorId,
             Status = CourseStatus.Draft,
+            Tags = (req.Tags ?? new())
+                .Select(t => t.Trim().ToLowerInvariant())
+                .Where(t => t.Length > 0)
+                .Distinct()
+                .ToList(),
+            Level = CourseLevel.IsValid(req.Level) ? req.Level! : string.Empty,
         };
         await _db.Courses.InsertOneAsync(course);
         return ServiceResult<CourseDto>.Ok(Mappers.ToCourseDto(course));

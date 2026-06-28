@@ -13,7 +13,7 @@ import type {
   SubmitChapterQuizRequest,
   ChapterQuizResult,
 } from '@/types/course';
-import type { ProgressDto, LearnerStats } from '@/types/learner';
+import type { ProgressDto, LearnerStats, Certificate } from '@/types/learner';
 import type {
   CreateCourseRequest,
   CreateChapterRequest,
@@ -26,8 +26,23 @@ import { apiClient } from '@/services/apiClient';
 
 // ─── Learner: Read ────────────────────────────────────────────────────────────
 
-export async function fetchCourses(): Promise<Course[]> {
-  const { data } = await apiClient.get<Course[]>('/api/courses');
+export interface CourseFilter {
+  search?: string;
+  tags?: string[];
+  level?: string;
+}
+
+export async function fetchCourses(params?: CourseFilter): Promise<Course[]> {
+  const query: Record<string, string> = {};
+  if (params?.search?.trim()) query.search = params.search.trim();
+  if (params?.tags?.length) query.tags = params.tags.join(',');
+  if (params?.level) query.level = params.level;
+  const { data } = await apiClient.get<Course[]>('/api/courses', { params: query });
+  return data;
+}
+
+export async function fetchCourseTags(): Promise<string[]> {
+  const { data } = await apiClient.get<string[]>('/api/courses/tags');
   return data;
 }
 
@@ -65,6 +80,11 @@ export async function getProgress(): Promise<ProgressDto[]> {
 
 export async function getStats(): Promise<LearnerStats> {
   const { data } = await apiClient.get<LearnerStats>('/api/me/stats');
+  return data;
+}
+
+export async function getCertificates(): Promise<Certificate[]> {
+  const { data } = await apiClient.get<Certificate[]>('/api/me/certificates');
   return data;
 }
 

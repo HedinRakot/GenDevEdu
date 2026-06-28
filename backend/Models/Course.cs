@@ -4,7 +4,11 @@ using MongoDB.Bson.Serialization.Attributes;
 namespace DevEdu.Api.Models;
 
 // ─── Lokalisierung ────────────────────────────────────────────────────────────
+// BsonIgnoreExtraElements: toleriert importierte Dokumente mit zusätzlichen/
+// abweichenden Feldern (z. B. ein literales `Id` statt `_id` in Sub-Dokumenten),
+// statt beim Deserialisieren zu werfen.
 
+[BsonIgnoreExtraElements]
 public class TextItem
 {
     public string Text { get; set; } = string.Empty;
@@ -12,6 +16,7 @@ public class TextItem
     public int Language { get; set; }
 }
 
+[BsonIgnoreExtraElements]
 public class Texte
 {
     public List<TextItem> Items { get; set; } = new();
@@ -23,6 +28,7 @@ public enum ChapterContentType { Lesson = 0, Video = 1, Questions = 2 }
 
 // ─── ChapterContent ──────────────────────────────────────────────────────────
 
+[BsonIgnoreExtraElements]
 public class ChapterContent
 {
     public string Id { get; set; } = Guid.NewGuid().ToString("N");
@@ -44,6 +50,7 @@ public class ChapterContent
 
 // ─── Chapter ─────────────────────────────────────────────────────────────────
 
+[BsonIgnoreExtraElements]
 public class Chapter
 {
     public string Id { get; set; } = Guid.NewGuid().ToString("N");
@@ -66,6 +73,7 @@ public class Chapter
 
 // ─── Course ──────────────────────────────────────────────────────────────────
 
+[BsonIgnoreExtraElements]
 public class Course
 {
     [BsonId]
@@ -78,6 +86,9 @@ public class Course
     public string AuthorId { get; set; } = string.Empty;
     public string Status { get; set; } = CourseStatus.Draft;
     public List<Chapter> Chapters { get; set; } = new();
+    // F11: Katalog – Filter/Suche
+    public List<string> Tags { get; set; } = new();
+    public string Level { get; set; } = string.Empty;   // "" | Beginner | Intermediate | Advanced
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }
@@ -87,4 +98,14 @@ public static class CourseStatus
     public const string Draft = "Draft";
     public const string Published = "Published";
     public const string Archived = "Archived";
+}
+
+public static class CourseLevel
+{
+    public const string Beginner = "Beginner";
+    public const string Intermediate = "Intermediate";
+    public const string Advanced = "Advanced";
+
+    public static readonly string[] All = { Beginner, Intermediate, Advanced };
+    public static bool IsValid(string? level) => !string.IsNullOrEmpty(level) && All.Contains(level);
 }

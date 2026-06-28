@@ -24,6 +24,12 @@ public static class EnrollmentEndpoints
                 Results.Ok(await svc.GetStatsAsync(user.UserId())))
             .RequireAuthorization();
 
+        // F10: erworbene Zertifikate
+        app.MapGet("/api/me/certificates",
+            async (ClaimsPrincipal user, CertificateService svc) =>
+                Results.Ok(await svc.GetMineAsync(user.UserId())))
+            .RequireAuthorization();
+
         app.MapPost("/api/content/{id}/complete",
             async (string id, ClaimsPrincipal user, EnrollmentService svc) =>
                 (await svc.CompleteChapterContentAsync(id, user.UserId())).ToHttp())

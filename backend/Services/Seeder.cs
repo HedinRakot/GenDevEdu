@@ -16,6 +16,8 @@ public class Seeder
 
     public async Task SeedAsync()
     {
+        await _db.EnsureIndexesAsync();   // idempotent, unabhängig vom Seed-Stand
+
         var hasCourses = await _db.Courses.Find(FilterDefinition<Course>.Empty).AnyAsync();
         if (hasCourses)
         {
@@ -92,6 +94,8 @@ public class Seeder
             Status = CourseStatus.Published,
             Titel = Bi("C# Grundlagen", "C# Basics"),
             Chapters = new List<Chapter> { chapter },
+            Tags = new List<string> { "csharp", "grundlagen" },
+            Level = CourseLevel.Beginner,
         };
 
         await _db.Courses.InsertOneAsync(course);

@@ -16,7 +16,7 @@ import { useNavigation } from '@react-navigation/native';
 
 import { useStreak } from '@/hooks/useStreak';
 import { useNotes } from '@/hooks/useNotes';
-import { useProgress, useStats } from '@/hooks/useCourses';
+import { useProgress, useStats, useCertificates } from '@/hooks/useCourses';
 import { Card } from '@/components/common/Card';
 import { ProgressBar } from '@/components/common/ProgressBar';
 import { DailyChallengeCard } from '@/components/widgets/DailyChallengeCard';
@@ -195,6 +195,45 @@ export function StatsSection() {
   );
 }
 
+export function CertificatesSection() {
+  const { t } = useTranslation();
+  const { colors } = useTheme();
+  const { data: certs, isLoading } = useCertificates();
+
+  return (
+    <Card>
+      <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>
+        {t('dashboard.certificates.title')}
+      </Text>
+
+      {isLoading ? (
+        <ActivityIndicator size="small" color={colors.primary} style={{ marginTop: Spacing.sm }} />
+      ) : !certs || certs.length === 0 ? (
+        <Text style={[styles.progressDetail, { color: colors.textSecondary, marginTop: Spacing.xs }]}>
+          {t('dashboard.certificates.empty')}
+        </Text>
+      ) : (
+        <View style={styles.certList}>
+          {certs.map((c) => (
+            <View key={c.id} style={[styles.certBadge, { backgroundColor: colors.surfaceElevated }]}>
+              <Text style={styles.certEmoji}>🏅</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.certName, { color: colors.textPrimary }]} numberOfLines={1}>
+                  {c.courseName}
+                </Text>
+                <Text style={[styles.certMeta, { color: colors.textTertiary }]} numberOfLines={1}>
+                  {t('dashboard.certificates.issuedOn', { date: new Date(c.issuedAt).toLocaleDateString() })}
+                  {`  ·  ${t('dashboard.certificates.code')}: ${c.verificationCode}`}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </View>
+      )}
+    </Card>
+  );
+}
+
 export function DashboardScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
@@ -267,6 +306,9 @@ export function DashboardScreen() {
         <View style={{ height: Spacing.lg }} />
 
         <StatsSection />
+        <View style={{ height: Spacing.lg }} />
+
+        <CertificatesSection />
         <View style={{ height: Spacing.lg }} />
 
         {/* Quick-Links */}
@@ -442,6 +484,12 @@ const styles = StyleSheet.create({
   courseStatHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   courseStatName: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold, flex: 1, marginRight: Spacing.sm },
   courseStatBadge: { fontSize: FontSize.xs, fontWeight: FontWeight.bold },
+
+  certList: { marginTop: Spacing.sm, gap: Spacing.sm },
+  certBadge: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, padding: Spacing.md, borderRadius: Radius.md },
+  certEmoji: { fontSize: 28 },
+  certName: { fontSize: FontSize.md, fontWeight: FontWeight.bold },
+  certMeta: { fontSize: FontSize.xs, marginTop: 2 },
 
   quickRow: { flexDirection: 'row', gap: Spacing.md, marginBottom: Spacing.lg },
   quickCard: {

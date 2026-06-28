@@ -27,4 +27,13 @@ public class MongoContext
     public IMongoCollection<Attempt> Attempts => Database.GetCollection<Attempt>("attempts");
     public IMongoCollection<CodeSubmission> CodeSubmissions => Database.GetCollection<CodeSubmission>("codesubmissions");
     public IMongoCollection<ChapterQuizAttempt> ChapterQuizAttempts => Database.GetCollection<ChapterQuizAttempt>("chapterquizattempts");
+    public IMongoCollection<Certificate> Certificates => Database.GetCollection<Certificate>("certificates");
+
+    /// <summary>Idempotente Index-Anlage (beim Start aufgerufen). Erzwingt 1 Zertifikat/Kurs/Nutzer.</summary>
+    public async Task EnsureIndexesAsync()
+    {
+        var unique = new CreateIndexOptions { Unique = true };
+        var keys = Builders<Certificate>.IndexKeys.Ascending(c => c.UserId).Ascending(c => c.CourseId);
+        await Certificates.Indexes.CreateOneAsync(new CreateIndexModel<Certificate>(keys, unique));
+    }
 }

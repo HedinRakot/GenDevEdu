@@ -99,6 +99,12 @@
       "done": "Готово",
       "empty": "Пока нет активности. Начните курс!"
     },
+    "certificates": {
+      "title": "Сертификаты",
+      "issuedOn": "Выдан {{date}}",
+      "code": "Код",
+      "empty": "Сертификатов пока нет. Пройдите курс полностью!"
+    },
     "challenge": {
       "label": "Daily Challenge",
       "start": "Открыть задание",
@@ -124,6 +130,9 @@
     "title": "Курсы",
     "subtitle": "Ваш путь обучения",
     "allCourses": "Все курсы",
+    "searchPlaceholder": "Поиск курсов…",
+    "allLevels": "Все уровни",
+    "noResults": "Курсы не найдены.",
     "inProgress": "В процессе",
     "completed": "Завершённые",
     "beginner": "Начинающий",

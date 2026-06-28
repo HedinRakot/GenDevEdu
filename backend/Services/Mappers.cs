@@ -8,7 +8,7 @@ public static class Mappers
     // ─── Course ──────────────────────────────────────────────────────────────
 
     public static CourseDto ToCourseDto(Course c) =>
-        new(c.ElementId, c.Name, c.Titel, c.Status);
+        new(c.ElementId, c.Name, c.Titel, c.Status, c.Tags, c.Level);
 
     public static ChapterResponseDto ToChapterResponseDto(Chapter ch) =>
         new(ch.ElementId, ch.Name, ch.CourseId, ch.Titel, ch.SortOrder, ch.Show,

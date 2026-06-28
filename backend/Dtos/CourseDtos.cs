@@ -8,7 +8,7 @@ public record TextItemDto(string Text, int Language);
 
 // ─── Kursliste (GET /api/courses) ────────────────────────────────────────────
 
-public record CourseDto(string ElementId, string Name, Texte Titel, string Status);
+public record CourseDto(string ElementId, string Name, Texte Titel, string Status, List<string> Tags, string Level);
 
 // ─── Kapitel-Liste (GET /api/courses/{id}/chapters) ──────────────────────────
 
@@ -60,7 +60,7 @@ public record ChapterContentDto(
 
 // ─── Requests (Author) ───────────────────────────────────────────────────────
 
-public record CreateCourseRequest(string? Name, List<TextItemDto>? TitelItems);
+public record CreateCourseRequest(string? Name, List<TextItemDto>? TitelItems, List<string>? Tags = null, string? Level = null);
 
 public record CreateChapterRequest(
     string? Name,

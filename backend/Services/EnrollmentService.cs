@@ -7,8 +7,13 @@ namespace DevEdu.Api.Services;
 public class EnrollmentService
 {
     private readonly MongoContext _db;
+    private readonly CertificateService _certs;
 
-    public EnrollmentService(MongoContext db) => _db = db;
+    public EnrollmentService(MongoContext db, CertificateService certs)
+    {
+        _db = db;
+        _certs = certs;
+    }
 
     public async Task<ServiceResult<EnrollmentDto>> EnrollAsync(CreateEnrollmentRequest req, string userId)
     {
@@ -73,6 +78,9 @@ public class EnrollmentService
 
         progress.LastVisited = DateTime.UtcNow;
         await _db.Progress.ReplaceOneAsync(p => p.Id == progress.Id, progress);
+
+        // F10: prüfen, ob der Kurs damit abgeschlossen ist → ggf. Zertifikat ausstellen.
+        await _certs.CheckAndIssueAsync(userId, course.Id);
 
         return ServiceResult<ProgressDto>.Ok(
             new ProgressDto(progress.CourseId, progress.CompletedChapterContentIds));

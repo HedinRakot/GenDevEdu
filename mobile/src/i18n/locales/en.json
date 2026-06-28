@@ -112,6 +112,12 @@
       "done": "Done",
       "empty": "No activity yet. Start a course!"
     },
+    "certificates": {
+      "title": "Certificates",
+      "issuedOn": "Issued on {{date}}",
+      "code": "Code",
+      "empty": "No certificates yet. Complete a whole course!"
+    },
     "challenge": {
       "label": "Daily Challenge",
       "start": "Open challenge",
@@ -137,6 +143,9 @@
     "title": "Courses",
     "subtitle": "Your Learning Path",
     "allCourses": "All Courses",
+    "searchPlaceholder": "Search courses…",
+    "allLevels": "All levels",
+    "noResults": "No courses found.",
     "inProgress": "In Progress",
     "completed": "Completed",
     "beginner": "Beginner",

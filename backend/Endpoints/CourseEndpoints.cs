@@ -11,8 +11,18 @@ public static class CourseEndpoints
     {
         // ── Lesezugriff (alle authentifizierten Nutzer) ───────────────────────
 
-        app.MapGet("/api/courses", async (ClaimsPrincipal user, CourseService svc) =>
-            Results.Ok(await svc.ListAsync(user.UserId(), user.Roles())))
+        app.MapGet("/api/courses",
+            async (string? search, string? tags, string? level, ClaimsPrincipal user, CourseService svc) =>
+            {
+                var tagList = string.IsNullOrWhiteSpace(tags)
+                    ? null
+                    : tags.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+                return Results.Ok(await svc.ListAsync(user.UserId(), user.Roles(), search, tagList, level));
+            })
+            .RequireAuthorization();
+
+        app.MapGet("/api/courses/tags", async (CourseService svc) =>
+            Results.Ok(await svc.GetTagsAsync()))
             .RequireAuthorization();
 
         app.MapGet("/api/courses/{id}/chapters",

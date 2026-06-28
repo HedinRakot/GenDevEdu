@@ -42,7 +42,7 @@ public static class StatsCalculator
             int totalChapters = quizChapterIds.Count;
 
             bool completed = completedEnrollmentCourses.Contains(course.Id)
-                || (totalContent > 0 && completedContent == totalContent && chaptersPassed == totalChapters);
+                || CourseCompletion.IsCourseComplete(course, prog);
 
             courseStats.Add(new CourseStatDto(
                 course.Id,

@@ -7,8 +7,13 @@ namespace DevEdu.Api.Services;
 public class ChapterQuizService
 {
     private readonly MongoContext _db;
+    private readonly CertificateService _certs;
 
-    public ChapterQuizService(MongoContext db) => _db = db;
+    public ChapterQuizService(MongoContext db, CertificateService certs)
+    {
+        _db = db;
+        _certs = certs;
+    }
 
     // ─── Autor: Quiz setzen / ersetzen ──────────────────────────────────────────
 
@@ -147,7 +152,11 @@ public class ChapterQuizService
         });
 
         if (passed)
+        {
             await MarkChapterQuizPassedAsync(userId, course.Id, chapterId);
+            // F10: Kapitel-Quiz bestanden könnte den Kurs abschließen → Zertifikat prüfen.
+            await _certs.CheckAndIssueAsync(userId, course.Id);
+        }
 
         int remaining = chapter.MaxAttempts == 0 ? -1 : Math.Max(0, chapter.MaxAttempts - attemptNo);
         return ServiceResult<ChapterQuizResultDto>.Ok(

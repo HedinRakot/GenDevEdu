@@ -29,12 +29,24 @@ export function CreateCourseScreen() {
   const [name, setName] = useState('');
   const [titelDe, setTitelDe] = useState('');
   const [titelEn, setTitelEn] = useState('');
+  const [tagsInput, setTagsInput] = useState('');
+  const [level, setLevel] = useState('');
+
+  const LEVELS: { value: string; label: string }[] = [
+    { value: 'Beginner', label: 'Anfänger' },
+    { value: 'Intermediate', label: 'Fortgeschritten' },
+    { value: 'Advanced', label: 'Experte' },
+  ];
 
   const onSave = () => {
     if (!name.trim()) {
       Alert.alert('Name erforderlich', 'Bitte gib einen internen Namen ein.');
       return;
     }
+    const tags = tagsInput
+      .split(',')
+      .map((t) => t.trim().toLowerCase())
+      .filter((t) => t.length > 0);
     create(
       {
         name: name.trim(),
@@ -42,6 +54,8 @@ export function CreateCourseScreen() {
           { text: titelDe.trim() || name.trim(), language: 1 },
           { text: titelEn.trim() || name.trim(), language: 2 },
         ],
+        tags,
+        level,
       },
       {
         onSuccess: (course) => {
@@ -101,6 +115,40 @@ export function CreateCourseScreen() {
             placeholder="e.g. C# Basics"
             placeholderTextColor={colors.textTertiary}
           />
+
+          <Text style={[styles.label, { color: colors.textSecondary }]}>Tags (kommagetrennt)</Text>
+          <TextInput
+            style={[styles.input, { backgroundColor: colors.surface, color: colors.textPrimary, borderColor: colors.border }]}
+            value={tagsInput}
+            onChangeText={setTagsInput}
+            placeholder="z.B. csharp, grundlagen"
+            placeholderTextColor={colors.textTertiary}
+            autoCapitalize="none"
+          />
+
+          <Text style={[styles.label, { color: colors.textSecondary }]}>Level</Text>
+          <View style={styles.levelRow}>
+            {LEVELS.map((lv) => {
+              const active = level === lv.value;
+              return (
+                <TouchableOpacity
+                  key={lv.value}
+                  onPress={() => setLevel((cur) => (cur === lv.value ? '' : lv.value))}
+                  style={[
+                    styles.levelChip,
+                    {
+                      backgroundColor: active ? colors.primary : colors.surface,
+                      borderColor: active ? colors.primary : colors.border,
+                    },
+                  ]}
+                >
+                  <Text style={{ color: active ? colors.textInverted : colors.textPrimary, fontSize: FontSize.xs }}>
+                    {lv.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -127,4 +175,6 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     fontSize: FontSize.md,
   },
+  levelRow: { flexDirection: 'row', gap: Spacing.sm, marginTop: Spacing.xs },
+  levelChip: { borderWidth: 1.5, borderRadius: Radius.full, paddingHorizontal: Spacing.md, paddingVertical: 6 },
 });
