@@ -1,0 +1,124 @@
+{
+  "_comment": "Inhalts-Overlay fuer den .NET-Kurs. Quelle der Wahrheit fuer DE/EN-Uebersetzungen und neu verfasste Kapitel. Wird per apply-course-content.ps1 idempotent in die lokale 'devedu'-DB eingespielt. Body-Texte liegen als Markdown unter <slug>/<contentId>.<lang>.md. Sprachcodes: 0=RU, 1=DE, 2=EN.",
+  "courseId": "63f93699b75850532d66ae48",
+  "courseName": ".NET",
+  "chapters": [
+    {
+      "_id": "63ff0c06863f6294ce07ea9c",
+      "slug": "ch03-vs-install",
+      "title": { "de": "Programmierumgebung einrichten", "en": "Setting up the development environment" },
+      "contents": [
+        {
+          "_id": "640c55fd224dd30803927b64",
+          "titles": { "de": "Kapitel 3. Visual Studio", "en": "Chapter 3. Visual Studio" },
+          "bodies": ["de", "en"],
+          "ruFromLessonText": true,
+          "clearLessonText": true
+        }
+      ]
+    },
+    {
+      "_id": "642494b0a0287f40262c4be6",
+      "slug": "ch05-schleifen",
+      "title": { "en": "4. Repeated actions" },
+      "contents": [
+        { "_id": "642496daa0287f40262c4be8", "titles": { "en": "Chapter 4.1. The for loop" }, "bodies": ["en"] },
+        { "_id": "642d6cc65b0f1fbe48baec29", "titles": { "en": "Chapter 4.2. The while loop" }, "bodies": ["en"] },
+        { "_id": "64249730a0287f40262c4be9", "titles": { "en": "Chapter 4.3. The continue statement" }, "bodies": ["en"] },
+        { "_id": "64249752a0287f40262c4bea", "titles": { "en": "Chapter 4.4. The break statement" }, "bodies": ["en"] },
+        { "_id": "6427215d19799c9a73031aff", "titles": { "en": "Chapter 4.5. Several conditions at once" }, "bodies": ["en"] },
+        { "_id": "64249dca396c0bdebbad4cbb", "titles": { "en": "Quiz: The for loop" }, "bodies": [] },
+        { "_id": "642d607bdc6df2ce11a2f3f1", "titles": { "en": "Exercises: Repeated actions" }, "bodies": ["en"] }
+      ]
+    },
+    {
+      "_id": "641def9877146bc2ac7476ff",
+      "slug": "ch06-funktionen",
+      "contents": [
+        { "_id": "64346a6b4527c5d249213ddd", "titles": { "de": "Kapitel 5.1. Wozu braucht man Funktionen?", "en": "Chapter 5.1. Why do we need functions?" }, "bodies": ["de", "en"], "ruFromLessonText": true, "clearLessonText": true },
+        { "_id": "64346f70d878001dd3e05853", "titles": { "de": "Kapitel 5.2. Woraus besteht eine Funktion?", "en": "Chapter 5.2. What is a function made of?" }, "bodies": ["de", "en"], "ruFromLessonText": true, "clearLessonText": true },
+        { "_id": "6434713ed878001dd3e05855", "titles": { "de": "Kapitel 5.3. Wie verwendet man Funktionen?", "en": "Chapter 5.3. How do you use functions?" }, "bodies": ["de", "en"], "ruFromLessonText": true, "clearLessonText": true },
+        { "_id": "64347094d878001dd3e05854", "titles": { "de": "Kapitel 5.4. Eine Funktion, die den Benutzernamen zurueckgibt", "en": "Chapter 5.4. A function that returns the user's name" }, "bodies": ["de", "en"], "ruFromLessonText": true, "clearLessonText": true },
+        { "_id": "6446769f632f103a14704b92", "titles": { "de": "Kapitel 5.5. Funktionsparameter", "en": "Chapter 5.5. Function parameters" }, "bodies": ["de", "en"], "ruFromLessonText": true, "clearLessonText": true },
+        { "_id": "643472fed878001dd3e05856", "titles": { "de": "Aufgaben", "en": "Exercises" }, "bodies": ["de", "en"], "ruFromLessonText": true, "clearLessonText": true },
+        { "_id": "644678bf632f103a14704b93", "titles": { "de": "Aufgaben zum Thema „Funktionsparameter“", "en": "Exercises: Function parameters" }, "bodies": ["de", "en"], "ruFromLessonText": true, "clearLessonText": true }
+      ]
+    },
+    {
+      "_id": "640289ec8a5041bf87e28cc8",
+      "slug": "ch07-klassen",
+      "contents": [
+        { "_id": "6456520376141cd3c38e5832", "titles": { "de": "Wie verwendet man Klassen?", "en": "How do you use classes?" }, "bodies": ["de", "en"], "ruFromLessonText": true, "clearLessonText": true },
+        { "_id": "64564f1676141cd3c38e582f", "titles": { "de": "Wozu braucht man Klassen?", "en": "Why do we need classes?" }, "bodies": ["de", "en"], "ruFromLessonText": true, "clearLessonText": true },
+        { "_id": "6456500076141cd3c38e5830", "titles": { "de": "Beispiel: eine Klasse schreiben", "en": "Example: writing a class" }, "bodies": ["de", "en"], "ruFromLessonText": true, "clearLessonText": true },
+        { "_id": "645652ea76141cd3c38e5833", "titles": { "de": "Aufgaben", "en": "Exercises" }, "bodies": ["de", "en"], "ruFromLessonText": true, "clearLessonText": true },
+        { "_id": "645d1bf776141cd3c38e5835", "titles": { "de": "Aufgaben zum Thema „Funktionen innerhalb einer Klasse“", "en": "Exercises: methods inside a class" }, "bodies": ["de", "en"], "ruFromLessonText": true, "clearLessonText": true },
+        { "_id": "645650cb76141cd3c38e5831", "titles": { "de": "public und private", "en": "public and private" }, "bodies": ["de", "en"], "ruFromLessonText": true, "clearLessonText": true },
+        { "_id": "645d154676141cd3c38e5834", "titles": { "de": "Funktionen innerhalb einer Klasse", "en": "Methods inside a class" }, "bodies": ["de", "en"], "ruFromLessonText": true, "clearLessonText": true }
+      ]
+    },
+    {
+      "_id": "64028a308a5041bf87e28ccc",
+      "slug": "ch08-listen",
+      "title": { "de": "7. Listen", "en": "7. Lists" },
+      "newContents": [
+        { "_id": "gen-ch08-01", "type": 0, "sortOrder": 0, "titles": { "de": "Was ist eine Liste?", "en": "What is a list?" }, "bodies": ["de", "en"] },
+        { "_id": "gen-ch08-02", "type": 0, "sortOrder": 10, "titles": { "de": "Listen verwenden: hinzufuegen, zugreifen, entfernen", "en": "Using lists: add, access, remove" }, "bodies": ["de", "en"] },
+        { "_id": "gen-ch08-03", "type": 0, "sortOrder": 20, "titles": { "de": "Durch eine Liste iterieren", "en": "Iterating over a list" }, "bodies": ["de", "en"] },
+        { "_id": "gen-ch08-04", "type": 0, "sortOrder": 30, "titles": { "de": "Aufgaben", "en": "Exercises" }, "bodies": ["de", "en"] }
+      ]
+    },
+    {
+      "_id": "64028a188a5041bf87e28cca",
+      "slug": "ch09-vererbung",
+      "title": { "de": "8. Vererbung (Klassenhierarchie)", "en": "8. Inheritance (class hierarchy)" },
+      "newContents": [
+        { "_id": "gen-ch09-01", "type": 0, "sortOrder": 0, "titles": { "de": "Was ist Vererbung?", "en": "What is inheritance?" }, "bodies": ["de", "en"] },
+        { "_id": "gen-ch09-02", "type": 0, "sortOrder": 10, "titles": { "de": "Eine abgeleitete Klasse erstellen", "en": "Creating a derived class" }, "bodies": ["de", "en"] },
+        { "_id": "gen-ch09-03", "type": 0, "sortOrder": 20, "titles": { "de": "Methoden ueberschreiben (virtual / override)", "en": "Overriding methods (virtual / override)" }, "bodies": ["de", "en"] },
+        { "_id": "gen-ch09-04", "type": 0, "sortOrder": 30, "titles": { "de": "Aufgaben", "en": "Exercises" }, "bodies": ["de", "en"] }
+      ]
+    },
+    {
+      "_id": "64028a028a5041bf87e28cc9",
+      "slug": "ch10-interfaces",
+      "title": { "de": "9. Interfaces", "en": "9. Interfaces" },
+      "newContents": [
+        { "_id": "gen-ch10-01", "type": 0, "sortOrder": 0, "titles": { "de": "Was ist ein Interface?", "en": "What is an interface?" }, "bodies": ["de", "en"] },
+        { "_id": "gen-ch10-02", "type": 0, "sortOrder": 10, "titles": { "de": "Ein Interface implementieren", "en": "Implementing an interface" }, "bodies": ["de", "en"] },
+        { "_id": "gen-ch10-03", "type": 0, "sortOrder": 20, "titles": { "de": "Aufgaben", "en": "Exercises" }, "bodies": ["de", "en"] }
+      ]
+    },
+    {
+      "_id": "64028a298a5041bf87e28ccb",
+      "slug": "ch11-enums",
+      "title": { "de": "10. Aufzaehlungen (enum)", "en": "10. Enumerations (enum)" },
+      "newContents": [
+        { "_id": "gen-ch11-01", "type": 0, "sortOrder": 0, "titles": { "de": "Was ist eine Aufzaehlung (enum)?", "en": "What is an enumeration (enum)?" }, "bodies": ["de", "en"] },
+        { "_id": "gen-ch11-02", "type": 0, "sortOrder": 10, "titles": { "de": "enum verwenden", "en": "Using an enum" }, "bodies": ["de", "en"] },
+        { "_id": "gen-ch11-03", "type": 0, "sortOrder": 20, "titles": { "de": "Aufgaben", "en": "Exercises" }, "bodies": ["de", "en"] }
+      ]
+    },
+    {
+      "_id": "64028b528a5041bf87e28ccd",
+      "slug": "ch12-fehlerbehandlung",
+      "title": { "de": "11. Fehlerbehandlung", "en": "11. Error handling" },
+      "newContents": [
+        { "_id": "gen-ch12-01", "type": 0, "sortOrder": 0, "titles": { "de": "Was sind Fehler und Ausnahmen?", "en": "What are errors and exceptions?" }, "bodies": ["de", "en"] },
+        { "_id": "gen-ch12-02", "type": 0, "sortOrder": 10, "titles": { "de": "try, catch und finally", "en": "try, catch and finally" }, "bodies": ["de", "en"] },
+        { "_id": "gen-ch12-03", "type": 0, "sortOrder": 20, "titles": { "de": "Aufgaben", "en": "Exercises" }, "bodies": ["de", "en"] }
+      ]
+    },
+    {
+      "_id": "64028b6c8a5041bf87e28cce",
+      "slug": "ch13-debugging",
+      "title": { "de": "12. Debugging", "en": "12. Debugging" },
+      "newContents": [
+        { "_id": "gen-ch13-01", "type": 0, "sortOrder": 0, "titles": { "de": "Was ist Debugging?", "en": "What is debugging?" }, "bodies": ["de", "en"] },
+        { "_id": "gen-ch13-02", "type": 0, "sortOrder": 10, "titles": { "de": "Haltepunkte und schrittweises Ausfuehren in Visual Studio", "en": "Breakpoints and stepping through code in Visual Studio" }, "bodies": ["de", "en"] },
+        { "_id": "gen-ch13-03", "type": 0, "sortOrder": 20, "titles": { "de": "Haeufige Fehler finden", "en": "Finding common bugs" }, "bodies": ["de", "en"] },
+        { "_id": "gen-ch13-04", "type": 0, "sortOrder": 30, "titles": { "de": "Aufgaben", "en": "Exercises" }, "bodies": ["de", "en"] }
+      ]
+    }
+  ]
+}

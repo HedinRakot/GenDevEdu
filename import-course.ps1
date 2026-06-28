@@ -249,3 +249,16 @@ if ($code -ne 0) {
 }
 Write-Host ""
 Write-Host "Erledigt." -ForegroundColor Green
+
+# ─── Selbstheilung: Inhalts-Overlay (DE/EN-Uebersetzungen + neue Kapitel) ─────────
+# Der aus der Prod-Quelle importierte Kurs ist unvollstaendig (nur-Russisch-Kapitel,
+# leere Ueberschriften, leere hintere Kapitel). Die im Repo gepflegten Korrekturen
+# werden direkt nach dem Import wieder angewandt, damit ein Re-Import nicht die
+# unvollstaendige Prod-Fassung hinterlaesst. Nur fuer den ".NET"-Kurs relevant.
+$applyScript = Join-Path $PSScriptRoot "apply-course-content.ps1"
+$overlayManifest = Join-Path $PSScriptRoot "course-content\dotnet\manifest.json"
+if (-not $DryRun -and (Test-Path $applyScript) -and (Test-Path $overlayManifest)) {
+    Write-Host ""
+    Write-Host "Wende Inhalts-Overlay an (apply-course-content.ps1) ..." -ForegroundColor Cyan
+    & $applyScript -TargetDb $TargetDb -Namespace $Namespace
+}
