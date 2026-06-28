@@ -27,11 +27,13 @@ import { useSnippets } from '@/hooks/useSnippets';
 import { useStreak } from '@/hooks/useStreak';
 import { useTheme } from '@/context/ThemeContext';
 import { translate } from '@/utils/textUtils';
+import { htmlToMarkdown } from '@/utils/htmlToMarkdown';
 import { ChapterContentType, QuestionType } from '@/types/course';
 import type { CoursesStackParamList } from '@/navigation/CoursesStack';
 import type { ChapterContent as ChapterContentModel, Question } from '@/types/course';
 import { markLessonComplete } from '@/store/storage';
 import { MarkdownRenderer } from '@/components/common/MarkdownRenderer';
+import { QuestionPrompt } from '@/components/common/QuestionPrompt';
 import { FontSize, FontWeight, Radius, Shadow, Spacing } from '@/config/theme';
 
 type NavProp = NativeStackNavigationProp<CoursesStackParamList, 'Lesson'>;
@@ -121,9 +123,11 @@ function ChoiceQuestionCard({ question, onAnsweredCorrectly }: QuestionCardProps
         },
       ]}
     >
-      <Text style={[styles.questionTitle, { color: colors.textPrimary }]}>
-        {translate(question.titel)}
-      </Text>
+      <QuestionPrompt
+        text={translate(question.titel)}
+        textStyle={[styles.questionTitle, { color: colors.textPrimary }]}
+        containerStyle={styles.questionPrompt}
+      />
       <View style={[styles.answerList, isTrueFalse && styles.trueFalseRow]}>
         {question.answers.map((answer, idx) => {
           const isSelected = selectedIds.includes(answer.id);
@@ -272,9 +276,11 @@ function CodeQuestionCard({ question, onAnsweredCorrectly }: QuestionCardProps) 
 
   return (
     <View style={[styles.questionCard, { backgroundColor: colors.surface, borderColor }]}>
-      <Text style={[styles.questionTitle, { color: colors.textPrimary }]}>
-        {translate(question.titel)}
-      </Text>
+      <QuestionPrompt
+        text={translate(question.titel)}
+        textStyle={[styles.questionTitle, { color: colors.textPrimary }]}
+        containerStyle={styles.questionPrompt}
+      />
 
       <TextInput
         style={[
@@ -421,7 +427,9 @@ function ContentItem({
   const title = translate(content.titel);
 
   if (content.contentType === ChapterContentType.Lesson) {
-    const text = translate(content.lessonTexte) || content.lessonText;
+    // Kursinhalt ist HTML (Legacy-Editor) → in Markdown wandeln, damit Tags wie
+    // <ul>/<li> formatiert dargestellt werden statt als roher Text zu erscheinen.
+    const text = htmlToMarkdown(translate(content.lessonTexte) || content.lessonText);
     const favorited = isFavorited(content.elementId);
 
     return (
@@ -640,6 +648,7 @@ const styles = StyleSheet.create({
     ...Shadow.sm,
   },
   questionTitle: { fontSize: FontSize.md, fontWeight: FontWeight.bold, marginBottom: Spacing.lg },
+  questionPrompt: { marginBottom: Spacing.sm },
   answerList: { gap: Spacing.sm, marginBottom: Spacing.xl },
   answerRow: {
     flexDirection: 'row',

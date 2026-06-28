@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { useChapterQuiz, useSubmitChapterQuiz } from '@/hooks/useCourses';
 import { useTheme } from '@/context/ThemeContext';
 import { translate } from '@/utils/textUtils';
+import { QuestionPrompt } from '@/components/common/QuestionPrompt';
 import { QuestionType } from '@/types/course';
 import type { Question, ChapterQuizResult } from '@/types/course';
 import type { CoursesStackParamList } from '@/navigation/CoursesStack';
@@ -153,7 +154,11 @@ export function ChapterQuizScreen() {
               key={q.elementId}
               style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}
             >
-              <Text style={[styles.question, { color: colors.textPrimary }]}>{translate(q.titel)}</Text>
+              <QuestionPrompt
+                text={translate(q.titel)}
+                textStyle={[styles.question, { color: colors.textPrimary }]}
+                containerStyle={styles.questionPrompt}
+              />
               <View style={[styles.answers, isTrueFalse && styles.tfRow]}>
                 {q.answers.map((a, idx) => {
                   const isSelected = sel.includes(a.id);
@@ -244,6 +249,7 @@ const styles = StyleSheet.create({
   bannerScore: { fontSize: FontSize.sm },
   card: { borderRadius: Radius.xl, padding: Spacing.lg, borderWidth: 1.5, ...Shadow.sm },
   question: { fontSize: FontSize.md, fontWeight: FontWeight.bold, marginBottom: Spacing.md },
+  questionPrompt: { marginBottom: Spacing.sm },
   answers: { gap: Spacing.sm },
   tfRow: { flexDirection: 'row', gap: Spacing.md },
   tfCol: { flex: 1 },
