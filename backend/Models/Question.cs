@@ -5,6 +5,7 @@ namespace DevEdu.Api.Models;
 
 public enum MobileQuestionType { OneChoice = 0, MultipleChoice = 1, OwnAnswer = 2, TrueFalse = 3, Code = 4 }
 
+[BsonIgnoreExtraElements]
 public class Answer
 {
     public string Id { get; set; } = Guid.NewGuid().ToString("N");
@@ -13,6 +14,7 @@ public class Answer
     public string Comment { get; set; } = string.Empty;
 }
 
+[BsonIgnoreExtraElements]
 public class Question
 {
     public string Id { get; set; } = Guid.NewGuid().ToString("N");
@@ -28,6 +30,7 @@ public class Question
 }
 
 /// <summary>Eigene MongoDB-Collection "questionlists". Fragen werden lazy geladen.</summary>
+[BsonIgnoreExtraElements]
 public class QuestionList
 {
     [BsonId]

@@ -1,3 +1,5 @@
+using MongoDB.Bson.Serialization.Attributes;
+
 namespace DevEdu.Api.Models;
 
 /// <summary>Unterstützte Sandbox-Sprachen. MVP: nur C#; das Enum lässt Erweiterung zu.</summary>
@@ -8,6 +10,7 @@ public enum CodeLanguage { CSharp = 0 }
 /// <see cref="SolutionCode"/> ist autor-intern und wird Lernern nie ausgeliefert
 /// (siehe Mappers-Reveal-Logik).
 /// </summary>
+[BsonIgnoreExtraElements]
 public class CodeQuestion
 {
     public CodeLanguage Language { get; set; } = CodeLanguage.CSharp;
@@ -21,6 +24,7 @@ public class CodeQuestion
     public int MemoryLimitMb { get; set; } = 256;
 }
 
+[BsonIgnoreExtraElements]
 public class CodeTestCase
 {
     public string Id { get; set; } = Guid.NewGuid().ToString("N");

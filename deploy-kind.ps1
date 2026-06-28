@@ -24,6 +24,10 @@
 
 .PARAMETER DeleteCluster
     Tear down the Kind cluster and remove the local registry container.
+    DESTROYS ALL MongoDB DATA (PVC). Prompts for confirmation unless -Yes is given.
+
+.PARAMETER Yes
+    Skip the confirmation prompt for -DeleteCluster (for automation).
 
 .PARAMETER Forward
     After deploying, open a new PowerShell window that forwards
@@ -43,7 +47,8 @@ param(
     [switch]$NoBuild,
     [switch]$BuildOnly,
     [switch]$DeleteCluster,
-    [switch]$Forward
+    [switch]$Forward,
+    [switch]$Yes
 )
 
 $ErrorActionPreference = "Stop"
@@ -115,6 +120,19 @@ function Write-TempKindConfig([string]$yaml) {
 
 # ── teardown ──────────────────────────────────────────────────────────────────
 if ($DeleteCluster) {
+    if (-not $Yes) {
+        Write-Host ""
+        Write-Host "WARNUNG: 'kind delete cluster --name $CLUSTER' loescht den Node-Container und" -ForegroundColor Yellow
+        Write-Host "         damit UNWIDERRUFLICH alle MongoDB-Daten (PVC 'mongo-data')." -ForegroundColor Yellow
+        Write-Host "         Importierte Kurse (z.B. '.NET') sind danach weg." -ForegroundColor Yellow
+        Write-Host "         Tipp: vorher  .\backup-local.ps1  ausfuehren." -ForegroundColor DarkGray
+        Write-Host ""
+        $answer = Read-Host "Zum Bestaetigen 'DELETE' eingeben (alles andere bricht ab)"
+        if ($answer -ne 'DELETE') {
+            Write-Host "Abgebrochen. Es wurde nichts geloescht." -ForegroundColor Green
+            exit 0
+        }
+    }
     Write-Step "Deleting Kind cluster '$CLUSTER'..."
     & kind delete cluster --name $CLUSTER
     Write-Step "Removing registry container '$REG_NAME'..."
