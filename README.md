@@ -4,10 +4,11 @@ Schulungs-Applikation für Entwickler: Autoren erstellen Kurse (Kurs → Kapitel
 Beispiele), Lerner arbeiten sie durch und beantworten Fragen. Siehe [PRD.md](PRD.md) für die
 vollständige Spezifikation und [docs/API_CONTRACT.md](docs/API_CONTRACT.md) für die API.
 
-Dieser Stand umfasst **Iteration 1–3 (Features F1–F9)**: Auth & Rollen (Clerk), Inhalts-Datenmodell,
+Dieser Stand umfasst **Iteration 1–3 (Features F1–F11)**: Auth & Rollen (Clerk), Inhalts-Datenmodell,
 Autoren-CRUD, Lernansicht, Quiz (Single/Multiple Choice, Wahr/Falsch), Fortschrittsverfolgung,
 Code-Aufgaben mit automatischer Sandbox-Auswertung (F7), Kapitel-Abschlussquizze mit
-Bestehensgrenze/Versuchslimit (F8) und ein Lerner-Dashboard mit Statistiken (F9).
+Bestehensgrenze/Versuchslimit (F8), ein Lerner-Dashboard mit Statistiken (F9),
+Zertifikate bei Kursabschluss (F10) und einen Katalog mit Suche/Filter/Tags (F11).
 
 ## Stack
 
@@ -242,6 +243,12 @@ abhaken und ggf. die Feature-Übersicht in `PRD.md` aktualisieren.
 - [x] **DELETE-Endpoints** — Autoren/Admins können löschen über `DELETE /api/courses/{id}`, `DELETE /api/chapters/{id}` und `DELETE /api/content/{id}` (Eigentümer-/Admin-Check, je `204`; Kurs-Delete kaskadiert QuestionLists/Attempts/Progress/Enrollments, Kapitel-/Inhalt-Delete räumt zugehörige QuestionLists ab). UI: Löschen-Button je Kurs (`AuthorCoursesScreen`), je Kapitel (`CourseEditorScreen`) und je Inhalt (`AddChapterContentScreen`), jeweils mit Bestätigungsdialog.
 - [x] **„Wahr/Falsch"-Fragetyp** — eigener Typ `TrueFalse` (Enum `3`) in Backend (`MobileQuestionType`) und Mobile (`QuestionType`). Serverseitig wie `OneChoice` über genau zwei Antworten (Wahr/Falsch, eine korrekt) ausgewertet — gesamte Attempt-/Reveal-Pipeline wiederverwendet. Dedizierte UI: Lerner sehen zwei nebeneinanderliegende Buttons (`LessonScreen`), Autoren wählen im `AddQuestionListScreen` per „Wahr/Falsch"-Chip nur die korrekte Seite (feste, zweisprachige Labels). Demo-Kurs hat jetzt eine 3. Frage dieses Typs. Tests in `__tests__/LessonScreen.test.tsx`.
 
+### Tests / E2E (zurückgestellt — niedrige Priorität)
+- [ ] **Automatisierte End-to-End-Tests mit `@clerk/testing` + Playwright** gegen die Expo-Web-App aufsetzen (Skill `clerk-testing` als Startpunkt). Soll den auth-pflichtigen Durchlauf headless abdecken, der aktuell nur manuell im Browser testbar ist: Clerk-Login (Lerner/Autor via Testing-Tokens) → F7 Code-Aufgabe einreichen, F8 Kapitelquiz anlegen/bestehen, F9 Dashboard-Statistiken, F10 Zertifikat-Ausstellung (inkl. Idempotenz). Voraussetzung: Backend per Port-Forward + Expo-Web erreichbar; Clerk-Testing-Keys in CI hinterlegen.
+- [ ] **Tote `e2e/`-Playwright-Suite entfernen**, sobald obiges steht — sie zielt noch auf das gelöschte Vite-Frontend (`devedu.localhost`, Manifest `k8s/30-frontend.yaml` bereits entfernt) und prüft nichts Funktionsfähiges mehr. Auch `test-e2e.sh` entsprechend anpassen/ersetzen.
+
+> **Hinweis:** Dieses Test-Paket ist bewusst **nach hinten priorisiert** — erst nach den restlichen Feature-Arbeiten (F11 ff.).
+
 ### Geplante Features (PRD)
 
 Detailplanung der noch offenen PRD-Features. Reihenfolge gemäß PRD: **F7 → F8 → F9 → F11 → F10**
@@ -296,32 +303,26 @@ Tiefere Auswertung als der bisherige Fortschritts-Überblick — als Statistik-B
 - [x] **Mobile**: `useStats`-Hook + `getStats`-API; `DashboardScreen` zeigt Kennzahl-Kacheln (`Card`) + Fortschritt je Kurs (`ProgressBar` + Status), Leerzustand; i18n `dashboard.stats.*` de/en/ru.
 - [x] **Tests**: 7 xUnit für `StatsCalculator` (Schnittmengen gegen Altlasten, Rollup, Trefferquote, distinct-Zählung, leere Eingabe); Mobile-Jest `DashboardStats` (Kacheln/Kursfortschritt/Leerzustand). Streak bleibt clientseitig.
 
-#### F11 – Katalog: Suche, Filter, Tags `P2` (hängt an F2)
+#### F11 – Katalog: Suche, Filter, Tags `P2` ✅ Implementiert
 
-Ziel: Kursliste mit Filter (Tags, Level) und Volltextsuche. `Course` trägt heute **keine**
-`Tags`/`Level` — Datenmodell muss zuerst erweitert werden.
+Kursliste mit Volltextsuche + Filter nach Tags und Level. Server-seitige Filterung.
 
-**Backend**
-- [ ] `Course` (`backend/Models/Course.cs`) um `Tags[]` und `Level` (z. B. Beginner/Intermediate/Advanced) erweitern; `CourseDtos` + `Mappers` anpassen.
-- [ ] MongoDB-Textindex auf Titel/Beschreibung anlegen (in `MongoContext`-Init).
-- [ ] `GET /api/courses` um Query-Parameter erweitern: `search`, `tags`, `level` (Filter + Volltextsuche, nur `Published` für Learner).
-- [ ] `Seeder` um Beispiel-Tags/Level am Demo-Kurs ergänzen.
+- [x] **Datenmodell**: `Course.Tags[]` + `Course.Level` (`CourseLevel`-Const: Beginner/Intermediate/Advanced); `CourseDto`/`CreateCourseRequest` + `Mappers` erweitert.
+- [x] **Filterlogik**: reiner `CourseCatalog.Filter` (Level exact, Tags ODER-Match, Suche über Name/Titel/Tags, case-insensitiv) — in-memory in `ListAsync` nach dem Published/Rollen-Filter (kein Mongo-Textindex bei dieser Datenmenge).
+- [x] **API**: `GET /api/courses?search=&tags=&level=` (tags komma-separiert) + `GET /api/courses/tags` (distinkte Tags der Published-Kurse für die Chips). `Seeder` taggt den Demo-Kurs (`csharp`, `grundlagen`, Level Beginner).
+- [x] **Mobile**: `useCourses(params)` (param-spezifischer Query-Key) + `useCourseTags`; `CoursesScreen` mit Suchfeld (300 ms debounced) + Level-/Tag-Chips + Level-Badge/Tags je Karte + Leerzustand; `CreateCourseScreen` mit Tags-Feld + Level-Chips; i18n `courses.*` de/en/ru.
+- [x] **Tests**: 5 xUnit `CourseCatalog` (Suche/Level/Tags/kombiniert/leer); Mobile-Jest `CoursesScreenFilter` (Level-Filter verengt Liste, noResults) + aktualisierter `CoursesScreen`-Test.
 
-**Mobile**
-- [ ] `CoursesScreen`: Suchfeld + Filter-Chips (Tags, Level); Query-Parameter an `useCourses` durchreichen (debounced Suche).
-- [ ] Autor-UI: Tags + Level beim Kurs-Anlegen/-Bearbeiten setzen (`CreateCourseScreen`, `CourseEditorScreen`).
-- [ ] i18n de/en/ru; Tests.
+> Bewusst zurückgestellt: Tags/Level nachträglich editieren (bräuchte `PUT /api/courses/{id}`); Mongo-Textindex (erst bei großem Katalog).
 
-#### F10 – Zertifikate / Abzeichen `P2` (hängt an F8)
+#### F10 – Zertifikate / Abzeichen `P2` ✅ Implementiert
 
-Ziel: Badge/Zertifikat bei Kursabschluss — abhängig von der F8-Bestehensgrenze (alle Kapitel-Quizze
-bestanden + alle Inhalte abgeschlossen).
+Bei Kursabschluss wird automatisch ein Zertifikat ausgestellt — Abschluss = alle Inhalte fertig
+**und** alle Kapitel-Quizze bestanden (geteilte Logik mit F8/F9).
 
-**Backend**
-- [ ] Modell `Certificate` (eigene Collection): `Id, UserId, CourseId, IssuedAt, VerificationCode`.
-- [ ] Ausstellungs-Logik: bei Kursabschluss prüfen (alle `ChapterContent` in `Progress` + alle Kapitel-Quizze in `ChapterQuizAttempt.Passed`) → Zertifikat einmalig ausstellen.
-- [ ] `GET /api/me/certificates` (Liste) und `GET /api/certificates/{code}` (öffentlich verifizierbar).
-
-**Mobile**
-- [ ] Zertifikats-/Badge-Anzeige (Screen + Badge auf `DashboardScreen`); optional Teilen/Export.
-- [ ] Hook + API-Layer; i18n de/en/ru; Tests.
+- [x] **Geteilte `CourseCompletion`** (rein, statisch): `IsChapterComplete`/`IsCourseComplete` — vereinheitlicht die zuvor doppelte Abschluss-Logik in `GetChaptersAsync` und `StatsCalculator`.
+- [x] **Modell + Idempotenz**: `Certificate` (Snapshots `CourseName`/`LearnerName` + `VerificationCode`), eigene Collection mit **Unique-Index `(UserId,CourseId)`**; `CertificateService.CheckAndIssueAsync` stellt einmalig aus + setzt `Enrollment.CompletedAt` (Race → DuplicateKey ignoriert).
+- [x] **Trigger**: aus `EnrollmentService.CompleteChapterContentAsync` **und** `ChapterQuizService.SubmitAsync` (bei bestandenem Quiz) — der erste Event, der den Kurs vervollständigt, löst die Ausstellung aus.
+- [x] **API**: `GET /api/me/certificates` (`CertificateDto`, neueste zuerst). Öffentliche Verifikation (`/api/certificates/{code}`) bewusst zurückgestellt — `VerificationCode` ist vorhanden, additiv nachrüstbar.
+- [x] **Mobile**: `useCertificates`-Hook + `getCertificates`-API; `CertificatesSection` (Badges 🏅 + Kursname + Datum + Code) im `DashboardScreen`, Leerzustand; Invalidierung von `['certificates']`/`['stats']` bei Inhalt-Abschluss + Quiz-Abgabe; i18n `dashboard.certificates.*` de/en/ru.
+- [x] **Tests**: 5 xUnit `CourseCompletion` (+ unveränderte `StatsCalculator`-Tests grün); Mobile-Jest `DashboardCertificates` (Badges + Leerzustand).

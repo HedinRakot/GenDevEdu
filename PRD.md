@@ -40,8 +40,8 @@ einen **Status**.
 | F7 | Code-Aufgaben & Sandbox-Auswertung | P1 | Implementiert | F5 |
 | F8 | Kapitel-Abschlussquiz & Bewertung | P1 | Implementiert | F5, F6 |
 | F9 | Lerner-Dashboard & Statistiken | P2 | Implementiert | F6 |
-| F10 | Zertifikate / Abzeichen | P2 | Geplant | F8 |
-| F11 | Katalog: Suche, Filter, Tags | P2 | Geplant | F2 |
+| F10 | Zertifikate / Abzeichen | P2 | Implementiert | F8 |
+| F11 | Katalog: Suche, Filter, Tags | P2 | Implementiert | F2 |
 | F12 | Unified Expo App (Web + iOS + Android) | P1 | In Arbeit | F1–F5 |
 | F13 | Erweiterungen (i18n, Diskussionen, Lernpfade) | P2 | Backlog | – |
 
@@ -52,7 +52,9 @@ einen **Status**.
 > - **F7** Code-Aufgaben implementiert: Fragetyp `Code`, async `POST /api/code-submissions` → Queue → `CodeExecutionWorker` → Polling via `GET /api/code-submissions/{id}`. Eigene Sandbox über einen **rootless Podman-Sidecar** (hinter `ISandboxRunner`, gehärtet via `--network none`/Memory/CPU/PIDs-Limits, read-only FS, non-root). MVP-Sprache C#; bestandene Aufgabe schreibt einen `Attempt` (F6). Container-Isolation ist dev-only — Prod-Härtung (gVisor/Jobs) dokumentiert.
 > - **F8** Kapitel-Abschlussquiz implementiert: dediziertes Quiz je Kapitel (`Chapter.ChapterQuizId`), gebündelte Abgabe via `POST /api/chapters/{id}/quiz/attempt` mit aggregiertem Score, Bestehensgrenze (`PassThresholdPercent`) und Versuchslimit (`MaxAttempts`, je Versuch ein `ChapterQuizAttempt`). Autoren legen/ersetzen Quizze im Author-Bereich an (`PUT/DELETE /api/chapters/{id}/quiz`, nur auto-bewertbare Fragetypen). Bestandenes Quiz fließt in den Kapitel-Abschluss (`Progress.PassedChapterQuizIds`, Basis für F10).
 > - **F9** Lerner-Dashboard vertieft: `GET /api/me/stats` aggregiert (reiner `StatsCalculator`) Kurse aktiv/abgeschlossen, Fortschritt je Kurs (%), Quiz-Trefferquote, Kapitel-Quizze bestanden und gelöste Code-Aufgaben; das `DashboardScreen` zeigt Kennzahl-Kacheln + Kurs-Fortschrittsbalken.
-> - **Offen:** Passwort-Reset-Flow (toter Link entfernt), In-App Admin-UI; F10–F11 wie markiert geplant.
+> - **F10** Zertifikate implementiert: bei Kursabschluss (geteilte `CourseCompletion`-Logik: alle Inhalte + alle Kapitel-Quizze) wird idempotent ein `Certificate` ausgestellt (Namens-Snapshots, `Enrollment.CompletedAt` gesetzt) — getriggert aus Inhalt-Abschluss + Kapitel-Quiz-Abgabe. `GET /api/me/certificates`; Badges im Dashboard. Öffentliche Verifikation bewusst zurückgestellt (`VerificationCode` vorhanden).
+> - **F11** Katalog implementiert: `Course` trägt jetzt `Tags[]` + `Level`; `GET /api/courses?search=&tags=&level=` filtert server-seitig (reiner `CourseCatalog`, in-memory) plus `GET /api/courses/tags` für die Filter-Chips. `CoursesScreen` hat Suchfeld (debounced) + Level-/Tag-Chips + Level-Badge/Tags je Karte; Autoren setzen Tags/Level beim Anlegen (`CreateCourseScreen`). Tags/Level nachträglich editierbar = offen.
+> - **Offen:** Passwort-Reset-Flow (toter Link entfernt), In-App Admin-UI; automatisierte E2E (Clerk+Playwright) zurückgestellt. F1–F11 implementiert; F12 in Arbeit, F13 Backlog.
 
 ---
 
