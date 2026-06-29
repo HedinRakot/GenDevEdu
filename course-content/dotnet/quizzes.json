@@ -1,0 +1,374 @@
+[
+  {
+    "_comment": "Bestehendes for-Schleifen-Quiz (Kap. 5): nur fehlendes Englisch ergaenzen. _id/IsCorrect bleiben unveraendert; nur EN-Titel werden upgesertet. Antworten, die bereits EN haben (break/continue/Symbole), sind hier ausgelassen.",
+    "_id": "6424978ca0287f40262c4beb",
+    "questions": [
+      {
+        "_id": "642497aca0287f40262c4bec",
+        "titles": { "en": "What will you use the for loop for?" },
+        "answers": [
+          { "_id": "441a25d6-0c21-41a2-a2a5-b16241cf0969", "titles": { "en": "When I want to write a condition." } },
+          { "_id": "29359ed9-f5f6-482a-9688-943ee8c23c15", "titles": { "en": "When I want an action to be repeated." } },
+          { "_id": "94b50489-12b7-4a8a-ae04-797dbd719eec", "titles": { "en": "When I need an action to end." } }
+        ]
+      },
+      {
+        "_id": "64249c98396c0bdebbad4cb7",
+        "titles": { "en": "What will the computer print to the screen with this code? <p> for(var position = 0; position < 100; position = position + 1) </p><p> { </p><p> if( position < 5) </p><p> { </p><p> continue; </p><p>} </p><p> Console.WriteLine(position); </p><p>} </p>" },
+        "answers": [
+          { "_id": "4c874fe8-762f-4d87-9287-8e341bb5fa2f", "titles": { "en": "Nothing is printed, there is an error." } },
+          { "_id": "2e963d1b-b63f-4152-8443-1b3c74ffad8f", "titles": { "en": "It prints the numbers from 5 to 99." } },
+          { "_id": "ed4b4e01-1e6c-4503-8e63-6e976ef06586", "titles": { "en": "It prints the numbers from 6 to 99." } },
+          { "_id": "41eb498d-1374-44ec-b4e7-b9f33944c857", "titles": { "en": "It prints the numbers from 0 to 99." } }
+        ]
+      },
+      {
+        "_id": "642497e1a0287f40262c4bee",
+        "titles": { "en": "Can you use an if statement inside a for loop?" },
+        "answers": [
+          { "_id": "56ce8030-0d07-434b-b85b-726d0526118a", "titles": { "en": "No, that is not possible; they would contradict each other." } },
+          { "_id": "29e88732-7952-460f-95b3-7d89ae8d3910", "titles": { "en": "Yes, to create additional conditions for running the command." } },
+          { "_id": "03a118c0-a063-473f-84d8-3994056d382c", "titles": { "en": "Sometimes you can, sometimes you cannot; it depends on the conditions." } }
+        ]
+      },
+      {
+        "_id": "64249810a0287f40262c4bf0",
+        "titles": { "en": "Imagine you are writing code. You want the program to count in order, but stop counting at the number 12. Which word do you use to make this happen?" }
+      },
+      {
+        "_id": "642498f1a0287f40262c4bf4",
+        "titles": { "en": "Which word could replace 'break' when it is used inside a for loop?" },
+        "answers": [
+          { "_id": "0f21abe1-1a2d-47a6-b4d4-a1d9ebde8960", "titles": { "en": "to continue" } },
+          { "_id": "2115c4e1-c219-42ff-950c-fa5338ae3c73", "titles": { "en": "to stop" } },
+          { "_id": "c79c15c2-b33e-4508-83a2-32f76eaee607", "titles": { "en": "to repeat over and over" } }
+        ]
+      },
+      {
+        "_id": "64249c08396c0bdebbad4cb5",
+        "titles": { "en": "List the errors in the code. <p> for(var position = 0; position < 100; position = position + 1) </p><p> { </p><p> for( position < 10) </p><p> (</p><p> continue; </p><p>) </p><p> Console.WriteLine(sum); </p><p>} </p>" },
+        "answers": [
+          { "_id": "1bcd3a81-efe0-4876-b872-d0ff3012df11", "titles": { "en": "Replace the round brackets with square brackets." } },
+          { "_id": "1be42982-1bde-44d7-b1ea-a614f3de1a5c", "titles": { "en": "Replace the round brackets with curly braces." } },
+          { "_id": "a776a933-aff8-4487-8be9-4000ec85422f", "titles": { "en": "Change 'for' in the second line to 'else'." } },
+          { "_id": "0a86376b-73b3-4114-a95d-c300654a7ede", "titles": { "en": "Change 'for' in the second line to 'if'." } },
+          { "_id": "c7a0350c-c53d-4a8e-a2fd-5c64462fa3e4", "titles": { "en": "Specify the variable 'position' inside the Console.WriteLine parentheses." } },
+          { "_id": "4ca6ca7b-c90b-48f8-9a44-98ca200e020a", "titles": { "en": "Leave the Console.WriteLine parentheses empty." } }
+        ]
+      },
+      {
+        "_id": "64249965a0287f40262c4bf6",
+        "titles": { "en": "Imagine you are writing code. You want the program to stop counting after 18. Which words and symbols do you use? <p>for(var position = 0; position < 100; position = position + 1) </p><p> { </p><p> if( position _______) </p><p> { </p><p> ________; </p><p>} </p><p> Console.WriteLine(position); </p><p>} </p>" }
+      },
+      {
+        "_id": "64249d47396c0bdebbad4cb9",
+        "titles": { "en": "What will the computer print to the screen if you write this code? <p> for(var position = 0; position < 100; position = position + 1) </p><p> { </p><p> if( position < 6) </p><p> { </p><p> breakdance; </p><p>} </p><p> Console.WriteLine(position); </p><p>} </p>" },
+        "answers": [
+          { "_id": "56a721ba-9d40-4b06-831a-9651d9ba81e7", "titles": { "en": "numbers from 0 to 6" } },
+          { "_id": "b4485f28-35a3-441e-b0fe-ff78f85d3c06", "titles": { "en": "numbers from 0 to 5" } },
+          { "_id": "849fa144-e1fd-4df6-a3f5-99e5bd62bc43", "titles": { "en": "numbers from 0 to 99" } },
+          { "_id": "4c405f9f-4c40-47d3-a52a-95c5d8a03e13", "titles": { "en": "nothing" } },
+          { "_id": "3d2a0d3b-a917-43ac-a7e6-e4b45a90d22a", "titles": { "en": "Nothing, because there is an error in the code." } }
+        ]
+      },
+      {
+        "_id": "642498b5a0287f40262c4bf2",
+        "titles": { "en": "Your program counts from 0 to 99. But you want it to count from 14 to 99. Which special word do you use in the condition?" }
+      }
+    ]
+  },
+  {
+    "_id": "gen-ql-ch08",
+    "chapterId": "64028a308a5041bf87e28ccc",
+    "quizContent": { "_id": "gen-ch08-quiz", "sortOrder": 40, "titles": { "de": "Quiz: Listen", "en": "Quiz: Lists" } },
+    "questions": [
+      {
+        "_id": "qz-ch08-q1",
+        "type": 0,
+        "titles": { "de": "Wie erstellst du eine leere Liste von `int`-Werten?", "en": "How do you create an empty list of `int` values?" },
+        "answers": [
+          { "_id": "qz-ch08-q1a", "isCorrect": true, "titles": { "de": "`List<int> zahlen = new List<int>();`", "en": "`List<int> numbers = new List<int>();`" } },
+          { "_id": "qz-ch08-q1b", "isCorrect": false, "titles": { "de": "`int[] zahlen = new List<int>();`", "en": "`int[] numbers = new List<int>();`" } },
+          { "_id": "qz-ch08-q1c", "isCorrect": false, "titles": { "de": "`List zahlen = new int[]();`", "en": "`List numbers = new int[]();`" } },
+          { "_id": "qz-ch08-q1d", "isCorrect": false, "titles": { "de": "`Array<int> zahlen = new Array<int>();`", "en": "`Array<int> numbers = new Array<int>();`" } }
+        ]
+      },
+      {
+        "_id": "qz-ch08-q2",
+        "type": 0,
+        "titles": { "de": "Mit welcher Methode fuegst du ein Element ans Ende einer Liste an?", "en": "Which method appends an element to the end of a list?" },
+        "answers": [
+          { "_id": "qz-ch08-q2a", "isCorrect": true, "titles": { "de": "`.Add(...)`", "en": "`.Add(...)`" } },
+          { "_id": "qz-ch08-q2b", "isCorrect": false, "titles": { "de": "`.Push(...)`", "en": "`.Push(...)`" } },
+          { "_id": "qz-ch08-q2c", "isCorrect": false, "titles": { "de": "`.Insert()` ohne Index", "en": "`.Insert()` without an index" } },
+          { "_id": "qz-ch08-q2d", "isCorrect": false, "titles": { "de": "`.New(...)`", "en": "`.New(...)`" } }
+        ]
+      },
+      {
+        "_id": "qz-ch08-q3",
+        "type": 0,
+        "titles": { "de": "Eine Liste `namen` enthaelt `[\"Anna\", \"Ben\", \"Cara\"]`. Was liefert `namen[0]`?", "en": "A list `names` contains `[\"Anna\", \"Ben\", \"Cara\"]`. What does `names[0]` return?" },
+        "answers": [
+          { "_id": "qz-ch08-q3a", "isCorrect": true, "titles": { "de": "`\"Anna\"` - der Index beginnt bei 0", "en": "`\"Anna\"` - indexing starts at 0" } },
+          { "_id": "qz-ch08-q3b", "isCorrect": false, "titles": { "de": "`\"Ben\"` - der Index beginnt bei 1", "en": "`\"Ben\"` - indexing starts at 1" } },
+          { "_id": "qz-ch08-q3c", "isCorrect": false, "titles": { "de": "`\"Cara\"` - das letzte Element", "en": "`\"Cara\"` - the last element" } },
+          { "_id": "qz-ch08-q3d", "isCorrect": false, "titles": { "de": "Einen Fehler, weil `[0]` ungueltig ist", "en": "An error, because `[0]` is invalid" } }
+        ]
+      },
+      {
+        "_id": "qz-ch08-q4",
+        "type": 3,
+        "titles": { "de": "`.Count` gibt die Anzahl der Elemente in einer Liste zurueck.", "en": "`.Count` returns the number of elements in a list." },
+        "answers": [
+          { "_id": "qz-ch08-q4a", "isCorrect": true, "titles": { "de": "Wahr", "en": "True" } },
+          { "_id": "qz-ch08-q4b", "isCorrect": false, "titles": { "de": "Falsch", "en": "False" } }
+        ]
+      }
+    ]
+  },
+  {
+    "_id": "gen-ql-ch09",
+    "chapterId": "64028a188a5041bf87e28cca",
+    "quizContent": { "_id": "gen-ch09-quiz", "sortOrder": 40, "titles": { "de": "Quiz: Vererbung", "en": "Quiz: Inheritance" } },
+    "questions": [
+      {
+        "_id": "qz-ch09-q1",
+        "type": 0,
+        "titles": { "de": "Wie schreibst du, dass `Student` von `Person` erbt?", "en": "How do you declare that `Student` inherits from `Person`?" },
+        "answers": [
+          { "_id": "qz-ch09-q1a", "isCorrect": true, "titles": { "de": "`class Student : Person`", "en": "`class Student : Person`" } },
+          { "_id": "qz-ch09-q1b", "isCorrect": false, "titles": { "de": "`class Student extends Person`", "en": "`class Student extends Person`" } },
+          { "_id": "qz-ch09-q1c", "isCorrect": false, "titles": { "de": "`class Student inherits Person`", "en": "`class Student inherits Person`" } },
+          { "_id": "qz-ch09-q1d", "isCorrect": false, "titles": { "de": "`class Student -> Person`", "en": "`class Student -> Person`" } }
+        ]
+      },
+      {
+        "_id": "qz-ch09-q2",
+        "type": 0,
+        "titles": { "de": "Welche Klasse ist die Basisklasse (Oberklasse) bei `class Student : Person`?", "en": "Which class is the base class (parent) in `class Student : Person`?" },
+        "answers": [
+          { "_id": "qz-ch09-q2a", "isCorrect": true, "titles": { "de": "`Person`", "en": "`Person`" } },
+          { "_id": "qz-ch09-q2b", "isCorrect": false, "titles": { "de": "`Student`", "en": "`Student`" } },
+          { "_id": "qz-ch09-q2c", "isCorrect": false, "titles": { "de": "Beide sind Basisklassen", "en": "Both are base classes" } },
+          { "_id": "qz-ch09-q2d", "isCorrect": false, "titles": { "de": "Keine von beiden", "en": "Neither of them" } }
+        ]
+      },
+      {
+        "_id": "qz-ch09-q3",
+        "type": 0,
+        "titles": { "de": "Mit welchem Schluesselwort markierst du eine Methode der Basisklasse, damit eine abgeleitete Klasse sie ueberschreiben darf?", "en": "Which keyword marks a base-class method so a derived class is allowed to override it?" },
+        "answers": [
+          { "_id": "qz-ch09-q3a", "isCorrect": true, "titles": { "de": "`virtual`", "en": "`virtual`" } },
+          { "_id": "qz-ch09-q3b", "isCorrect": false, "titles": { "de": "`override`", "en": "`override`" } },
+          { "_id": "qz-ch09-q3c", "isCorrect": false, "titles": { "de": "`static`", "en": "`static`" } },
+          { "_id": "qz-ch09-q3d", "isCorrect": false, "titles": { "de": "`sealed`", "en": "`sealed`" } }
+        ]
+      },
+      {
+        "_id": "qz-ch09-q4",
+        "type": 3,
+        "titles": { "de": "Eine abgeleitete Klasse erbt die oeffentlichen Eigenschaften und Methoden ihrer Basisklasse.", "en": "A derived class inherits the public properties and methods of its base class." },
+        "answers": [
+          { "_id": "qz-ch09-q4a", "isCorrect": true, "titles": { "de": "Wahr", "en": "True" } },
+          { "_id": "qz-ch09-q4b", "isCorrect": false, "titles": { "de": "Falsch", "en": "False" } }
+        ]
+      }
+    ]
+  },
+  {
+    "_id": "gen-ql-ch10",
+    "chapterId": "64028a028a5041bf87e28cc9",
+    "quizContent": { "_id": "gen-ch10-quiz", "sortOrder": 30, "titles": { "de": "Quiz: Interfaces", "en": "Quiz: Interfaces" } },
+    "questions": [
+      {
+        "_id": "qz-ch10-q1",
+        "type": 0,
+        "titles": { "de": "Was beschreibt ein Interface am besten?", "en": "What best describes an interface?" },
+        "answers": [
+          { "_id": "qz-ch10-q1a", "isCorrect": true, "titles": { "de": "Einen Vertrag, der festlegt, welche Member eine Klasse bereitstellen muss", "en": "A contract that defines which members a class must provide" } },
+          { "_id": "qz-ch10-q1b", "isCorrect": false, "titles": { "de": "Eine fertige Klasse mit vollstaendig implementierten Methoden", "en": "A ready-made class with fully implemented methods" } },
+          { "_id": "qz-ch10-q1c", "isCorrect": false, "titles": { "de": "Eine Variable, die mehrere Werte speichert", "en": "A variable that stores multiple values" } },
+          { "_id": "qz-ch10-q1d", "isCorrect": false, "titles": { "de": "Eine Schleife ueber eine Liste", "en": "A loop over a list" } }
+        ]
+      },
+      {
+        "_id": "qz-ch10-q2",
+        "type": 0,
+        "titles": { "de": "Wie deklarierst du, dass die Klasse `Hund` das Interface `ITier` implementiert?", "en": "How do you declare that the class `Dog` implements the interface `IAnimal`?" },
+        "answers": [
+          { "_id": "qz-ch10-q2a", "isCorrect": true, "titles": { "de": "`class Hund : ITier`", "en": "`class Dog : IAnimal`" } },
+          { "_id": "qz-ch10-q2b", "isCorrect": false, "titles": { "de": "`class Hund implements ITier`", "en": "`class Dog implements IAnimal`" } },
+          { "_id": "qz-ch10-q2c", "isCorrect": false, "titles": { "de": "`class Hund uses ITier`", "en": "`class Dog uses IAnimal`" } },
+          { "_id": "qz-ch10-q2d", "isCorrect": false, "titles": { "de": "`interface Hund : ITier`", "en": "`interface Dog : IAnimal`" } }
+        ]
+      },
+      {
+        "_id": "qz-ch10-q3",
+        "type": 0,
+        "titles": { "de": "Was muss eine Klasse tun, die ein Interface implementiert?", "en": "What must a class do when it implements an interface?" },
+        "answers": [
+          { "_id": "qz-ch10-q3a", "isCorrect": true, "titles": { "de": "Alle im Interface deklarierten Member bereitstellen", "en": "Provide all members declared in the interface" } },
+          { "_id": "qz-ch10-q3b", "isCorrect": false, "titles": { "de": "Nur einen beliebigen Member bereitstellen", "en": "Provide just any one of the members" } },
+          { "_id": "qz-ch10-q3c", "isCorrect": false, "titles": { "de": "Gar nichts - das Interface erledigt alles", "en": "Nothing - the interface does everything" } },
+          { "_id": "qz-ch10-q3d", "isCorrect": false, "titles": { "de": "Das Interface in eine Liste umwandeln", "en": "Convert the interface into a list" } }
+        ]
+      },
+      {
+        "_id": "qz-ch10-q4",
+        "type": 3,
+        "titles": { "de": "Eine Klasse kann mehrere Interfaces gleichzeitig implementieren.", "en": "A class can implement multiple interfaces at the same time." },
+        "answers": [
+          { "_id": "qz-ch10-q4a", "isCorrect": true, "titles": { "de": "Wahr", "en": "True" } },
+          { "_id": "qz-ch10-q4b", "isCorrect": false, "titles": { "de": "Falsch", "en": "False" } }
+        ]
+      }
+    ]
+  },
+  {
+    "_id": "gen-ql-ch11",
+    "chapterId": "64028a298a5041bf87e28ccb",
+    "quizContent": { "_id": "gen-ch11-quiz", "sortOrder": 30, "titles": { "de": "Quiz: Aufzaehlungen (enum)", "en": "Quiz: Enumerations (enum)" } },
+    "questions": [
+      {
+        "_id": "qz-ch11-q1",
+        "type": 0,
+        "titles": { "de": "Was ist ein `enum`?", "en": "What is an `enum`?" },
+        "answers": [
+          { "_id": "qz-ch11-q1a", "isCorrect": true, "titles": { "de": "Ein fester Satz benannter Werte", "en": "A fixed set of named values" } },
+          { "_id": "qz-ch11-q1b", "isCorrect": false, "titles": { "de": "Eine Liste, die beliebig wachsen kann", "en": "A list that can grow without limit" } },
+          { "_id": "qz-ch11-q1c", "isCorrect": false, "titles": { "de": "Eine Methode zum Einlesen von Zahlen", "en": "A method for reading numbers" } },
+          { "_id": "qz-ch11-q1d", "isCorrect": false, "titles": { "de": "Ein Schluesselwort fuer Schleifen", "en": "A keyword for loops" } }
+        ]
+      },
+      {
+        "_id": "qz-ch11-q2",
+        "type": 0,
+        "titles": { "de": "Wie deklarierst du eine Aufzaehlung der Wochentage?", "en": "How do you declare an enumeration of the days of the week?" },
+        "answers": [
+          { "_id": "qz-ch11-q2a", "isCorrect": true, "titles": { "de": "`enum Wochentag { Montag, Dienstag, Mittwoch }`", "en": "`enum Weekday { Monday, Tuesday, Wednesday }`" } },
+          { "_id": "qz-ch11-q2b", "isCorrect": false, "titles": { "de": "`list Wochentag = { Montag, Dienstag }`", "en": "`list Weekday = { Monday, Tuesday }`" } },
+          { "_id": "qz-ch11-q2c", "isCorrect": false, "titles": { "de": "`enum Wochentag = [Montag, Dienstag]`", "en": "`enum Weekday = [Monday, Tuesday]`" } },
+          { "_id": "qz-ch11-q2d", "isCorrect": false, "titles": { "de": "`class Wochentag : enum`", "en": "`class Weekday : enum`" } }
+        ]
+      },
+      {
+        "_id": "qz-ch11-q3",
+        "type": 0,
+        "titles": { "de": "Warum ist ein `enum` besser als sogenannte \"magische Zahlen\" (z. B. `1` fuer Montag)?", "en": "Why is an `enum` better than so-called \"magic numbers\" (e.g. `1` for Monday)?" },
+        "answers": [
+          { "_id": "qz-ch11-q3a", "isCorrect": true, "titles": { "de": "Der Code wird lesbarer und der Compiler erlaubt nur gueltige Werte", "en": "The code becomes more readable and the compiler allows only valid values" } },
+          { "_id": "qz-ch11-q3b", "isCorrect": false, "titles": { "de": "Das Programm laeuft dadurch immer schneller", "en": "It always makes the program run faster" } },
+          { "_id": "qz-ch11-q3c", "isCorrect": false, "titles": { "de": "Man braucht dann keine Variablen mehr", "en": "You no longer need variables at all" } },
+          { "_id": "qz-ch11-q3d", "isCorrect": false, "titles": { "de": "`enum` ersetzt die `Main`-Methode", "en": "`enum` replaces the `Main` method" } }
+        ]
+      },
+      {
+        "_id": "qz-ch11-q4",
+        "type": 3,
+        "titles": { "de": "Einen `enum`-Wert kann man in einer `switch`-Anweisung verwenden.", "en": "An `enum` value can be used in a `switch` statement." },
+        "answers": [
+          { "_id": "qz-ch11-q4a", "isCorrect": true, "titles": { "de": "Wahr", "en": "True" } },
+          { "_id": "qz-ch11-q4b", "isCorrect": false, "titles": { "de": "Falsch", "en": "False" } }
+        ]
+      }
+    ]
+  },
+  {
+    "_id": "gen-ql-ch12",
+    "chapterId": "64028b528a5041bf87e28ccd",
+    "quizContent": { "_id": "gen-ch12-quiz", "sortOrder": 30, "titles": { "de": "Quiz: Fehlerbehandlung", "en": "Quiz: Error handling" } },
+    "questions": [
+      {
+        "_id": "qz-ch12-q1",
+        "type": 0,
+        "titles": { "de": "Mit welchem Block faengst du eine Ausnahme (Exception) ab?", "en": "Which block do you use to catch an exception?" },
+        "answers": [
+          { "_id": "qz-ch12-q1a", "isCorrect": true, "titles": { "de": "`catch`", "en": "`catch`" } },
+          { "_id": "qz-ch12-q1b", "isCorrect": false, "titles": { "de": "`throw`", "en": "`throw`" } },
+          { "_id": "qz-ch12-q1c", "isCorrect": false, "titles": { "de": "`error`", "en": "`error`" } },
+          { "_id": "qz-ch12-q1d", "isCorrect": false, "titles": { "de": "`except`", "en": "`except`" } }
+        ]
+      },
+      {
+        "_id": "qz-ch12-q2",
+        "type": 0,
+        "titles": { "de": "Was passiert bei `int.Parse(\"abc\")`?", "en": "What happens with `int.Parse(\"abc\")`?" },
+        "answers": [
+          { "_id": "qz-ch12-q2a", "isCorrect": true, "titles": { "de": "Es wird eine Exception ausgeloest, weil `\"abc\"` keine Zahl ist", "en": "An exception is thrown because `\"abc\"` is not a number" } },
+          { "_id": "qz-ch12-q2b", "isCorrect": false, "titles": { "de": "Es wird `0` zurueckgegeben", "en": "It returns `0`" } },
+          { "_id": "qz-ch12-q2c", "isCorrect": false, "titles": { "de": "Es wird `null` zurueckgegeben", "en": "It returns `null`" } },
+          { "_id": "qz-ch12-q2d", "isCorrect": false, "titles": { "de": "Es wird `\"abc\"` als Text zurueckgegeben", "en": "It returns `\"abc\"` as text" } }
+        ]
+      },
+      {
+        "_id": "qz-ch12-q3",
+        "type": 0,
+        "titles": { "de": "Wofuer dient der `finally`-Block?", "en": "What is the `finally` block used for?" },
+        "answers": [
+          { "_id": "qz-ch12-q3a", "isCorrect": true, "titles": { "de": "Fuer Code, der in jedem Fall ausgefuehrt werden soll - egal ob ein Fehler auftrat oder nicht", "en": "For code that should run in any case - whether or not an error occurred" } },
+          { "_id": "qz-ch12-q3b", "isCorrect": false, "titles": { "de": "Nur fuer Code, der bei einem Fehler ausgefuehrt wird", "en": "Only for code that runs when an error occurs" } },
+          { "_id": "qz-ch12-q3c", "isCorrect": false, "titles": { "de": "Um eine neue Exception auszuloesen", "en": "To throw a new exception" } },
+          { "_id": "qz-ch12-q3d", "isCorrect": false, "titles": { "de": "Um das Programm sofort zu beenden", "en": "To terminate the program immediately" } }
+        ]
+      },
+      {
+        "_id": "qz-ch12-q4",
+        "type": 3,
+        "titles": { "de": "Der `finally`-Block wird ausgefuehrt, egal ob im `try`-Block eine Exception auftrat oder nicht.", "en": "The `finally` block runs whether or not an exception occurred in the `try` block." },
+        "answers": [
+          { "_id": "qz-ch12-q4a", "isCorrect": true, "titles": { "de": "Wahr", "en": "True" } },
+          { "_id": "qz-ch12-q4b", "isCorrect": false, "titles": { "de": "Falsch", "en": "False" } }
+        ]
+      }
+    ]
+  },
+  {
+    "_id": "gen-ql-ch13",
+    "chapterId": "64028b6c8a5041bf87e28cce",
+    "quizContent": { "_id": "gen-ch13-quiz", "sortOrder": 40, "titles": { "de": "Quiz: Debugging", "en": "Quiz: Debugging" } },
+    "questions": [
+      {
+        "_id": "qz-ch13-q1",
+        "type": 0,
+        "titles": { "de": "Mit welcher Taste setzt du in Visual Studio einen Haltepunkt (Breakpoint)?", "en": "Which key sets a breakpoint in Visual Studio?" },
+        "answers": [
+          { "_id": "qz-ch13-q1a", "isCorrect": true, "titles": { "de": "`F9`", "en": "`F9`" } },
+          { "_id": "qz-ch13-q1b", "isCorrect": false, "titles": { "de": "`F5`", "en": "`F5`" } },
+          { "_id": "qz-ch13-q1c", "isCorrect": false, "titles": { "de": "`F1`", "en": "`F1`" } },
+          { "_id": "qz-ch13-q1d", "isCorrect": false, "titles": { "de": "`F12`", "en": "`F12`" } }
+        ]
+      },
+      {
+        "_id": "qz-ch13-q2",
+        "type": 0,
+        "titles": { "de": "Womit startest du das Programm im Debug-Modus?", "en": "Which key starts the program in debug mode?" },
+        "answers": [
+          { "_id": "qz-ch13-q2a", "isCorrect": true, "titles": { "de": "`F5`", "en": "`F5`" } },
+          { "_id": "qz-ch13-q2b", "isCorrect": false, "titles": { "de": "`F9`", "en": "`F9`" } },
+          { "_id": "qz-ch13-q2c", "isCorrect": false, "titles": { "de": "`Esc`", "en": "`Esc`" } },
+          { "_id": "qz-ch13-q2d", "isCorrect": false, "titles": { "de": "`Strg + C`", "en": "`Ctrl + C`" } }
+        ]
+      },
+      {
+        "_id": "qz-ch13-q3",
+        "type": 0,
+        "titles": { "de": "Was ist in C# der Unterschied zwischen `==` und `=`?", "en": "In C#, what is the difference between `==` and `=`?" },
+        "answers": [
+          { "_id": "qz-ch13-q3a", "isCorrect": true, "titles": { "de": "`==` vergleicht zwei Werte, `=` weist einen Wert zu", "en": "`==` compares two values, `=` assigns a value" } },
+          { "_id": "qz-ch13-q3b", "isCorrect": false, "titles": { "de": "`==` weist zu, `=` vergleicht", "en": "`==` assigns, `=` compares" } },
+          { "_id": "qz-ch13-q3c", "isCorrect": false, "titles": { "de": "Beide machen genau dasselbe", "en": "Both do exactly the same thing" } },
+          { "_id": "qz-ch13-q3d", "isCorrect": false, "titles": { "de": "`=` vergleicht nur Zahlen, `==` nur Texte", "en": "`=` only compares numbers, `==` only compares text" } }
+        ]
+      },
+      {
+        "_id": "qz-ch13-q4",
+        "type": 3,
+        "titles": { "de": "`F10` (Prozedurschritt / Step Over) fuehrt eine aufgerufene Methode komplett aus, waehrend `F11` (Einzelschritt / Step Into) in die Methode hineinspringt.", "en": "`F10` (Step Over) runs a called method completely, while `F11` (Step Into) jumps into the method." },
+        "answers": [
+          { "_id": "qz-ch13-q4a", "isCorrect": true, "titles": { "de": "Wahr", "en": "True" } },
+          { "_id": "qz-ch13-q4b", "isCorrect": false, "titles": { "de": "Falsch", "en": "False" } }
+        ]
+      }
+    ]
+  }
+]
