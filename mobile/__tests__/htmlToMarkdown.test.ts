@@ -71,4 +71,23 @@ describe('htmlToMarkdown', () => {
   it('strips unknown tags while keeping content', () => {
     expect(htmlToMarkdown('<section><p>Hello <mark>world</mark></p></section>')).toBe('Hello world');
   });
+
+  it('preserves fenced code blocks containing angle brackets and ampersands', () => {
+    const md =
+      'Beispiel:\n\n```csharp\nList<int> zahlen = new List<int>();\nif (a < 10 && b > 0) { }\n```\n\nFertig.';
+    // Code darf NICHT als HTML interpretiert/entfernt werden.
+    expect(htmlToMarkdown(md)).toBe(md);
+  });
+
+  it('preserves inline code with angle brackets', () => {
+    expect(htmlToMarkdown('Nutze `List<int>` und `a < b` hier.')).toBe(
+      'Nutze `List<int>` und `a < b` hier.',
+    );
+  });
+
+  it('still converts HTML around protected code', () => {
+    expect(htmlToMarkdown('<p>Siehe <strong>`List<int>`</strong> unten</p>')).toBe(
+      'Siehe **`List<int>`** unten',
+    );
+  });
 });

@@ -8,6 +8,11 @@
  * `&gt;` — im .NET-Kurs sehr häufig, z. B. `List&lt;int&gt;`) nicht versehentlich
  * als HTML-Tags interpretiert, sondern bleiben als Text `<`/`>` erhalten.
  *
+ * Bereits als Markdown gepflegte Inhalte enthalten echte Code-Bereiche (fenced
+ * ```…``` bzw. inline `…`) mit literalen `<`, `>`, `&`. Diese werden VOR der
+ * HTML-Verarbeitung ausgeklammert und danach wortgetreu wiederhergestellt, damit
+ * z. B. `List<int>` oder `position < 100` nicht als Tag entfernt werden.
+ *
  * Für reinen Markdown-/Klartext (kein `<` und kein `&`) ist die Funktion ein No-Op.
  */
 
@@ -54,13 +59,32 @@ function safeCodePoint(code: number): string {
   }
 }
 
+// Sentinel um geschützte Code-Bereiche. Das Nullzeichen (U+0000) wird von keiner
+// HTML-/Whitespace-Regel berührt und kommt in echten Inhalten nicht vor. Wir
+// erzeugen es über fromCharCode, damit die Quelldatei reiner Text bleibt.
+const NUL = String.fromCharCode(0);
+const RESTORE_RE = new RegExp(NUL + '(\\d+)' + NUL, 'g');
+
 export function htmlToMarkdown(input: string | null | undefined): string {
   if (!input) return '';
 
   // Kein HTML/keine Entities → bereits Klartext oder Markdown, unverändert lassen.
   if (!/[<&]/.test(input)) return input;
 
-  let s = input.replace(/\r\n?/g, '\n');
+  // Markdown-Code (fenced ```…``` und inline `…`) schützen: dessen `<`, `>`, `&`
+  // dürfen NICHT als HTML-Tags/Entities interpretiert werden (z. B. `List<int>`,
+  // `position < 100`). Code-Bereiche werden durch Sentinel-Platzhalter ersetzt, der
+  // Rest als HTML verarbeitet und der Code danach wortgetreu wiederhergestellt.
+  const codeBlocks: string[] = [];
+  const stash = (m: string): string => {
+    codeBlocks.push(m);
+    return NUL + (codeBlocks.length - 1) + NUL;
+  };
+  let s = input
+    .replace(/```[\s\S]*?```/g, stash) // fenced code blocks
+    .replace(/`[^`\n]*`/g, stash); // inline code
+
+  s = s.replace(/\r\n?/g, '\n');
 
   // Zeilenumbrüche
   s = s.replace(/<br\s*\/?>/gi, '\n');
@@ -123,6 +147,10 @@ export function htmlToMarkdown(input: string | null | undefined): string {
   // Whitespace aufräumen
   s = s.replace(/[ \t]+\n/g, '\n');
   s = s.replace(/\n{3,}/g, '\n\n');
+  s = s.trim();
 
-  return s.trim();
+  // Geschützten Code wortgetreu wiederherstellen
+  s = s.replace(RESTORE_RE, (_m, i) => codeBlocks[Number(i)] ?? '');
+
+  return s;
 }

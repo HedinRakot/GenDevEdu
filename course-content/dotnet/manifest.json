@@ -4,6 +4,47 @@
   "courseName": ".NET",
   "chapters": [
     {
+      "_id": "63f936d4b75850532d66ae53",
+      "slug": "ch01-typen",
+      "_note": "Reformat HTML -> Markdown (Code in ```csharp-Boxen). Titel/RU unveraendert.",
+      "contents": [
+        { "_id": "6403d9a2171ab831d2b485df", "bodies": ["de", "en"] },
+        { "_id": "63ff19ef4f634dffe8a069b3", "bodies": ["de", "en"] },
+        { "_id": "6407854d7120cfacc2e56cb2", "bodies": ["de", "en"] },
+        { "_id": "640785017120cfacc2e56cb1", "bodies": ["de", "en"] },
+        { "_id": "63ffbf63141a2763921889b3", "bodies": ["de", "en"] },
+        { "_id": "64052f4f293ceb1af029fcbc", "bodies": ["de", "en"] }
+      ]
+    },
+    {
+      "_id": "63f93d2fb75850532d66ae64",
+      "slug": "ch02-variablen",
+      "_note": "Reformat HTML -> Markdown (Code in ```csharp-Boxen). Titel/RU unveraendert.",
+      "contents": [
+        { "_id": "640a1bd07329958a0c6b2a68", "bodies": ["de", "en"] },
+        { "_id": "640a1be77329958a0c6b2a69", "bodies": ["de", "en"] },
+        { "_id": "640b5d01a31124bc394170dc", "bodies": ["de", "en"] },
+        { "_id": "640b5ecda31124bc394170dd", "bodies": ["de", "en"] },
+        { "_id": "640b5f1aa31124bc394170de", "bodies": ["de", "en"] },
+        { "_id": "640b5f2ea31124bc394170df", "bodies": ["de", "en"] },
+        { "_id": "641e1bce77146bc2ac747701", "bodies": ["de", "en"] },
+        { "_id": "641b4141016818584390c021", "bodies": ["de", "en"] }
+      ]
+    },
+    {
+      "_id": "641c97384c01f3ed4d1ed20e",
+      "slug": "ch04-bedingungen",
+      "_note": "Reformat HTML -> Markdown (Code in ```csharp-Boxen). Titel/RU unveraendert.",
+      "contents": [
+        { "_id": "641c97e54c01f3ed4d1ed210", "bodies": ["de", "en"] },
+        { "_id": "641c9b854c01f3ed4d1ed211", "bodies": ["de", "en"] },
+        { "_id": "641c9beb4c01f3ed4d1ed212", "bodies": ["de", "en"] },
+        { "_id": "641e1c5377146bc2ac747702", "bodies": ["de", "en"] },
+        { "_id": "64245109a0287f40262c4be5", "bodies": ["de", "en"] },
+        { "_id": "641e1f1577146bc2ac747704", "bodies": ["de", "en"] }
+      ]
+    },
+    {
       "_id": "63ff0c06863f6294ce07ea9c",
       "slug": "ch03-vs-install",
       "title": { "de": "Programmierumgebung einrichten", "en": "Setting up the development environment" },
@@ -22,13 +63,13 @@
       "slug": "ch05-schleifen",
       "title": { "en": "4. Repeated actions" },
       "contents": [
-        { "_id": "642496daa0287f40262c4be8", "titles": { "en": "Chapter 4.1. The for loop" }, "bodies": ["en"] },
-        { "_id": "642d6cc65b0f1fbe48baec29", "titles": { "en": "Chapter 4.2. The while loop" }, "bodies": ["en"] },
-        { "_id": "64249730a0287f40262c4be9", "titles": { "en": "Chapter 4.3. The continue statement" }, "bodies": ["en"] },
-        { "_id": "64249752a0287f40262c4bea", "titles": { "en": "Chapter 4.4. The break statement" }, "bodies": ["en"] },
-        { "_id": "6427215d19799c9a73031aff", "titles": { "en": "Chapter 4.5. Several conditions at once" }, "bodies": ["en"] },
+        { "_id": "642496daa0287f40262c4be8", "titles": { "en": "Chapter 4.1. The for loop" }, "bodies": ["de", "en"] },
+        { "_id": "642d6cc65b0f1fbe48baec29", "titles": { "en": "Chapter 4.2. The while loop" }, "bodies": ["de", "en"] },
+        { "_id": "64249730a0287f40262c4be9", "titles": { "en": "Chapter 4.3. The continue statement" }, "bodies": ["de", "en"] },
+        { "_id": "64249752a0287f40262c4bea", "titles": { "en": "Chapter 4.4. The break statement" }, "bodies": ["de", "en"] },
+        { "_id": "6427215d19799c9a73031aff", "titles": { "en": "Chapter 4.5. Several conditions at once" }, "bodies": ["de", "en"] },
         { "_id": "64249dca396c0bdebbad4cbb", "titles": { "en": "Quiz: The for loop" }, "bodies": [] },
-        { "_id": "642d607bdc6df2ce11a2f3f1", "titles": { "en": "Exercises: Repeated actions" }, "bodies": ["en"] }
+        { "_id": "642d607bdc6df2ce11a2f3f1", "titles": { "en": "Exercises: Repeated actions" }, "bodies": ["de", "en"] }
       ]
     },
     {
