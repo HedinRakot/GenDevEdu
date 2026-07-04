@@ -96,6 +96,7 @@ export function AuthorCoursesScreen() {
       <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <Text style={[styles.title, { color: colors.textPrimary }]}>✏️ Meine Kurse</Text>
         <TouchableOpacity
+          testID="author-new-course"
           style={[styles.addButton, { backgroundColor: colors.primary }]}
           onPress={() => navigation.navigate('CreateCourse')}
         >

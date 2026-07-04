@@ -4,11 +4,12 @@ Schulungs-Applikation für Entwickler: Autoren erstellen Kurse (Kurs → Kapitel
 Beispiele), Lerner arbeiten sie durch und beantworten Fragen. Siehe [PRD.md](PRD.md) für die
 vollständige Spezifikation und [docs/API_CONTRACT.md](docs/API_CONTRACT.md) für die API.
 
-Dieser Stand umfasst **Iteration 1–3 (Features F1–F11)**: Auth & Rollen (Clerk), Inhalts-Datenmodell,
+Dieser Stand umfasst **Iteration 1–3 (Features F1–F12)**: Auth & Rollen (Clerk), Inhalts-Datenmodell,
 Autoren-CRUD, Lernansicht, Quiz (Single/Multiple Choice, Wahr/Falsch), Fortschrittsverfolgung,
 Code-Aufgaben mit automatischer Sandbox-Auswertung (F7), Kapitel-Abschlussquizze mit
 Bestehensgrenze/Versuchslimit (F8), ein Lerner-Dashboard mit Statistiken (F9),
-Zertifikate bei Kursabschluss (F10) und einen Katalog mit Suche/Filter/Tags (F11).
+Zertifikate bei Kursabschluss (F10), einen Katalog mit Suche/Filter/Tags (F11) und die
+Unified Expo App für Web/iOS/Android (F12).
 
 ## Stack
 
@@ -18,7 +19,7 @@ Zertifikate bei Kursabschluss (F10) und einen Katalog mit Suche/Filter/Tags (F11
 | Backend | .NET 10 (ASP.NET Core Minimal API) |
 | Datenbank | MongoDB |
 | Deployment | Kubernetes (Kind oder k3s), nginx-Ingress |
-| E2E-Tests | Playwright (im Docker-Image) |
+| E2E-Tests | Playwright + Clerk (gegen Expo-Web) |
 
 ## Voraussetzungen
 
@@ -111,6 +112,7 @@ npx expo start --ios
 cd mobile
 npm test              # einmalig
 npm run test:watch    # watch-Modus
+npm run test:coverage # mit Coverage-Report
 ```
 
 > **Hinweis Auth:** Auth läuft über **Clerk**. Vor dem ersten Start in
@@ -205,7 +207,7 @@ deploy.sh        Linux-Deployment: Docker + k3s
 | `deploy-kind.ps1` | Windows | Images bauen → Registry → Kind-Cluster anlegen → Manifeste anwenden. Flags: `-NoBuild`, `-BuildOnly`, `-DeleteCluster`, `-Forward` |
 | `deploy.sh` | Linux | Images bauen → Registry pushen → k8s/ anwenden → Rollout abwarten. Flags: `--no-build`, `--build-only` |
 | `setup-registry.sh` | Linux | Einmalig: Registry-Container `localhost:5000` + k3s `registries.yaml` |
-| `test-e2e.sh` | Linux | Playwright im Docker-Image gegen das Deployment. Override: `BASE_URL=…` |
+| `test-e2e.sh` | – | Playwright + Clerk gegen die Expo-Web-App. Voraussetzungen/Keys: `e2e/README.md`. Override: `BASE_URL=…` |
 
 ## Nützliche Befehle
 
@@ -243,11 +245,27 @@ abhaken und ggf. die Feature-Übersicht in `PRD.md` aktualisieren.
 - [x] **DELETE-Endpoints** — Autoren/Admins können löschen über `DELETE /api/courses/{id}`, `DELETE /api/chapters/{id}` und `DELETE /api/content/{id}` (Eigentümer-/Admin-Check, je `204`; Kurs-Delete kaskadiert QuestionLists/Attempts/Progress/Enrollments, Kapitel-/Inhalt-Delete räumt zugehörige QuestionLists ab). UI: Löschen-Button je Kurs (`AuthorCoursesScreen`), je Kapitel (`CourseEditorScreen`) und je Inhalt (`AddChapterContentScreen`), jeweils mit Bestätigungsdialog.
 - [x] **„Wahr/Falsch"-Fragetyp** — eigener Typ `TrueFalse` (Enum `3`) in Backend (`MobileQuestionType`) und Mobile (`QuestionType`). Serverseitig wie `OneChoice` über genau zwei Antworten (Wahr/Falsch, eine korrekt) ausgewertet — gesamte Attempt-/Reveal-Pipeline wiederverwendet. Dedizierte UI: Lerner sehen zwei nebeneinanderliegende Buttons (`LessonScreen`), Autoren wählen im `AddQuestionListScreen` per „Wahr/Falsch"-Chip nur die korrekte Seite (feste, zweisprachige Labels). Demo-Kurs hat jetzt eine 3. Frage dieses Typs. Tests in `__tests__/LessonScreen.test.tsx`.
 
-### Tests / E2E (zurückgestellt — niedrige Priorität)
-- [ ] **Automatisierte End-to-End-Tests mit `@clerk/testing` + Playwright** gegen die Expo-Web-App aufsetzen (Skill `clerk-testing` als Startpunkt). Soll den auth-pflichtigen Durchlauf headless abdecken, der aktuell nur manuell im Browser testbar ist: Clerk-Login (Lerner/Autor via Testing-Tokens) → F7 Code-Aufgabe einreichen, F8 Kapitelquiz anlegen/bestehen, F9 Dashboard-Statistiken, F10 Zertifikat-Ausstellung (inkl. Idempotenz). Voraussetzung: Backend per Port-Forward + Expo-Web erreichbar; Clerk-Testing-Keys in CI hinterlegen.
-- [ ] **Tote `e2e/`-Playwright-Suite entfernen**, sobald obiges steht — sie zielt noch auf das gelöschte Vite-Frontend (`devedu.localhost`, Manifest `k8s/30-frontend.yaml` bereits entfernt) und prüft nichts Funktionsfähiges mehr. Auch `test-e2e.sh` entsprechend anpassen/ersetzen.
+### Tests / E2E
 
-> **Hinweis:** Dieses Test-Paket ist bewusst **nach hinten priorisiert** — erst nach den restlichen Feature-Arbeiten (F11 ff.).
+Die Test-Suiten wurden überarbeitet (Stand 2026-06-30):
+
+- [x] **Backend-Integrationstests** — `tests/DevEdu.Api.Tests/Integration/` fährt die echte
+  Minimal-API über `WebApplicationFactory<Program>` gegen ein wegwerfbares **EphemeralMongo**
+  hoch. Auth wird durch ein Header-gesteuertes Test-Scheme ersetzt (Learner/Author/Admin ohne
+  echtes Clerk-JWT), die Podman-Sandbox durch ein deterministisches Fake. Abgedeckt: Kurs-CRUD +
+  Publish-Gating, Enrollment/Progress, Kapitelquiz (Score/MaxAttempts/Reveal), Code-Submission-
+  Pipeline (202 → Polling → Attempt), Clerk-Webhook-Signatur (gültig/ungültig/Replay), Zertifikat-
+  Idempotenz. Lauf: `dotnet test tests/DevEdu.Api.Tests` (Unit + Integration).
+- [x] **Mobile-Jest aufgeräumt + erweitert** — doppelte `CoursesScreen`-Tests konsolidiert, neue
+  Tests für `SettingsScreen`/`CourseDetailScreen`/`GlossaryScreen`/`SnippetsScreen`/`CreateCourseScreen`
+  + `useStreak`, Coverage-Reporting (`npm run test:coverage`).
+- [x] **E2E neu: `@clerk/testing` + Playwright gegen Expo-Web** — die tote Vite-Suite
+  (`devedu.localhost`) wurde durch UI-gesteuerte Specs (`e2e/tests/learner.spec.ts`,
+  `author.spec.ts`) ersetzt: Clerk-Login → Kurs öffnen → Frage beantworten bzw. Autor → Kurs anlegen.
+  Voraussetzungen + Ausführung: siehe [`e2e/README.md`](e2e/README.md). `test-e2e.sh` entsprechend ersetzt.
+
+> Offen (bewusst zurückgestellt): CI-Pipeline (GitHub Actions für `dotnet test` + `npm test`),
+> Erweiterung der E2E um F7/F8/F9/F10 (testIDs sind vorhanden).
 
 ### Geplante Features (PRD)
 

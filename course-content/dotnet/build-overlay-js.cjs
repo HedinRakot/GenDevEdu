@@ -9,6 +9,38 @@
 const fs = require('fs');
 const path = require('path');
 
+// ── Code-Aufgaben (type 4): Quell-`code{}` → eingebettetes C#-BSON-Modell ────────
+// Reine Funktion (Single Source of Truth): wird (a) hier zu Testzwecken exportiert
+// und (b) per .toString() in das mongosh-Skript eingebettet, das gegen die DB laeuft.
+// Feldnamen in PascalCase (CodeQuestion/CodeTestCase). TestCase-Ids deterministisch
+// (<questionId>-tc<index>) => idempotentes Re-Apply.
+function mapCodeQuestion(qd) {
+  const cd = qd.code || {};
+  return {
+    Language: (cd.language == null ? 0 : cd.language),
+    StarterCode: cd.starterCode || '',
+    SolutionCode: cd.solutionCode || '',
+    TimeLimitMs: (cd.timeLimitMs == null ? 5000 : cd.timeLimitMs),
+    MemoryLimitMb: (cd.memoryLimitMb == null ? 256 : cd.memoryLimitMb),
+    TestCases: (cd.testCases || []).map(function (tc, i) {
+      return {
+        Id: (tc.id || (qd._id + '-tc' + i)),
+        Input: tc.input || '',
+        ExpectedOutput: tc.expectedOutput || '',
+        Hidden: !!tc.hidden
+      };
+    })
+  };
+}
+
+module.exports = { mapCodeQuestion };
+
+// ── CLI (nur bei direktem Aufruf, nicht beim require() im Test) ──────────────────
+if (require.main === module) {
+  main();
+}
+
+function main() {
 const [, , contentDir, targetDb, dryRunArg, outPath] = process.argv;
 if (!contentDir || !targetDb || !outPath) {
   console.error('Usage: node build-overlay-js.cjs <contentDir> <targetDb> <true|false> <outJsPath>');
@@ -78,6 +110,7 @@ function decodeOnce(s) {
 const stats = {
   chTitles: 0, contentsUpdated: 0, newContents: 0, titleItems: 0, bodyItems: 0,
   quizzes: 0, newQuestionLists: 0, newQuestions: 0, questionsUpdated: 0, newQuizContents: 0,
+  codeQuestions: 0,
   warnings: []
 };
 
@@ -186,6 +219,9 @@ const qlWrites = [];
       });
       if (isNewA) { if (!q.Answers) q.Answers = []; q.Answers.push(a); }
     });
+    // Code-Aufgaben (type 4): Code-Objekt ueber die geteilte mapCodeQuestion-Funktion
+    // aufbauen (Quelle: oben im Builder definiert, hier ins Skript eingebettet).
+    if (qd.type === 4 && qd.code) { q.Code = mapCodeQuestion(qd); stats.codeQuestions++; }
     if (isNewQ) { if (!ql.Questions) ql.Questions = []; ql.Questions.push(q); stats.newQuestions++; }
     else stats.questionsUpdated++;
   });
@@ -239,5 +275,8 @@ print("APPLIED -> courses + questionlists (" + OV.courseId + ")");
 print("FERTIG.");
 `;
 
-fs.writeFileSync(outPath, header + logic, 'utf8');
+// mapCodeQuestion-Quelle einbetten, damit das mongosh-Skript dieselbe Logik nutzt.
+const helperSrc = '\n' + mapCodeQuestion.toString() + '\n';
+fs.writeFileSync(outPath, header + helperSrc + logic, 'utf8');
 console.log(bodyCount + ' Body-Datei(en) + ' + quizCount + ' Quiz(ze) eingebettet -> ' + outPath);
+}

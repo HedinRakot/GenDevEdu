@@ -106,6 +106,9 @@ export function SettingsScreen() {
   const currentLang = i18nInstance.language as SupportedLanguage;
   const [notificationsOn, setNotificationsOn] = useState(false);
 
+  const isAuthor = user?.role === 'instructor' || user?.role === 'admin';
+  const isAdmin = user?.role === 'admin';
+
   useEffect(() => {
     isStreakReminderEnabled().then(setNotificationsOn);
   }, []);
@@ -269,6 +272,30 @@ export function SettingsScreen() {
             isLast
           />
         </SettingsSection>
+
+        {/* Verwaltung (rollenabhängig) */}
+        {(isAuthor || isAdmin) && (
+          <SettingsSection title={t('settings.management.title')}>
+            {isAuthor && (
+              <SettingsRow
+                icon="✏️"
+                label={t('settings.management.author')}
+                subtitle={t('settings.management.authorSubtitle')}
+                onPress={() => navigation.navigate('Author')}
+                isLast={!isAdmin}
+              />
+            )}
+            {isAdmin && (
+              <SettingsRow
+                icon="🛡️"
+                label={t('settings.management.admin')}
+                subtitle={t('settings.management.adminSubtitle')}
+                onPress={() => navigation.navigate('Admin')}
+                isLast
+              />
+            )}
+          </SettingsSection>
+        )}
 
         {/* Konto */}
         <SettingsSection title={t('settings.account.title')}>

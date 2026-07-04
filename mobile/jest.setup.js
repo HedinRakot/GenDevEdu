@@ -38,6 +38,24 @@ jest.mock('@react-native-async-storage/async-storage', () => {
   };
 });
 
+// react-native-safe-area-context Mock: liefert Null-Insets + Passthrough-Komponenten,
+// damit useSafeAreaInsets() ohne SafeAreaProvider im Test nicht wirft.
+jest.mock('react-native-safe-area-context', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+  const insets = { top: 0, right: 0, bottom: 0, left: 0 };
+  const frame = { x: 0, y: 0, width: 390, height: 844 };
+  return {
+    __esModule: true,
+    SafeAreaProvider: ({ children }) => React.createElement(React.Fragment, null, children),
+    SafeAreaView: ({ children, ...props }) => React.createElement(View, props, children),
+    SafeAreaInsetsContext: React.createContext(insets),
+    useSafeAreaInsets: () => insets,
+    useSafeAreaFrame: () => frame,
+    initialWindowMetrics: { insets, frame },
+  };
+});
+
 // expo-notifications Mock (nicht in Tests benötigt)
 jest.mock('expo-notifications', () => ({
   setNotificationHandler: jest.fn(),

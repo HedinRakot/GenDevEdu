@@ -2,11 +2,13 @@
   "name": "devedu-e2e",
   "version": "1.0.0",
   "private": true,
-  "description": "Playwright end-to-end tests for DevEdu (MVP)",
+  "description": "Playwright + Clerk end-to-end tests for the DevEdu Expo Web app",
   "scripts": {
     "test": "playwright test"
   },
   "devDependencies": {
-    "@playwright/test": "1.48.0"
+    "@clerk/testing": "^1.5.0",
+    "@playwright/test": "1.48.0",
+    "dotenv": "^16.4.5"
   }
 }

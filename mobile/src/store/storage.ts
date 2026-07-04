@@ -221,10 +221,16 @@ export async function appendChatMessage(message: ChatMessage): Promise<void> {
   await setJson(STORAGE_KEYS.CHAT_HISTORY, trimmed);
 }
 
-export async function updateChatMessage(id: string, content: string): Promise<void> {
+export async function updateChatMessage(
+  id: string,
+  content: string,
+  sources?: ChatMessage['sources'],
+): Promise<void> {
   const history = await getChatHistory();
   const updated = history.map((m) =>
-    m.id === id ? { ...m, content, isStreaming: false } : m,
+    m.id === id
+      ? { ...m, content, isStreaming: false, ...(sources && sources.length ? { sources } : {}) }
+      : m,
   );
   await setJson(STORAGE_KEYS.CHAT_HISTORY, updated);
 }

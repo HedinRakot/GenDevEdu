@@ -80,7 +80,7 @@ export function CreateCourseScreen() {
             <Text style={[styles.cancel, { color: colors.primary }]}>Abbrechen</Text>
           </TouchableOpacity>
           <Text style={[styles.title, { color: colors.textPrimary }]}>Neuer Kurs</Text>
-          <TouchableOpacity onPress={onSave} disabled={isPending}>
+          <TouchableOpacity testID="create-course-submit" onPress={onSave} disabled={isPending}>
             <Text style={[styles.save, { color: isPending ? colors.textTertiary : colors.primary }]}>
               {isPending ? 'Wird erstellt…' : 'Erstellen'}
             </Text>
@@ -90,6 +90,7 @@ export function CreateCourseScreen() {
         <ScrollView contentContainerStyle={styles.form}>
           <Text style={[styles.label, { color: colors.textSecondary }]}>Interner Name *</Text>
           <TextInput
+            testID="create-course-name"
             style={[styles.input, { backgroundColor: colors.surface, color: colors.textPrimary, borderColor: colors.border }]}
             value={name}
             onChangeText={setName}

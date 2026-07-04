@@ -167,7 +167,11 @@
   },
   "chat": {
     "title": "KI-Tutor",
-    "subtitle": "Powered by Gemini",
+    "subtitle": "Dein KI-Lernassistent",
+    "askTutor": "Tutor fragen",
+    "contextBanner": "🎯 Bezieht sich auf deine aktuelle Lektion",
+    "whyWrong": "Warum falsch?",
+    "explainWrong": "Warum ist meine Antwort falsch?",
     "placeholder": "Stell eine Frage zur Softwareentwicklung...",
     "send": "Senden",
     "clearHistory": "Chat löschen",
@@ -190,6 +194,7 @@
     "code": {
       "submit": "Code testen",
       "grading": "Wird bewertet…",
+      "askTutor": "Hilfe vom Tutor",
       "placeholder": "Schreibe deinen Code hier…",
       "error": "Fehler beim Ausführen des Codes.",
       "allTestsPassed": "Alle Tests bestanden!",
@@ -258,6 +263,13 @@
     },
     "tools": {
       "title": "Lerntools"
+    },
+    "management": {
+      "title": "Verwaltung",
+      "author": "Autorenbereich",
+      "authorSubtitle": "Kurse erstellen und verwalten",
+      "admin": "Nutzerverwaltung",
+      "adminSubtitle": "Rollen und Konten verwalten"
     },
     "account": {
       "title": "Konto",

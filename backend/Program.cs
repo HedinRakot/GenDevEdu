@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using DevEdu.Api.Endpoints;
 using DevEdu.Api.Models;
 using DevEdu.Api.Services;
+using DevEdu.Api.Services.Chat;
 using DevEdu.Api.Services.CodeExecution;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -98,6 +99,22 @@ builder.Services.AddHttpClient<ClerkAdminService>(client =>
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", secret);
 });
 
+// ---- B1: Chat (kurs-bewusster Tutor, umschaltbarer Provider) ----
+// Beide Provider werden registriert; ChatService wählt per Chat:Provider (Default
+// "gemini"). Ein Provider ohne API-Key meldet IsConfigured=false und wird nie gewählt.
+builder.Services.AddHttpClient<GeminiChatProvider>();
+builder.Services.AddHttpClient<ClaudeChatProvider>();
+builder.Services.AddTransient<IChatProvider>(sp => sp.GetRequiredService<GeminiChatProvider>());
+builder.Services.AddTransient<IChatProvider>(sp => sp.GetRequiredService<ClaudeChatProvider>());
+builder.Services.AddScoped<ChatContextBuilder>();
+
+// B4/B5: RAG-Index (Gemini-Embeddings + Mongo-Persistenz) + Retrieval.
+builder.Services.AddHttpClient<GeminiEmbeddingProvider>();
+builder.Services.AddTransient<IEmbeddingProvider>(sp => sp.GetRequiredService<GeminiEmbeddingProvider>());
+builder.Services.AddScoped<CourseIndexer>();
+builder.Services.AddScoped<RagRetriever>();
+builder.Services.AddScoped<ChatService>();
+
 // ---- CORS ----
 const string CorsPolicy = "AllowAll";
 builder.Services.AddCors(options =>
@@ -143,6 +160,7 @@ app.MapEnrollmentEndpoints();
 app.MapAdminEndpoints();
 app.MapCodeSubmissionEndpoints();
 app.MapChapterQuizEndpoints();
+app.MapChatEndpoints();
 
 using (var scope = app.Services.CreateScope())
 {

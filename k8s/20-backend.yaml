@@ -14,6 +14,10 @@ stringData:
   # Paste the secret from Clerk Dashboard → Webhooks → <endpoint> → Signing Secret.
   # Empty = signature verification is SKIPPED (dev only — never leave empty in prod).
   Clerk__WebhookSecret: ""
+  # B1: Chat-Provider-Keys. Gemini ist Default-Provider (Chat__Provider). Trage hier
+  # deinen Google-Gemini-Key ein; Anthropic bleibt leer (Provider dann inaktiv).
+  Chat__Gemini__ApiKey: ""
+  Chat__Anthropic__ApiKey: ""
 ---
 # F7: persistenter Store für den Podman-Sidecar, damit das ~4.6 GB Runner-Image
 # NICHT bei jedem Pod-Start neu geladen wird. storageClassName bewusst weggelassen
@@ -83,6 +87,19 @@ spec:
               value: "localhost/devedu/csharp-runner:local"
             - name: Sandbox__ScratchDir
               value: "/sandbox"
+            # ── B1: Chat (kurs-bewusster Tutor, umschaltbarer Provider) ──
+            - name: Chat__Provider
+              value: "gemini"
+            - name: Chat__Gemini__ApiKey
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: Chat__Gemini__ApiKey
+            - name: Chat__Anthropic__ApiKey
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: Chat__Anthropic__ApiKey
           volumeMounts:
             - name: podman-sock
               mountPath: /podman

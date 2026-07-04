@@ -37,6 +37,7 @@ function CourseCard({ course, onPress }: { course: Course; onPress: () => void }
 
   return (
     <TouchableOpacity
+      testID="course-card"
       style={[styles.card, { backgroundColor: colors.surface }]}
       onPress={onPress}
       activeOpacity={0.85}
@@ -57,7 +58,7 @@ function CourseCard({ course, onPress }: { course: Course; onPress: () => void }
             </View>
           )}
         </View>
-        <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>
+        <Text testID="course-card-title" style={[styles.cardTitle, { color: colors.textPrimary }]}>
           {title || course.name}
         </Text>
         {course.tags.length > 0 && (

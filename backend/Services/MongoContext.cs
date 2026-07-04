@@ -28,6 +28,7 @@ public class MongoContext
     public IMongoCollection<CodeSubmission> CodeSubmissions => Database.GetCollection<CodeSubmission>("codesubmissions");
     public IMongoCollection<ChapterQuizAttempt> ChapterQuizAttempts => Database.GetCollection<ChapterQuizAttempt>("chapterquizattempts");
     public IMongoCollection<Certificate> Certificates => Database.GetCollection<Certificate>("certificates");
+    public IMongoCollection<CourseEmbedding> CourseEmbeddings => Database.GetCollection<CourseEmbedding>("courseembeddings");
 
     /// <summary>Idempotente Index-Anlage (beim Start aufgerufen). Erzwingt 1 Zertifikat/Kurs/Nutzer.</summary>
     public async Task EnsureIndexesAsync()

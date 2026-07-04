@@ -42,7 +42,7 @@ einen **Status**.
 | F9 | Lerner-Dashboard & Statistiken | P2 | Implementiert | F6 |
 | F10 | Zertifikate / Abzeichen | P2 | Implementiert | F8 |
 | F11 | Katalog: Suche, Filter, Tags | P2 | Implementiert | F2 |
-| F12 | Unified Expo App (Web + iOS + Android) | P1 | In Arbeit | F1–F5 |
+| F12 | Unified Expo App (Web + iOS + Android) | P1 | Implementiert | F1–F5 |
 | F13 | Erweiterungen (i18n, Diskussionen, Lernpfade) | P2 | Backlog | – |
 
 > **Audit-Stand (2026-06-26):**
@@ -54,7 +54,8 @@ einen **Status**.
 > - **F9** Lerner-Dashboard vertieft: `GET /api/me/stats` aggregiert (reiner `StatsCalculator`) Kurse aktiv/abgeschlossen, Fortschritt je Kurs (%), Quiz-Trefferquote, Kapitel-Quizze bestanden und gelöste Code-Aufgaben; das `DashboardScreen` zeigt Kennzahl-Kacheln + Kurs-Fortschrittsbalken.
 > - **F10** Zertifikate implementiert: bei Kursabschluss (geteilte `CourseCompletion`-Logik: alle Inhalte + alle Kapitel-Quizze) wird idempotent ein `Certificate` ausgestellt (Namens-Snapshots, `Enrollment.CompletedAt` gesetzt) — getriggert aus Inhalt-Abschluss + Kapitel-Quiz-Abgabe. `GET /api/me/certificates`; Badges im Dashboard. Öffentliche Verifikation bewusst zurückgestellt (`VerificationCode` vorhanden).
 > - **F11** Katalog implementiert: `Course` trägt jetzt `Tags[]` + `Level`; `GET /api/courses?search=&tags=&level=` filtert server-seitig (reiner `CourseCatalog`, in-memory) plus `GET /api/courses/tags` für die Filter-Chips. `CoursesScreen` hat Suchfeld (debounced) + Level-/Tag-Chips + Level-Badge/Tags je Karte; Autoren setzen Tags/Level beim Anlegen (`CreateCourseScreen`). Tags/Level nachträglich editierbar = offen.
-> - **Offen:** Passwort-Reset-Flow (toter Link entfernt), In-App Admin-UI; automatisierte E2E (Clerk+Playwright) zurückgestellt. F1–F11 implementiert; F12 in Arbeit, F13 Backlog.
+> - **F12** Unified Expo App: Author-CMS (Kurs anlegen/bearbeiten/**publizieren** via `CreateCourseScreen`/`CourseEditorScreen`), Einschreibung (Auto-Enroll in `CourseDetailScreen`) und Quiz-Abgabe (`useSubmitAttempt`/`useSubmitChapterQuiz`/`useSubmitCode`) sind umgesetzt — die zuvor als „fehlend" gelisteten Screens existieren vollständig. Native iOS/Android sowie der k8s-Austausch des Vite-Builds laufen weiterhin über Expo.
+> - **Offen:** native iOS/Android-Politur; Prod-Härtung der Sandbox (gVisor/Jobs). F1–F12 implementiert, F13 Backlog. **Test-Suiten überarbeitet:** Backend-Integrationstests (WebApplicationFactory + ephemeres Mongo), Mobile-Jest aufgeräumt/erweitert (+Coverage), tote Vite-E2E ersetzt durch Clerk+Playwright gegen Expo-Web.
 
 ---
 
@@ -231,12 +232,12 @@ Gemeinsame Frage-Felder: `id, scope (Topic/Chapter), refId, prompt (Markdown), e
 - **Author CMS** (Kurs erstellen/bearbeiten, Kapitel/Themen-CRUD) wird als neue Screens in `mobile/src/screens/author/` implementiert — Feature-Parität zum abgelösten Vite-Frontend.
 - Bereits vorhandene Screens: Kursliste, Kursdetail, Lektion, Glossar, KI-Chat, Snippets, Einstellungen, Dashboard.
 
-**Fehlende Screens (TODO):**
-| Screen | Priorität |
-|---|---|
-| Author CMS: Kurs erstellen/publizieren | P0 |
-| Enrollment | P0 |
-| Quiz-Antworten absenden | P1 |
+**Screens — Status:**
+| Screen | Priorität | Status |
+|---|---|---|
+| Author CMS: Kurs erstellen/publizieren | P0 | ✅ `CreateCourseScreen` + `CourseEditorScreen` (Publish) |
+| Enrollment | P0 | ✅ Auto-Enroll in `CourseDetailScreen` (`useEnrollment`) |
+| Quiz-Antworten absenden | P1 | ✅ `useSubmitAttempt` / `useSubmitChapterQuiz` / `useSubmitCode` |
 
 **Akzeptanzkriterien**
 - `npx expo start --web` liefert dieselbe Funktionalität wie das bisherige Vite-Frontend.

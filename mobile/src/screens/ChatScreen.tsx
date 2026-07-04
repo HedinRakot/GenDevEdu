@@ -12,17 +12,12 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRoute } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
-import { sendMessageStreaming } from '@/api/gemini';
-import {
-  appendChatMessage,
-  clearChatHistory,
-  getChatHistory,
-  updateChatMessage,
-} from '@/store/storage';
-import { GEMINI_API_KEY } from '@/config/env';
+import type { ChatContext } from '@/api/chat';
 import type { ChatMessage } from '@/types/chat';
+import { useChat } from '@/hooks/useChat';
 import { useTheme } from '@/context/ThemeContext';
 import { useSnippets } from '@/hooks/useSnippets';
 import { MarkdownRenderer } from '@/components/common/MarkdownRenderer';
@@ -65,6 +60,18 @@ function ChatBubble({ message, onFavorite, isFavorited }: BubbleProps) {
           <MarkdownRenderer content={message.content || '...'} />
         )}
 
+        {!isUser && message.sources && message.sources.length > 0 && (
+          <View style={styles.sourceRow}>
+            {message.sources.map((s, i) => (
+              <View key={`${s.chapterId}-${i}`} style={[styles.sourceChip, { backgroundColor: colors.primarySurface }]}>
+                <Text style={[styles.sourceChipText, { color: colors.primary }]} numberOfLines={1}>
+                  📄 {s.title}
+                </Text>
+              </View>
+            ))}
+          </View>
+        )}
+
         <View style={styles.bubbleFooter}>
           <Text
             style={[
@@ -91,16 +98,17 @@ export function ChatScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const flatListRef = useRef<FlatList<ChatMessage>>(null);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const route = useRoute();
+  const params = route.params as
+    | { context?: ChatContext; seed?: string; seedNonce?: number }
+    | undefined;
+  const context = params?.context;
+  const seed = params?.seed;
+  const seedNonce = params?.seedNonce;
   const [inputText, setInputText] = useState('');
-  const [isSending, setIsSending] = useState(false);
-
+  const { messages, isSending, sendMessage: sendChat, clearHistory } = useChat();
   const { snippets, save: saveSnippet } = useSnippets();
-  const isApiKeySet = GEMINI_API_KEY.length > 0;
-
-  useEffect(() => {
-    getChatHistory().then(setMessages);
-  }, []);
+  const lastSeedNonce = useRef<number | undefined>(undefined);
 
   const scrollToBottom = useCallback(() => {
     setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
@@ -110,68 +118,22 @@ export function ChatScreen() {
     if (messages.length > 0) scrollToBottom();
   }, [messages.length, scrollToBottom]);
 
-  const sendMessage = useCallback(async () => {
+  // B7: Aus einem Screen mit vorformulierter Frage kommen (z. B. „Warum falsch?") —
+  // einmal je Navigation (seedNonce) automatisch absenden.
+  useEffect(() => {
+    if (seed && seedNonce !== undefined && lastSeedNonce.current !== seedNonce) {
+      lastSeedNonce.current = seedNonce;
+      void sendChat(seed, context ? { context } : undefined).then(scrollToBottom);
+    }
+  }, [seed, seedNonce, context, sendChat, scrollToBottom]);
+
+  const handleSend = useCallback(async () => {
     const text = inputText.trim();
     if (!text || isSending) return;
-    if (!isApiKeySet) {
-      Alert.alert('API-Key', t('chat.apiKeyMissing'));
-      return;
-    }
-
     setInputText('');
-    setIsSending(true);
-
-    const userMessage: ChatMessage = {
-      id: `msg_${Date.now()}_user`,
-      role: 'user',
-      content: text,
-      timestamp: Date.now(),
-    };
-    await appendChatMessage(userMessage);
-    let history = await getChatHistory();
-    setMessages(history);
-
-    const aiMessageId = `msg_${Date.now()}_model`;
-    await appendChatMessage({
-      id: aiMessageId,
-      role: 'model',
-      content: '',
-      timestamp: Date.now(),
-      isStreaming: true,
-    });
-    history = await getChatHistory();
-    setMessages(history);
+    await sendChat(text, context ? { context } : undefined);
     scrollToBottom();
-
-    let finalText = '';
-    try {
-      await sendMessageStreaming(
-        text,
-        history.filter((m) => m.id !== aiMessageId),
-        (_chunk, fullText) => {
-          finalText = fullText;
-          setMessages((prev) =>
-            prev.map((m) =>
-              m.id === aiMessageId ? { ...m, content: fullText, isStreaming: true } : m,
-            ),
-          );
-        },
-      );
-
-      await updateChatMessage(aiMessageId, finalText || '...');
-    } catch (err: unknown) {
-      const errorMsg =
-        err instanceof Error && err.message === 'API_KEY_MISSING'
-          ? t('chat.apiKeyMissing')
-          : t('chat.errorSending');
-      await updateChatMessage(aiMessageId, `⚠️ ${errorMsg}`);
-    } finally {
-      const updatedHistory = await getChatHistory();
-      setMessages(updatedHistory);
-      setIsSending(false);
-      scrollToBottom();
-    }
-  }, [inputText, isSending, isApiKeySet, t, scrollToBottom]);
+  }, [inputText, isSending, sendChat, scrollToBottom, context]);
 
   const handleFavorite = useCallback(
     async (message: ChatMessage) => {
@@ -199,8 +161,7 @@ export function ChatScreen() {
         text: t('common.delete'),
         style: 'destructive',
         onPress: async () => {
-          await clearChatHistory();
-          setMessages([]);
+          await clearHistory();
         },
       },
     ]);
@@ -225,10 +186,10 @@ export function ChatScreen() {
         </TouchableOpacity>
       </View>
 
-      {!isApiKeySet && (
-        <View style={[styles.apiKeyWarning, { backgroundColor: colors.warningSurface }]}>
-          <Text style={[styles.apiKeyWarningText, { color: colors.warning }]}>
-            ⚠️ {t('chat.apiKeyMissing')}
+      {context && (
+        <View testID="chat-context-banner" style={[styles.contextBanner, { backgroundColor: colors.primarySurface }]}>
+          <Text style={[styles.contextBannerText, { color: colors.primary }]}>
+            {t('chat.contextBanner')}
           </Text>
         </View>
       )}
@@ -284,7 +245,7 @@ export function ChatScreen() {
             multiline
             maxLength={2000}
             returnKeyType="send"
-            onSubmitEditing={sendMessage}
+            onSubmitEditing={handleSend}
             blurOnSubmit={false}
           />
           <TouchableOpacity
@@ -294,7 +255,7 @@ export function ChatScreen() {
                 backgroundColor: !inputText.trim() || isSending ? colors.border : colors.primary,
               },
             ]}
-            onPress={sendMessage}
+            onPress={handleSend}
             disabled={!inputText.trim() || isSending}
           >
             {isSending ? (
@@ -334,6 +295,8 @@ const styles = StyleSheet.create({
 
   apiKeyWarning: { paddingHorizontal: Spacing.lg, paddingVertical: Spacing.sm },
   apiKeyWarningText: { fontSize: FontSize.sm, fontWeight: FontWeight.medium },
+  contextBanner: { paddingHorizontal: Spacing.lg, paddingVertical: Spacing.sm },
+  contextBannerText: { fontSize: FontSize.sm, fontWeight: FontWeight.medium },
 
   emptyState: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: Spacing.xl },
   emptyEmoji: { fontSize: 64, marginBottom: Spacing.md },
@@ -367,6 +330,9 @@ const styles = StyleSheet.create({
   },
   bubbleTime: { fontSize: FontSize.xs, textAlign: 'right' },
   favStar: { fontSize: 18, marginLeft: Spacing.sm },
+  sourceRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.xs, marginTop: Spacing.xs },
+  sourceChip: { paddingHorizontal: Spacing.sm, paddingVertical: 2, borderRadius: Radius.full, maxWidth: 200 },
+  sourceChipText: { fontSize: FontSize.xs, fontWeight: FontWeight.medium },
 
   inputRow: {
     flexDirection: 'row',

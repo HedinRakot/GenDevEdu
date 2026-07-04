@@ -30,6 +30,7 @@ function ChapterRow({ chapter, onPress }: { chapter: Chapter; onPress: () => voi
 
   return (
     <TouchableOpacity
+      testID="chapter-row"
       style={[
         styles.chapterRow,
         {

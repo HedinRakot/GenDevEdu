@@ -59,6 +59,8 @@ export function QuestionCard(props: QuestionCardProps) {
 function ChoiceQuestionCard({ question, onAnsweredCorrectly }: QuestionCardProps) {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const navigation = useNavigation<any>();
+  const route = useRoute<any>();
   const { mutateAsync, isPending } = useSubmitAttempt();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [status, setStatus] = useState<AnswerStatus>('idle');
@@ -202,6 +204,7 @@ function ChoiceQuestionCard({ question, onAnsweredCorrectly }: QuestionCardProps
 
       {status === 'idle' ? (
         <TouchableOpacity
+          testID="submit-answer"
           style={[styles.checkButton, { backgroundColor: colors.primary }, isPending && { opacity: 0.7 }]}
           onPress={validate}
           disabled={isPending}
@@ -215,6 +218,7 @@ function ChoiceQuestionCard({ question, onAnsweredCorrectly }: QuestionCardProps
       ) : (
         <View style={styles.feedback}>
           <Text
+            testID="answer-feedback"
             style={[
               styles.feedbackText,
               { color: status === 'correct' ? colors.success : colors.error },
@@ -223,11 +227,35 @@ function ChoiceQuestionCard({ question, onAnsweredCorrectly }: QuestionCardProps
             {status === 'correct' ? `✅ ${t('quiz.correct')}` : `❌ ${t('quiz.tryAgain')}`}
           </Text>
           {status === 'incorrect' && (
-            <TouchableOpacity onPress={reset}>
-              <Text style={[styles.retryText, { color: colors.primary }]}>
-                {t('common.retry')}
-              </Text>
-            </TouchableOpacity>
+            <View style={styles.feedbackActions}>
+              <TouchableOpacity onPress={reset}>
+                <Text style={[styles.retryText, { color: colors.primary }]}>
+                  {t('common.retry')}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                testID="quiz-why-wrong"
+                onPress={() =>
+                  navigation.navigate('Chat' as never, {
+                    context: {
+                      courseId: route.params?.courseId,
+                      chapterId: route.params?.chapterId,
+                      questionId: question.elementId,
+                      selectedAnswer: question.answers
+                        .filter((a) => selectedIds.includes(a.id))
+                        .map((a) => translate(a.titel))
+                        .join(', '),
+                    },
+                    seed: t('chat.explainWrong'),
+                    seedNonce: Date.now(),
+                  } as never)
+                }
+              >
+                <Text style={[styles.retryText, { color: colors.primary }]}>
+                  🤖 {t('chat.whyWrong')}
+                </Text>
+              </TouchableOpacity>
+            </View>
           )}
         </View>
       )}
@@ -240,6 +268,8 @@ function ChoiceQuestionCard({ question, onAnsweredCorrectly }: QuestionCardProps
 function CodeQuestionCard({ question, onAnsweredCorrectly }: QuestionCardProps) {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const navigation = useNavigation<any>();
+  const route = useRoute<any>();
   const { mutateAsync, isPending } = useSubmitCode();
   const [code, setCode] = useState(question.code?.starterCode ?? '');
   const [submissionId, setSubmissionId] = useState<string | undefined>(undefined);
@@ -311,6 +341,24 @@ function CodeQuestionCard({ question, onAnsweredCorrectly }: QuestionCardProps) 
         ) : (
           <Text style={styles.checkButtonText}>{t('quiz.code.submit')}</Text>
         )}
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        testID="code-ask-tutor"
+        style={styles.codeHelpButton}
+        onPress={() =>
+          navigation.navigate('Chat' as never, {
+            context: {
+              courseId: route.params?.courseId,
+              chapterId: route.params?.chapterId,
+              questionId: question.elementId,
+            },
+          } as never)
+        }
+      >
+        <Text style={[styles.codeHelpText, { color: colors.primary }]}>
+          🤖 {t('quiz.code.askTutor')}
+        </Text>
       </TouchableOpacity>
 
       {result?.status === 'Error' && (
@@ -512,7 +560,7 @@ export function LessonScreen() {
   const { colors } = useTheme();
   const route = useRoute<RoutePropType>();
   const navigation = useNavigation<NavProp>();
-  const { chapterId } = route.params;
+  const { chapterId, courseId } = route.params;
 
   const { data: model, isLoading, error } = useChapterContent(chapterId);
   const { recordActivity } = useStreak();
@@ -572,9 +620,23 @@ export function LessonScreen() {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Text style={[styles.backText, { color: colors.primary }]}>‹ {t('common.back')}</Text>
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.textPrimary }]} numberOfLines={1}>
+        <Text style={[styles.headerTitle, { color: colors.textPrimary, flex: 1 }]} numberOfLines={1}>
           {model.chapterName}
         </Text>
+        <TouchableOpacity
+          testID="ask-tutor"
+          onPress={() =>
+            navigation.navigate(
+              'Chat' as never,
+              { context: { courseId, chapterId } } as never,
+            )
+          }
+          style={styles.tutorButton}
+        >
+          <Text style={[styles.tutorButtonText, { color: colors.primary }]}>
+            🤖 {t('chat.askTutor')}
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
@@ -605,6 +667,11 @@ const styles = StyleSheet.create({
   },
   backButton: {},
   backText: { fontSize: FontSize.md, fontWeight: FontWeight.medium },
+  tutorButton: { paddingVertical: 4, paddingHorizontal: Spacing.sm },
+  tutorButtonText: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
+  codeHelpButton: { alignSelf: 'center', paddingVertical: Spacing.sm },
+  codeHelpText: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
+  feedbackActions: { flexDirection: 'row', gap: Spacing.lg, marginTop: Spacing.xs },
   headerTitle: { fontSize: FontSize.md, fontWeight: FontWeight.bold, flex: 1 },
 
   scroll: { flex: 1 },

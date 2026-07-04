@@ -19,6 +19,14 @@ export function setApiTokenProvider(fn: () => Promise<string | null>): void {
   _tokenProvider = fn;
 }
 
+/**
+ * Aktuelles Access-Token (oder null). Für Aufrufe außerhalb von Axios — z. B. der
+ * fetch-basierte SSE-Chat-Stream, der den Interceptor nicht durchläuft.
+ */
+export async function getApiToken(): Promise<string | null> {
+  return _tokenProvider ? _tokenProvider() : null;
+}
+
 export const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
   timeout: API_TIMEOUT_MS,

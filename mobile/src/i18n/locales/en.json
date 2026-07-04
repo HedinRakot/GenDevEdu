@@ -167,7 +167,11 @@
   },
   "chat": {
     "title": "AI Tutor",
-    "subtitle": "Powered by Gemini",
+    "subtitle": "Your AI learning assistant",
+    "askTutor": "Ask tutor",
+    "contextBanner": "🎯 Refers to your current lesson",
+    "whyWrong": "Why wrong?",
+    "explainWrong": "Why is my answer wrong?",
     "placeholder": "Ask a question about software development...",
     "send": "Send",
     "clearHistory": "Clear Chat",
@@ -190,6 +194,7 @@
     "code": {
       "submit": "Run code",
       "grading": "Grading…",
+      "askTutor": "Ask the tutor",
       "placeholder": "Write your code here…",
       "error": "Error while running the code.",
       "allTestsPassed": "All tests passed!",
@@ -258,6 +263,13 @@
     },
     "tools": {
       "title": "Learning Tools"
+    },
+    "management": {
+      "title": "Management",
+      "author": "Author area",
+      "authorSubtitle": "Create and manage courses",
+      "admin": "User management",
+      "adminSubtitle": "Manage roles and accounts"
     },
     "account": {
       "title": "Account",

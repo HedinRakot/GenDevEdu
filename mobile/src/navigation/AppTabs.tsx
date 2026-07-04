@@ -1,6 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { DashboardScreen } from '@/screens/DashboardScreen';
@@ -25,6 +26,9 @@ export type AppTabsParamList = {
 };
 
 const Tab = createBottomTabNavigator<AppTabsParamList>();
+
+/** Inhaltshöhe der Tab-Bar ohne unteren Safe-Area-Inset. */
+const TAB_BAR_HEIGHT = 64;
 
 interface TabIconProps {
   emoji: string;
@@ -60,6 +64,7 @@ export function AppTabs() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
   const isAuthor = user?.role === 'instructor' || user?.role === 'admin';
   const isAdmin = user?.role === 'admin';
 
@@ -67,7 +72,16 @@ export function AppTabs() {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarStyle: [styles.tabBar, { backgroundColor: colors.tabBackground }],
+        // Höhe + unteres Padding um den Safe-Area-Inset erweitern (Home-Indicator),
+        // sonst rutschen die Icons auf dem Smartphone nach oben.
+        tabBarStyle: [
+          styles.tabBar,
+          {
+            backgroundColor: colors.tabBackground,
+            height: TAB_BAR_HEIGHT + insets.bottom,
+            paddingBottom: insets.bottom,
+          },
+        ],
         tabBarShowLabel: false,
       }}
     >
@@ -107,32 +121,28 @@ export function AppTabs() {
           ),
         }}
       />
+      {/* Rollen-Bereiche: nicht in der Bottom-Bar (würde sie überfüllen), sondern
+          über die Einstellungen erreichbar — daher als Screen registriert, aber
+          ohne eigenen Tab-Button. */}
       {isAuthor && (
         <Tab.Screen
           name="Author"
           component={AuthorStack}
-          options={{
-            tabBarIcon: ({ focused }) => (
-              <TabIcon emoji="✏️" focused={focused} label={t('navigation.author')} />
-            ),
-          }}
+          options={{ tabBarButton: () => null, tabBarItemStyle: { display: 'none' } }}
         />
       )}
       {isAdmin && (
         <Tab.Screen
           name="Admin"
           component={AdminUsersScreen}
-          options={{
-            tabBarIcon: ({ focused }) => (
-              <TabIcon emoji="🛡️" focused={focused} label={t('navigation.admin')} />
-            ),
-          }}
+          options={{ tabBarButton: () => null, tabBarItemStyle: { display: 'none' } }}
         />
       )}
       <Tab.Screen
         name="Settings"
         component={SettingsScreen}
         options={{
+          tabBarButtonTestID: 'tab-settings',
           tabBarIcon: ({ focused }) => (
             <TabIcon emoji="⚙️" focused={focused} label={t('navigation.settings')} />
           ),
@@ -145,7 +155,7 @@ export function AppTabs() {
 const styles = StyleSheet.create({
   tabBar: {
     borderTopWidth: 0,
-    height: 72,
+    height: TAB_BAR_HEIGHT,
     paddingBottom: 0,
     ...Shadow.md,
   },

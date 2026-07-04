@@ -8,7 +8,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "@clerk/expo": "^3.6.2",
@@ -51,12 +52,24 @@
     "setupFiles": [
       "<rootDir>/jest.setup.js"
     ],
+    "testTimeout": 15000,
     "transformIgnorePatterns": [
       "node_modules/(?!(jest-)?react-native|@react-native|@react-navigation|@react-native-async-storage|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-native-markdown-display|react-i18next|i18next|@tanstack/react-query|@clerk/.*|axios)"
     ],
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/src/$1"
-    }
+    },
+    "collectCoverageFrom": [
+      "src/**/*.{ts,tsx}",
+      "!src/**/*.d.ts",
+      "!src/i18n/**",
+      "!src/types/**",
+      "!src/**/index.{ts,tsx}"
+    ],
+    "coverageReporters": [
+      "text-summary",
+      "lcov"
+    ]
   },
   "private": true
 }

@@ -370,5 +370,145 @@
         ]
       }
     ]
+  },
+  {
+    "_comment": "Code-Aufgabe (Pilot, Kap. 5 Schleifen): erste type:4-Frage ueber die Content-Pipeline. Schema: type 4 + code{ language(0=C#), starterCode, solutionCode, timeLimitMs, memoryLimitMb, testCases[]{ input, expectedOutput, hidden } }. SolutionCode wird Lernern nie ausgeliefert; versteckte Testfaelle zeigen nur Pass/Fail. TestCase-Ids werden im Builder deterministisch als <questionId>-tc<index> erzeugt.",
+    "_id": "gen-ql-ch05-code",
+    "chapterId": "642494b0a0287f40262c4be6",
+    "quizContent": { "_id": "gen-ch05-code", "sortOrder": 50, "titles": { "de": "Uebung: Summe 1..n", "en": "Exercise: Sum 1..n" } },
+    "questions": [
+      {
+        "_id": "qz-ch05-code-1",
+        "type": 4,
+        "titles": { "de": "Lies eine ganze Zahl `n` von der Konsole (stdin) und gib die Summe `1 + 2 + ... + n` aus.", "en": "Read an integer `n` from the console (stdin) and print the sum `1 + 2 + ... + n`." },
+        "code": {
+          "language": 0,
+          "starterCode": "var n = int.Parse(Console.ReadLine()!);\n// TODO: berechne und gib die Summe 1..n aus\n",
+          "solutionCode": "var n = int.Parse(Console.ReadLine()!);\nvar sum = 0;\nfor (var i = 1; i <= n; i++) sum += i;\nConsole.WriteLine(sum);\n",
+          "timeLimitMs": 5000,
+          "memoryLimitMb": 256,
+          "testCases": [
+            { "input": "5\n", "expectedOutput": "15", "hidden": false },
+            { "input": "1\n", "expectedOutput": "1", "hidden": false },
+            { "input": "10\n", "expectedOutput": "55", "hidden": true },
+            { "input": "100\n", "expectedOutput": "5050", "hidden": true }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "_comment": "Code-Aufgabe Kap. 4 (Bedingungen): groessere von zwei Zahlen via if/else.",
+    "_id": "gen-ql-ch04-code",
+    "chapterId": "641c97384c01f3ed4d1ed20e",
+    "quizContent": { "_id": "gen-ch04-code", "sortOrder": 50, "titles": { "de": "Uebung: Die groessere Zahl", "en": "Exercise: The larger number" } },
+    "questions": [
+      {
+        "_id": "qz-ch04-code-1",
+        "type": 4,
+        "titles": { "de": "Lies zwei ganze Zahlen (je eine Zeile) und gib die groessere aus.", "en": "Read two integers (one per line) and print the larger one." },
+        "code": {
+          "language": 0,
+          "starterCode": "var a = int.Parse(Console.ReadLine()!);\nvar b = int.Parse(Console.ReadLine()!);\n// TODO: gib die groessere Zahl aus\n",
+          "solutionCode": "var a = int.Parse(Console.ReadLine()!);\nvar b = int.Parse(Console.ReadLine()!);\nif (a > b) Console.WriteLine(a); else Console.WriteLine(b);\n",
+          "testCases": [
+            { "input": "3\n7\n", "expectedOutput": "7", "hidden": false },
+            { "input": "9\n2\n", "expectedOutput": "9", "hidden": false },
+            { "input": "5\n5\n", "expectedOutput": "5", "hidden": true }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "_comment": "Code-Aufgabe Kap. 6 (Funktionen): Funktion Quadrat(x).",
+    "_id": "gen-ql-ch06-code",
+    "chapterId": "641def9877146bc2ac7476ff",
+    "quizContent": { "_id": "gen-ch06-code", "sortOrder": 50, "titles": { "de": "Uebung: Quadrat-Funktion", "en": "Exercise: Square function" } },
+    "questions": [
+      {
+        "_id": "qz-ch06-code-1",
+        "type": 4,
+        "titles": { "de": "Schreibe eine Funktion `Quadrat(x)`, die das Quadrat zurueckgibt. Lies `n` und gib `Quadrat(n)` aus.", "en": "Write a function `Square(x)` that returns the square. Read `n` and print `Square(n)`." },
+        "code": {
+          "language": 0,
+          "starterCode": "int Quadrat(int x)\n{\n    // TODO: gib x * x zurueck\n    return 0;\n}\n\nvar n = int.Parse(Console.ReadLine()!);\nConsole.WriteLine(Quadrat(n));\n",
+          "solutionCode": "int Quadrat(int x) => x * x;\n\nvar n = int.Parse(Console.ReadLine()!);\nConsole.WriteLine(Quadrat(n));\n",
+          "testCases": [
+            { "input": "4\n", "expectedOutput": "16", "hidden": false },
+            { "input": "0\n", "expectedOutput": "0", "hidden": false },
+            { "input": "12\n", "expectedOutput": "144", "hidden": true }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "_comment": "Code-Aufgabe Kap. 7 (Klassen): Klasse Rechteck mit Methode Flaeche().",
+    "_id": "gen-ql-ch07-code",
+    "chapterId": "640289ec8a5041bf87e28cc8",
+    "quizContent": { "_id": "gen-ch07-code", "sortOrder": 50, "titles": { "de": "Uebung: Klasse Rechteck", "en": "Exercise: Rectangle class" } },
+    "questions": [
+      {
+        "_id": "qz-ch07-code-1",
+        "type": 4,
+        "titles": { "de": "Erstelle eine Klasse `Rechteck` (Breite, Hoehe) mit Methode `Flaeche()`. Lies Breite und Hoehe (je eine Zeile) und gib die Flaeche aus.", "en": "Create a class `Rectangle` (width, height) with a method `Area()`. Read width and height (one per line) and print the area." },
+        "code": {
+          "language": 0,
+          "starterCode": "var b = int.Parse(Console.ReadLine()!);\nvar h = int.Parse(Console.ReadLine()!);\n// TODO: Rechteck erstellen und Flaeche ausgeben\n\nclass Rechteck\n{\n    public int Breite;\n    public int Hoehe;\n    // TODO: Methode Flaeche()\n}\n",
+          "solutionCode": "var b = int.Parse(Console.ReadLine()!);\nvar h = int.Parse(Console.ReadLine()!);\nvar r = new Rechteck { Breite = b, Hoehe = h };\nConsole.WriteLine(r.Flaeche());\n\nclass Rechteck\n{\n    public int Breite;\n    public int Hoehe;\n    public int Flaeche() => Breite * Hoehe;\n}\n",
+          "testCases": [
+            { "input": "3\n4\n", "expectedOutput": "12", "hidden": false },
+            { "input": "5\n5\n", "expectedOutput": "25", "hidden": false },
+            { "input": "7\n8\n", "expectedOutput": "56", "hidden": true }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "_comment": "Code-Aufgabe Kap. 8 (Listen): groesste Zahl aus einer List<int>.",
+    "_id": "gen-ql-ch08-code",
+    "chapterId": "64028a308a5041bf87e28ccc",
+    "quizContent": { "_id": "gen-ch08-code", "sortOrder": 50, "titles": { "de": "Uebung: Groesste Zahl in einer Liste", "en": "Exercise: Largest number in a list" } },
+    "questions": [
+      {
+        "_id": "qz-ch08-code-1",
+        "type": 4,
+        "titles": { "de": "Lies `n`, dann `n` ganze Zahlen (je eine Zeile), speichere sie in einer `List<int>` und gib die groesste aus.", "en": "Read `n`, then `n` integers (one per line), store them in a `List<int>` and print the largest." },
+        "code": {
+          "language": 0,
+          "starterCode": "var n = int.Parse(Console.ReadLine()!);\nvar zahlen = new List<int>();\n// TODO: n Zahlen einlesen und die groesste ausgeben\n",
+          "solutionCode": "var n = int.Parse(Console.ReadLine()!);\nvar zahlen = new List<int>();\nfor (var i = 0; i < n; i++) zahlen.Add(int.Parse(Console.ReadLine()!));\nConsole.WriteLine(zahlen.Max());\n",
+          "testCases": [
+            { "input": "3\n5\n9\n2\n", "expectedOutput": "9", "hidden": false },
+            { "input": "1\n42\n", "expectedOutput": "42", "hidden": false },
+            { "input": "4\n-3\n-7\n-1\n-9\n", "expectedOutput": "-1", "hidden": true }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "_comment": "Code-Aufgabe Kap. 9 (Vererbung): abstrakte Basisklasse + ueberschreibende Methode.",
+    "_id": "gen-ql-ch09-code",
+    "chapterId": "64028a188a5041bf87e28cca",
+    "quizContent": { "_id": "gen-ch09-code", "sortOrder": 50, "titles": { "de": "Uebung: Tierlaute (Vererbung)", "en": "Exercise: Animal sounds (inheritance)" } },
+    "questions": [
+      {
+        "_id": "qz-ch09-code-1",
+        "type": 4,
+        "titles": { "de": "Basisklasse `Tier` mit Methode `Laut()`. Leite `Hund` (\"Wuff\") und `Katze` (\"Miau\") ab. Lies `hund` oder `katze` und gib den passenden Laut aus.", "en": "Base class `Tier` with method `Laut()`. Derive `Hund` (\"Wuff\") and `Katze` (\"Miau\"). Read `hund` or `katze` and print the matching sound." },
+        "code": {
+          "language": 0,
+          "starterCode": "var art = Console.ReadLine()!.Trim();\n// TODO: passendes Tier erzeugen und Laut() ausgeben\n\nabstract class Tier\n{\n    public abstract string Laut();\n}\n// TODO: Hund und Katze von Tier ableiten\n",
+          "solutionCode": "var art = Console.ReadLine()!.Trim();\nTier tier = art == \"hund\" ? (Tier)new Hund() : new Katze();\nConsole.WriteLine(tier.Laut());\n\nabstract class Tier\n{\n    public abstract string Laut();\n}\nclass Hund : Tier { public override string Laut() => \"Wuff\"; }\nclass Katze : Tier { public override string Laut() => \"Miau\"; }\n",
+          "testCases": [
+            { "input": "hund\n", "expectedOutput": "Wuff", "hidden": false },
+            { "input": "katze\n", "expectedOutput": "Miau", "hidden": true }
+          ]
+        }
+      }
+    ]
   }
 ]

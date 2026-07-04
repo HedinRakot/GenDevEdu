@@ -9,6 +9,11 @@ jest.mock('@/api/courses', () => ({
   submitAttempt: jest.fn(),
 }));
 
+jest.mock('@react-navigation/native', () => ({
+  useNavigation: () => ({ navigate: jest.fn(), goBack: jest.fn() }),
+  useRoute: () => ({ params: {} }),
+}));
+
 import { ThemeProvider } from '@/context/ThemeContext';
 import { QuestionCard } from '@/screens/LessonScreen';
 import { QuestionType } from '@/types/course';
