@@ -44,6 +44,7 @@ einen **Status**.
 | F11 | Katalog: Suche, Filter, Tags | P2 | Implementiert | F2 |
 | F12 | Unified Expo App (Web + iOS + Android) | P1 | Implementiert | F1–F5 |
 | F13 | Erweiterungen (i18n, Diskussionen, Lernpfade) | P2 | Backlog | – |
+| F14 | AZAV-Anwesenheits- & Aktivitätsnachweis | P0 | Implementiert | F1 |
 
 > **Audit-Stand (2026-06-26):**
 > - **F1** Rollen jetzt end-to-end funktionsfähig: Session-Token trägt `role` aus Clerk `public_metadata.role`, Backend mappt auf .NET-Rollen, UI-Gating für den Author-Tab greift. Rollenvergabe aktuell manuell (Clerk-Dashboard/CLI), In-App Admin-UI offen.
@@ -247,6 +248,23 @@ Gemeinsame Frage-Felder: `id, scope (Topic/Chapter), refId, prompt (Markdown), e
 ## F13 – Erweiterungen (Backlog) `P2`
 
 - Mehrsprachigkeit (i18n), Kommentare/Diskussionen, Lernpfade, Empfehlungen.
+
+## F14 – AZAV-Anwesenheits- & Aktivitätsnachweis `P0`
+
+**Ziel:** Lückenlose Teilnahmenachweise für Arbeitsagentur/Finanzamt (AZAV): Login/Logout-Protokoll, Lernzeit pro Tag, Tagesstatus, Fehlzeiten und Exporte.
+
+- **Rohevents als Beweismaterial:** Die App sendet bei aktiver Nutzung alle 60 s einen Heartbeat mit Kontext (Screen/Kurs/Kapitel) plus Login/Logout-Events; Speicherung append-only in `attendanceevents` (kein TTL — Aufbewahrungspflicht). Offline-Puffer in der App (AsyncStorage), idempotenter Batch-Upload (`clientEventId` unique), Server-Zeit (`receivedAt`) ist autoritativ gegen manipulierte Client-Uhren.
+- **Abgeleitete Daten:** Server-seitige Sessionisierung (Gap 5 min, Tail-Credit 60 s) → materialisierte Tagesaggregate (`dailyattendance`, Recompute-on-Write). Tages-Bucketing in Europe/Berlin (TimeZoneConverter wegen `InvariantGlobalization`), DST-korrekt.
+- **Status pro Solltag** (Mo–Fr im Maßnahmezeitraum): `anwesend` (≥ Soll-Minuten, Default 240), `teilweise`, `fehlend`, `entschuldigt` (krank/urlaub/feiertag/sonstig, von Lehrern gepflegt; schlägt Minuten), `keinSolltag`. Status wird beim Lesen abgeleitet, nie gespeichert.
+- **Lehrer-UI** (`AuthorOrAdmin`): Tagesübersicht mit Rotflagge (heute fehlend / 7 Tage inaktiv), Lerner-Detail (Monats-Tagesliste), Entschuldigungen erfassen/entfernen.
+- **Admin** (`AdminOnly`): Maßnahmezeiträume (CRUD, Überlappungsprüfung), Exporte: Rohevents-CSV, Tagesübersicht-CSV (UTF-8-BOM) und PDF-Monatsbericht (QuestPDF Community, Unterschriftsfelder), Recompute-Endpoint.
+- **Hinweis:** Heartbeats belegen App-Foreground-Zeit, nicht Aufmerksamkeit — abgestimmte Auslegung des Aktivitätsnachweises für Online-Maßnahmen.
+
+**Akzeptanzkriterien**
+- Jeder Login/Logout und jede aktive Minute ist über Rohevents belegbar (Export reproduzierbar).
+- Wiederholte Uploads erzeugen keine Doppelzählung (Dedup-Test).
+- Tagesstatus kippt korrekt bei Entschuldigung/Zeitraumänderung ohne Neuberechnung.
+- `report.pdf` liefert pro Lerner/Monat Solltage, Anwesenheit, Fehlzeiten, Summen und Unterschriftszeilen.
 
 ---
 

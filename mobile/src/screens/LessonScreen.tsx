@@ -626,10 +626,8 @@ export function LessonScreen() {
         <TouchableOpacity
           testID="ask-tutor"
           onPress={() =>
-            navigation.navigate(
-              'Chat' as never,
-              { context: { courseId, chapterId } } as never,
-            )
+            (navigation as unknown as { navigate: (name: string, params?: object) => void })
+              .navigate('Chat', { context: { courseId, chapterId } })
           }
           style={styles.tutorButton}
         >

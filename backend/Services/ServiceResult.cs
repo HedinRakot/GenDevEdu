@@ -31,4 +31,8 @@ public class ServiceResult<T>
         new() { Status = ResultStatus.Forbidden, Error = error };
     public static ServiceResult<T> NotFound(string error = "Not found") =>
         new() { Status = ResultStatus.NotFound, Error = error };
+
+    /// <summary>Überträgt einen Fehlerstatus auf einen anderen Werttyp (Value bleibt leer).</summary>
+    public ServiceResult<TOther> As<TOther>() =>
+        new() { Status = Status, Error = Error, Details = Details };
 }

@@ -103,9 +103,10 @@ public class CodeExecutionWorker : BackgroundService
         }
 
         sub.CompletedAt = DateTime.UtcNow;
-        await db.CodeSubmissions.ReplaceOneAsync(x => x.Id == sub.Id, sub, cancellationToken: ct);
 
         // F6: bestandene Code-Aufgabe zählt wie eine gelöste Quizfrage.
+        // Attempt VOR dem finalen Statuswechsel schreiben: Sobald "Completed"
+        // sichtbar ist, existiert auch der Attempt (Leser verlassen sich darauf).
         if (sub.Status == CodeSubmissionStatus.Completed)
         {
             await db.Attempts.InsertOneAsync(new Attempt
@@ -117,6 +118,8 @@ public class CodeExecutionWorker : BackgroundService
                 Score = sub.PassedCount,
             }, cancellationToken: ct);
         }
+
+        await db.CodeSubmissions.ReplaceOneAsync(x => x.Id == sub.Id, sub, cancellationToken: ct);
     }
 
     private void MapResult(CodeSubmission sub, CodeQuestion code, SandboxRunResult result, long durationMs)

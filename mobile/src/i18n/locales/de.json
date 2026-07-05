@@ -15,6 +15,64 @@
     "search": "Suchen",
     "noResults": "Keine Ergebnisse"
   },
+  "attendance": {
+    "title": "Anwesenheit",
+    "today": "Heute",
+    "minutesOf": "{{minutes}} / {{required}} min",
+    "inactive7Days": "Seit 7+ Tagen keine Aktivität",
+    "loadError": "Anwesenheitsdaten konnten nicht geladen werden.",
+    "saveError": "Speichern fehlgeschlagen.",
+    "emptyOverview": "Keine Teilnehmer mit aktivem Maßnahmezeitraum.",
+    "emptyDetail": "Keine Tage im Zeitraum.",
+    "excuseAction": "Entschuldigen",
+    "removeExcuse": "Entschuldigung entfernen",
+    "excuseTitle": "Tag(e) entschuldigen",
+    "excuseNotePlaceholder": "Notiz (optional, z. B. Attest liegt vor)",
+    "from": "Von",
+    "to": "Bis",
+    "status": {
+      "anwesend": "Anwesend",
+      "teilweise": "Teilweise",
+      "fehlend": "Fehlend",
+      "entschuldigt": "Entschuldigt",
+      "keinSolltag": "Kein Solltag"
+    },
+    "reasons": {
+      "krank": "Krank",
+      "urlaub": "Urlaub",
+      "feiertag": "Feiertag",
+      "sonstig": "Sonstig"
+    },
+    "periods": {
+      "title": "Maßnahmezeiträume",
+      "new": "Neuer Zeitraum",
+      "edit": "Zeitraum bearbeiten",
+      "empty": "Noch keine Maßnahmezeiträume angelegt.",
+      "learner": "Teilnehmer/in",
+      "pickLearner": "Teilnehmer/in auswählen",
+      "minutesPerDay": "Soll-Minuten/Tag",
+      "label": "Bezeichnung",
+      "labelPlaceholder": "z. B. Umschulung FIAE 2026",
+      "day": "Tag"
+    },
+    "export": {
+      "title": "Export",
+      "csvTitle": "CSV-Export",
+      "csvHint": "Tagesübersicht (Status pro Tag) oder Rohevents (lückenloses Protokoll) für Excel.",
+      "dailyCsv": "Tagesübersicht (CSV)",
+      "eventsCsv": "Rohevents (CSV)",
+      "eventsNeedsLearner": "Für Rohevents bitte eine/n Teilnehmer/in auswählen.",
+      "pdfTitle": "PDF-Anwesenheitsnachweis",
+      "pdfHint": "Formatierter Monatsbericht pro Teilnehmer/in mit Unterschriftsfeldern.",
+      "pdf": "Monatsbericht (PDF)",
+      "pdfNeedsLearner": "Für den PDF-Bericht bitte eine/n Teilnehmer/in auswählen.",
+      "year": "Jahr",
+      "month": "Monat",
+      "allLearners": "Alle Teilnehmer",
+      "done": "Export erstellt.",
+      "failed": "Export fehlgeschlagen."
+    }
+  },
   "auth": {
     "login": "Anmelden",
     "logout": "Abmelden",
@@ -269,7 +327,9 @@
       "author": "Autorenbereich",
       "authorSubtitle": "Kurse erstellen und verwalten",
       "admin": "Nutzerverwaltung",
-      "adminSubtitle": "Rollen und Konten verwalten"
+      "adminSubtitle": "Rollen und Konten verwalten",
+      "attendance": "Anwesenheit",
+      "attendanceSubtitle": "Aktivität, Fehlzeiten und Nachweise (AZAV)"
     },
     "account": {
       "title": "Konto",

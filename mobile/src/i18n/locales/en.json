@@ -15,6 +15,64 @@
     "search": "Search",
     "noResults": "No results"
   },
+  "attendance": {
+    "title": "Attendance",
+    "today": "Today",
+    "minutesOf": "{{minutes}} / {{required}} min",
+    "inactive7Days": "No activity for 7+ days",
+    "loadError": "Could not load attendance data.",
+    "saveError": "Saving failed.",
+    "emptyOverview": "No learners with an active training period.",
+    "emptyDetail": "No days in this range.",
+    "excuseAction": "Excuse",
+    "removeExcuse": "Remove excuse",
+    "excuseTitle": "Excuse day(s)",
+    "excuseNotePlaceholder": "Note (optional, e.g. sick note on file)",
+    "from": "From",
+    "to": "To",
+    "status": {
+      "anwesend": "Present",
+      "teilweise": "Partial",
+      "fehlend": "Absent",
+      "entschuldigt": "Excused",
+      "keinSolltag": "No target day"
+    },
+    "reasons": {
+      "krank": "Sick",
+      "urlaub": "Vacation",
+      "feiertag": "Public holiday",
+      "sonstig": "Other"
+    },
+    "periods": {
+      "title": "Training periods",
+      "new": "New period",
+      "edit": "Edit period",
+      "empty": "No training periods yet.",
+      "learner": "Learner",
+      "pickLearner": "Select learner",
+      "minutesPerDay": "Target minutes/day",
+      "label": "Label",
+      "labelPlaceholder": "e.g. Retraining 2026",
+      "day": "day"
+    },
+    "export": {
+      "title": "Export",
+      "csvTitle": "CSV export",
+      "csvHint": "Daily summary (status per day) or raw events (gapless log) for Excel.",
+      "dailyCsv": "Daily summary (CSV)",
+      "eventsCsv": "Raw events (CSV)",
+      "eventsNeedsLearner": "Please select a learner for raw events.",
+      "pdfTitle": "PDF attendance report",
+      "pdfHint": "Formatted monthly report per learner with signature lines.",
+      "pdf": "Monthly report (PDF)",
+      "pdfNeedsLearner": "Please select a learner for the PDF report.",
+      "year": "Year",
+      "month": "Month",
+      "allLearners": "All learners",
+      "done": "Export created.",
+      "failed": "Export failed."
+    }
+  },
   "auth": {
     "login": "Sign In",
     "logout": "Sign Out",
@@ -269,7 +327,9 @@
       "author": "Author area",
       "authorSubtitle": "Create and manage courses",
       "admin": "User management",
-      "adminSubtitle": "Manage roles and accounts"
+      "adminSubtitle": "Manage roles and accounts",
+      "attendance": "Attendance",
+      "attendanceSubtitle": "Activity, absences and evidence (AZAV)"
     },
     "account": {
       "title": "Account",

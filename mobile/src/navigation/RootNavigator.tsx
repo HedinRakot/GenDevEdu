@@ -9,8 +9,10 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
+import { useAttendanceTracking } from '@/hooks/useAttendanceTracking';
 import { AuthStack } from './AuthStack';
 import { AppTabs } from './AppTabs';
+import { navigationRef } from './navigationRef';
 
 /**
  * RootNavigator – Auth-Guard + dynamisches Navigation-Theme.
@@ -18,6 +20,9 @@ import { AppTabs } from './AppTabs';
 export function RootNavigator() {
   const { isAuthenticated, isLoading } = useAuth();
   const { colors, isDark } = useTheme();
+
+  // F14: Heartbeat-Tracking, solange ein Nutzer angemeldet ist.
+  useAttendanceTracking(isAuthenticated && !isLoading);
 
   if (isLoading) {
     return (
@@ -41,7 +46,7 @@ export function RootNavigator() {
   };
 
   return (
-    <NavigationContainer theme={navTheme}>
+    <NavigationContainer ref={navigationRef} theme={navTheme}>
       {isAuthenticated ? <AppTabs /> : <AuthStack />}
     </NavigationContainer>
   );

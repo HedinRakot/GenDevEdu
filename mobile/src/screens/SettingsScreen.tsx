@@ -282,6 +282,14 @@ export function SettingsScreen() {
                 label={t('settings.management.author')}
                 subtitle={t('settings.management.authorSubtitle')}
                 onPress={() => navigation.navigate('Author')}
+              />
+            )}
+            {isAuthor && (
+              <SettingsRow
+                icon="🗓️"
+                label={t('settings.management.attendance')}
+                subtitle={t('settings.management.attendanceSubtitle')}
+                onPress={() => navigation.navigate('Attendance')}
                 isLast={!isAdmin}
               />
             )}

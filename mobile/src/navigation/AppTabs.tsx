@@ -10,6 +10,7 @@ import { SettingsScreen } from '@/screens/SettingsScreen';
 import { SnippetsScreen } from '@/screens/SnippetsScreen';
 import { CoursesStack } from './CoursesStack';
 import { AuthorStack } from './AuthorStack';
+import { AttendanceStack } from './AttendanceStack';
 import { AdminUsersScreen } from '@/screens/admin/AdminUsersScreen';
 import { useTheme } from '@/context/ThemeContext';
 import { useAuth } from '@/context/AuthContext';
@@ -23,6 +24,7 @@ export type AppTabsParamList = {
   Settings: undefined;
   Author: undefined;
   Admin: undefined;
+  Attendance: undefined;
 };
 
 const Tab = createBottomTabNavigator<AppTabsParamList>();
@@ -128,6 +130,13 @@ export function AppTabs() {
         <Tab.Screen
           name="Author"
           component={AuthorStack}
+          options={{ tabBarButton: () => null, tabBarItemStyle: { display: 'none' } }}
+        />
+      )}
+      {isAuthor && (
+        <Tab.Screen
+          name="Attendance"
+          component={AttendanceStack}
           options={{ tabBarButton: () => null, tabBarItemStyle: { display: 'none' } }}
         />
       )}

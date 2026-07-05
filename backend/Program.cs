@@ -43,6 +43,15 @@ builder.Services.AddSingleton<ISandboxRunner, PodmanSandboxRunner>();
 builder.Services.AddScoped<CodeSubmissionService>();
 builder.Services.AddHostedService<CodeExecutionWorker>();
 
+// ---- F14: AZAV-Anwesenheitsnachweis ----
+var attendanceOptions = builder.Configuration.GetSection("Attendance").Get<AttendanceOptions>() ?? new AttendanceOptions();
+builder.Services.AddSingleton(attendanceOptions);
+builder.Services.AddScoped<AttendanceService>();
+builder.Services.AddScoped<AttendanceExportService>();
+builder.Services.AddScoped<AttendancePdfService>();
+// QuestPDF verlangt eine explizite Lizenzwahl (Community: < 1 M$ Jahresumsatz).
+QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+
 // ---- JSON: camelCase ----
 builder.Services.ConfigureHttpJsonOptions(o =>
 {
@@ -161,6 +170,7 @@ app.MapAdminEndpoints();
 app.MapCodeSubmissionEndpoints();
 app.MapChapterQuizEndpoints();
 app.MapChatEndpoints();
+app.MapAttendanceEndpoints();
 
 using (var scope = app.Services.CreateScope())
 {
