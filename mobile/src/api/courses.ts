@@ -156,6 +156,17 @@ export async function addChapterContent(
   return data;
 }
 
+export async function updateChapterContent(
+  contentId: string,
+  req: CreateChapterContentRequest,
+): Promise<ChapterContent> {
+  const { data } = await apiClient.put<ChapterContent>(
+    `/api/content/${encodeURIComponent(contentId)}`,
+    req,
+  );
+  return data;
+}
+
 export async function createQuestionList(
   req: CreateQuestionListRequest,
 ): Promise<QuestionListModel> {

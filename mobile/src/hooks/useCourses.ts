@@ -18,6 +18,7 @@ import {
   publishCourse,
   addChapter,
   addChapterContent,
+  updateChapterContent,
   createQuestionList,
   deleteCourse,
   deleteChapter,
@@ -244,6 +245,18 @@ export function useAddChapterContent(chapterId: string, courseId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (req: CreateChapterContentRequest) => addChapterContent(chapterId, req),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: courseKeys.chapters(courseId) });
+      qc.invalidateQueries({ queryKey: courseKeys.content(chapterId) });
+    },
+  });
+}
+
+export function useUpdateChapterContent(chapterId: string, courseId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ contentId, req }: { contentId: string; req: CreateChapterContentRequest }) =>
+      updateChapterContent(contentId, req),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: courseKeys.chapters(courseId) });
       qc.invalidateQueries({ queryKey: courseKeys.content(chapterId) });

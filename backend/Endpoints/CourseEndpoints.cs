@@ -55,6 +55,10 @@ public static class CourseEndpoints
             async (string id, CreateChapterContentRequest req, ClaimsPrincipal user, CourseService svc) =>
                 (await svc.AddChapterContentAsync(id, req, user.UserId(), user.IsAdmin())).ToHttp());
 
+        author.MapPut("/api/content/{id}",
+            async (string id, CreateChapterContentRequest req, ClaimsPrincipal user, CourseService svc) =>
+                (await svc.UpdateChapterContentAsync(id, req, user.UserId(), user.IsAdmin())).ToHttp());
+
         // ── Löschen (Author/Admin) ────────────────────────────────────────────
 
         author.MapDelete("/api/courses/{id}",

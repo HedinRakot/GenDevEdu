@@ -209,6 +209,37 @@ public class CourseService
         return ServiceResult<ChapterContentDto>.Ok(Mappers.ToChapterContentDto(cc));
     }
 
+    public async Task<ServiceResult<ChapterContentDto>> UpdateChapterContentAsync(
+        string contentId, CreateChapterContentRequest req, string userId, bool isAdmin)
+    {
+        var course = await _db.Courses
+            .Find(c => c.Chapters.Any(ch => ch.ChapterContent.Any(cc => cc.Id == contentId)))
+            .FirstOrDefaultAsync();
+        if (course is null)
+            return ServiceResult<ChapterContentDto>.NotFound("ChapterContent not found.");
+        if (!isAdmin && course.AuthorId != userId)
+            return ServiceResult<ChapterContentDto>.Forbidden("Not your course.");
+        if (string.IsNullOrWhiteSpace(req.Name))
+            return ServiceResult<ChapterContentDto>.Validation("name is required.");
+
+        var chapter = course.Chapters.First(ch => ch.ChapterContent.Any(cc => cc.Id == contentId));
+        var cc = chapter.ChapterContent.First(c => c.Id == contentId);
+
+        // Identität + Verknüpfungen bleiben erhalten (Id/ElementId/CourseId/ChapterId/QuestionListId).
+        cc.Name = req.Name.Trim();
+        cc.Titel = Mappers.BuildTexte(req.TitelItems, req.Name);
+        cc.ContentType = (ChapterContentType)req.ContentType;
+        cc.LessonText = req.LessonText ?? string.Empty;
+        cc.LessonTexte = Mappers.BuildTexte(req.LessonTexteItems, string.Empty);
+        cc.VideoUrl = req.VideoUrl ?? string.Empty;
+        cc.SortOrder = req.SortOrder;
+
+        course.UpdatedAt = DateTime.UtcNow;
+        await _db.Courses.ReplaceOneAsync(c => c.Id == course.Id, course);
+
+        return ServiceResult<ChapterContentDto>.Ok(Mappers.ToChapterContentDto(cc));
+    }
+
     // ─── Delete (Author/Admin) ────────────────────────────────────────────────
 
     public async Task<ServiceResult<bool>> DeleteCourseAsync(string courseId, string userId, bool isAdmin)

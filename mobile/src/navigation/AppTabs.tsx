@@ -114,14 +114,12 @@ export function AppTabs() {
           ),
         }}
       />
+      {/* Snippets: nicht mehr in der Bottom-Bar (erreichbar über Dashboard + Einstellungen),
+          aber als Screen registriert, damit navigation.navigate('Snippets') weiter funktioniert. */}
       <Tab.Screen
         name="Snippets"
         component={SnippetsScreen}
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <TabIcon emoji="📌" focused={focused} label={t('navigation.snippets')} />
-          ),
-        }}
+        options={{ tabBarButton: () => null, tabBarItemStyle: { display: 'none' } }}
       />
       {/* Rollen-Bereiche: nicht in der Bottom-Bar (würde sie überfüllen), sondern
           über die Einstellungen erreichbar — daher als Screen registriert, aber

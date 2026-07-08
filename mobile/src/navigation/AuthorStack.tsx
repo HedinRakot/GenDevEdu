@@ -16,7 +16,13 @@ export type AuthorStackParamList = {
   CreateCourse: undefined;
   CourseEditor: { courseId: string; courseName: string };
   AddChapter: { courseId: string };
-  AddChapterContent: { chapterId: string; courseId: string; chapterName: string };
+  AddChapterContent: {
+    chapterId: string;
+    courseId: string;
+    chapterName: string;
+    /** Gesetzt = Bearbeiten-Modus für diesen Inhalt (statt neu anlegen). */
+    editContentId?: string;
+  };
   AddQuestionList: { chapterContentId: string; courseId: string };
   ChapterQuizEditor: { chapterId: string; courseId: string; chapterName: string };
 };

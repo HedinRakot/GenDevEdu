@@ -15,11 +15,13 @@
     },
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.developereducation.education",
       "infoPlist": {
         "UIBackgroundModes": []
       }
     },
     "android": {
+      "package": "com.developereducation.education",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -36,6 +38,16 @@
         {
           "color": "#6366F1",
           "defaultChannel": "streak"
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "packagingOptions": {
+              "pickFirst": ["META-INF/versions/9/OSGI-INF/MANIFEST.MF"]
+            }
+          }
         }
       ]
     ]
