@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, render, waitFor } from '@testing-library/react-native';
+import { render, waitFor } from '@testing-library/react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import '@/i18n';
@@ -8,7 +8,6 @@ import '@/i18n';
 // QueryClient gehen, damit der useCourses-Hook samt Query-Keys mitgetestet wird.
 jest.mock('@/api/courses', () => ({
   fetchCourses: jest.fn(),
-  fetchCourseTags: jest.fn(),
 }));
 
 jest.mock('@react-navigation/native', () => ({
@@ -18,10 +17,9 @@ jest.mock('@react-navigation/native', () => ({
 import { ThemeProvider } from '@/context/ThemeContext';
 import { CoursesScreen } from '@/screens/CoursesScreen';
 import type { Course } from '@/types/course';
-import { fetchCourses, fetchCourseTags } from '@/api/courses';
+import { fetchCourses } from '@/api/courses';
 
 const mockedFetch = fetchCourses as jest.Mock;
-const mockedTags = fetchCourseTags as jest.Mock;
 
 function course(name: string, level: string, tags: string[]): Course {
   return {
@@ -34,7 +32,10 @@ function course(name: string, level: string, tags: string[]): Course {
   } as unknown as Course;
 }
 
-const ALL = [course('C# Kurs', 'Beginner', ['csharp']), course('TS Kurs', 'Advanced', ['typescript'])];
+const ALL = [
+  course('.NET Grundlagen', 'Beginner', ['csharp']),
+  course('.NET Aufbau', 'Advanced', ['csharp']),
+];
 
 function renderScreen() {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -49,18 +50,21 @@ function renderScreen() {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockedTags.mockResolvedValue(['csharp', 'typescript']);
-  mockedFetch.mockImplementation((params?: { level?: string }) =>
-    Promise.resolve(params?.level ? ALL.filter((c) => c.level === params.level) : ALL),
-  );
+  mockedFetch.mockResolvedValue(ALL);
 });
 
 describe('CoursesScreen', () => {
-  it('renders the search field + title', async () => {
-    const { getByText, getByPlaceholderText } = renderScreen();
+  it('renders the title and loads the course list', async () => {
+    const { getByText } = renderScreen();
     expect(getByText(/kurse|courses/i)).toBeTruthy();
-    expect(getByPlaceholderText(/suchen|search/i)).toBeTruthy();
     await waitFor(() => expect(mockedFetch).toHaveBeenCalled());
+  });
+
+  it('fetches without any filter argument (search/filter removed)', async () => {
+    renderScreen();
+    await waitFor(() => expect(mockedFetch).toHaveBeenCalled());
+    // Der Screen ruft die Kursliste ohne Filter-Objekt ab.
+    expect(mockedFetch).toHaveBeenCalledWith(undefined);
   });
 
   it('shows error text and retry button when fetch fails', async () => {
@@ -70,32 +74,17 @@ describe('CoursesScreen', () => {
     expect(getByText(/erneut|retry/i)).toBeTruthy();
   });
 
-  it('renders a course (name + tag) when data is loaded', async () => {
+  it('renders both courses (name + tag) when data is loaded', async () => {
     const { findByText, findAllByText } = renderScreen();
-    expect(await findByText('C# Kurs')).toBeTruthy();
-    // "#csharp" erscheint sowohl als Filter-Chip als auch auf der Kurskarte.
-    expect((await findAllByText('#csharp')).length).toBeGreaterThan(0);
+    expect(await findByText('.NET Grundlagen')).toBeTruthy();
+    expect(await findByText('.NET Aufbau')).toBeTruthy();
+    // "#csharp" erscheint nur noch auf den Kurskarten (kein Filter-Chip mehr).
+    expect((await findAllByText('#csharp')).length).toBe(2);
   });
 
-  it('shows the empty hint when no courses match', async () => {
+  it('shows the empty hint when no courses are returned', async () => {
     mockedFetch.mockResolvedValue([]);
     const { findByText } = renderScreen();
     expect(await findByText(/keine kurse gefunden|no courses found/i)).toBeTruthy();
-  });
-
-  it('narrows the list when a level chip is selected', async () => {
-    const { getByText, getByTestId, queryByText, findByText } = renderScreen();
-
-    expect(await findByText('C# Kurs')).toBeTruthy();
-    expect(getByText('TS Kurs')).toBeTruthy();
-
-    // Level „Advanced" wählen (testID, da das Label auch im Kurs-Badge steht).
-    fireEvent.press(getByTestId('level-Advanced'));
-
-    await waitFor(() =>
-      expect(mockedFetch).toHaveBeenCalledWith(expect.objectContaining({ level: 'Advanced' })),
-    );
-    expect(await findByText('TS Kurs')).toBeTruthy();
-    expect(queryByText('C# Kurs')).toBeNull();
   });
 });

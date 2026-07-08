@@ -1,10 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React from 'react';
 import {
   ActivityIndicator,
   FlatList,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -13,7 +12,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 
-import { useCourses, useCourseTags } from '@/hooks/useCourses';
+import { useCourses } from '@/hooks/useCourses';
 import { useTheme } from '@/context/ThemeContext';
 import { translate } from '@/utils/textUtils';
 import type { CoursesStackParamList } from '@/navigation/CoursesStack';
@@ -22,7 +21,6 @@ import { FontSize, FontWeight, Radius, Shadow, Spacing } from '@/config/theme';
 
 type NavProp = NativeStackNavigationProp<CoursesStackParamList, 'CoursesList'>;
 
-const LEVELS = ['Beginner', 'Intermediate', 'Advanced'] as const;
 const LEVEL_LABEL: Record<string, string> = {
   Beginner: 'courses.beginner',
   Intermediate: 'courses.intermediate',
@@ -74,62 +72,12 @@ function CourseCard({ course, onPress }: { course: Course; onPress: () => void }
   );
 }
 
-function Chip({
-  label,
-  active,
-  onPress,
-  testID,
-}: {
-  label: string;
-  active: boolean;
-  onPress: () => void;
-  testID?: string;
-}) {
-  const { colors } = useTheme();
-  return (
-    <TouchableOpacity
-      testID={testID}
-      onPress={onPress}
-      style={[
-        styles.chip,
-        {
-          backgroundColor: active ? colors.primary : colors.surface,
-          borderColor: active ? colors.primary : colors.border,
-        },
-      ]}
-    >
-      <Text style={[styles.chipText, { color: active ? colors.textInverted : colors.textSecondary }]}>
-        {label}
-      </Text>
-    </TouchableOpacity>
-  );
-}
-
 export function CoursesScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const navigation = useNavigation<NavProp>();
 
-  const [search, setSearch] = useState('');
-  const [debounced, setDebounced] = useState('');
-  const [level, setLevel] = useState<string | null>(null);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-
-  useEffect(() => {
-    const id = setTimeout(() => setDebounced(search), 300);
-    return () => clearTimeout(id);
-  }, [search]);
-
-  const filter = useMemo(
-    () => ({ search: debounced, level: level ?? undefined, tags: selectedTags }),
-    [debounced, level, selectedTags],
-  );
-
-  const { data: courses, isLoading, error, refetch } = useCourses(filter);
-  const { data: tags } = useCourseTags();
-
-  const toggleTag = (tag: string) =>
-    setSelectedTags((prev) => (prev.includes(tag) ? prev.filter((x) => x !== tag) : [...prev, tag]));
+  const { data: courses, isLoading, error, refetch } = useCourses();
 
   if (error) {
     return (
@@ -153,7 +101,6 @@ export function CoursesScreen() {
         keyExtractor={(item) => item.elementId}
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
           <View style={styles.listHeader}>
             <Text style={[styles.screenTitle, { color: colors.textPrimary }]}>
@@ -162,48 +109,6 @@ export function CoursesScreen() {
             <Text style={[styles.screenSubtitle, { color: colors.textSecondary }]}>
               {t('courses.subtitle')}
             </Text>
-
-            {/* Suche */}
-            <View style={[styles.searchBox, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-              <Text style={styles.searchIcon}>🔍</Text>
-              <TextInput
-                style={[styles.searchInput, { color: colors.textPrimary }]}
-                value={search}
-                onChangeText={setSearch}
-                placeholder={t('courses.searchPlaceholder')}
-                placeholderTextColor={colors.textTertiary}
-                autoCorrect={false}
-                autoCapitalize="none"
-              />
-              {search.length > 0 && (
-                <TouchableOpacity onPress={() => setSearch('')}>
-                  <Text style={[styles.clear, { color: colors.textTertiary }]}>✕</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-
-            {/* Level-Filter */}
-            <View style={styles.chipRow}>
-              <Chip testID="level-all" label={t('courses.allLevels')} active={level === null} onPress={() => setLevel(null)} />
-              {LEVELS.map((lv) => (
-                <Chip
-                  key={lv}
-                  testID={`level-${lv}`}
-                  label={t(LEVEL_LABEL[lv])}
-                  active={level === lv}
-                  onPress={() => setLevel((cur) => (cur === lv ? null : lv))}
-                />
-              ))}
-            </View>
-
-            {/* Tag-Filter */}
-            {!!tags && tags.length > 0 && (
-              <View style={styles.chipRow}>
-                {tags.map((tag) => (
-                  <Chip key={tag} label={`#${tag}`} active={selectedTags.includes(tag)} onPress={() => toggleTag(tag)} />
-                ))}
-              </View>
-            )}
           </View>
         }
         renderItem={({ item }) => (
@@ -233,22 +138,6 @@ const styles = StyleSheet.create({
   listHeader: { marginBottom: Spacing.lg, gap: Spacing.md },
   screenTitle: { fontSize: FontSize.xxxl, fontWeight: FontWeight.extrabold },
   screenSubtitle: { fontSize: FontSize.md, marginTop: 4 },
-
-  searchBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: Radius.md,
-    borderWidth: 1,
-    paddingHorizontal: Spacing.md,
-    gap: Spacing.sm,
-  },
-  searchIcon: { fontSize: 16 },
-  searchInput: { flex: 1, paddingVertical: Spacing.sm, fontSize: FontSize.md },
-  clear: { fontSize: FontSize.md, paddingHorizontal: Spacing.xs },
-
-  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
-  chip: { borderWidth: 1.5, borderRadius: Radius.full, paddingHorizontal: Spacing.md, paddingVertical: 6 },
-  chipText: { fontSize: FontSize.xs, fontWeight: FontWeight.semibold },
 
   card: { borderRadius: Radius.xl, overflow: 'hidden', flexDirection: 'row', ...Shadow.md },
   stripe: { width: 6 },
