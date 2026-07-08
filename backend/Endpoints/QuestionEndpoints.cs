@@ -30,5 +30,9 @@ public static class QuestionEndpoints
         author.MapPost("/api/questionlists",
             async (CreateQuestionListRequest req, ClaimsPrincipal user, QuestionService svc) =>
                 (await svc.CreateQuestionListAsync(req, user.UserId(), user.IsAdmin())).ToHttp());
+
+        author.MapPut("/api/questionlists/{id}",
+            async (string id, UpdateQuestionListRequest req, ClaimsPrincipal user, QuestionService svc) =>
+                (await svc.UpdateQuestionListAsync(id, req, user.UserId(), user.IsAdmin())).ToHttp());
     }
 }

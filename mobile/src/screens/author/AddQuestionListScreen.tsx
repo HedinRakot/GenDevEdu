@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -13,7 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-import { useCreateQuestionList } from '@/hooks/useCourses';
+import { useCreateQuestionList, useUpdateQuestionList, useQuestions } from '@/hooks/useCourses';
 import { useTheme } from '@/context/ThemeContext';
 import type { AuthorStackParamList } from '@/navigation/AuthorStack';
 import type { CreateQuestionRequest } from '@/types/author';
@@ -21,6 +22,7 @@ import {
   QuestionEditor,
   emptyQuestion,
   draftToCreateRequest,
+  questionToDraft,
   type DraftQuestion,
 } from '@/components/author/QuestionEditor';
 import { FontSize, FontWeight, Radius, Spacing } from '@/config/theme';
@@ -32,10 +34,24 @@ export function AddQuestionListScreen() {
   const { colors } = useTheme();
   const navigation = useNavigation<NavProp>();
   const route = useRoute<RoutePropType>();
-  const { chapterContentId } = route.params;
+  const { chapterContentId, questionListId } = route.params;
+  const isEdit = !!questionListId;
 
-  const { mutate: create, isPending } = useCreateQuestionList();
+  const { mutate: create, isPending: isCreating } = useCreateQuestionList();
+  const { mutate: update, isPending: isUpdating } = useUpdateQuestionList();
+  const { data: existing, isLoading } = useQuestions(questionListId);
+
   const [questions, setQuestions] = useState<DraftQuestion[]>([emptyQuestion()]);
+
+  // Bestehende Fragen einmalig zum Bearbeiten vorbefüllen (Replace-Semantik).
+  const seeded = useRef(false);
+  useEffect(() => {
+    if (!isEdit || seeded.current || !existing) return;
+    seeded.current = true;
+    if (existing.questions.length > 0) setQuestions(existing.questions.map(questionToDraft));
+  }, [isEdit, existing]);
+
+  const isPending = isCreating || isUpdating;
 
   const updateQ = (i: number, q: DraftQuestion) =>
     setQuestions((prev) => prev.map((old, idx) => (idx === i ? q : old)));
@@ -46,6 +62,20 @@ export function AddQuestionListScreen() {
       mapped = questions.map((q, i) => draftToCreateRequest(q, i));
     } catch (e: any) {
       Alert.alert('Validierung', e.message);
+      return;
+    }
+
+    if (isEdit) {
+      update(
+        { questionListId: questionListId!, questions: mapped },
+        {
+          onSuccess: () => {
+            Alert.alert('✓', 'Fragen wurden aktualisiert.');
+            navigation.goBack();
+          },
+          onError: () => Alert.alert('Fehler', 'Fragen konnten nicht gespeichert werden.'),
+        },
+      );
       return;
     }
 
@@ -61,11 +91,21 @@ export function AddQuestionListScreen() {
     );
   };
 
+  if (isEdit && isLoading) {
+    return (
+      <SafeAreaView style={[styles.centered, { backgroundColor: colors.background }]}>
+        <ActivityIndicator color={colors.primary} />
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['bottom']}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.form}>
-          <Text style={[styles.heading, { color: colors.textPrimary }]}>Fragen erstellen</Text>
+          <Text style={[styles.heading, { color: colors.textPrimary }]}>
+            {isEdit ? 'Fragen bearbeiten' : 'Fragen erstellen'}
+          </Text>
 
           {questions.map((q, i) => (
             <QuestionEditor
@@ -90,7 +130,11 @@ export function AddQuestionListScreen() {
             disabled={isPending}
           >
             <Text style={styles.saveButtonText}>
-              {isPending ? 'Wird gespeichert…' : 'Fragenliste speichern'}
+              {isPending
+                ? 'Wird gespeichert…'
+                : isEdit
+                  ? 'Änderungen speichern'
+                  : 'Fragenliste speichern'}
             </Text>
           </TouchableOpacity>
         </ScrollView>
@@ -101,6 +145,7 @@ export function AddQuestionListScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   form: { padding: Spacing.lg, gap: Spacing.md },
   heading: { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, marginBottom: Spacing.sm },
   addQButton: {

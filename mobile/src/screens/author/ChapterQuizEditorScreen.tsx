@@ -17,29 +17,19 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { useChapterQuiz, useSetChapterQuiz, useDeleteChapterQuiz } from '@/hooks/useCourses';
 import { useTheme } from '@/context/ThemeContext';
-import { translate } from '@/utils/textUtils';
 import type { AuthorStackParamList } from '@/navigation/AuthorStack';
 import type { CreateQuestionRequest } from '@/types/author';
-import type { Question } from '@/types/course';
 import {
   QuestionEditor,
   emptyQuestion,
   draftToCreateRequest,
+  questionToDraft,
   type DraftQuestion,
 } from '@/components/author/QuestionEditor';
 import { FontSize, FontWeight, Radius, Spacing } from '@/config/theme';
 
 type NavProp = NativeStackNavigationProp<AuthorStackParamList, 'ChapterQuizEditor'>;
 type RoutePropType = RouteProp<AuthorStackParamList, 'ChapterQuizEditor'>;
-
-function questionToDraft(q: Question): DraftQuestion {
-  return {
-    name: q.name ?? '',
-    titleDe: translate(q.titel),
-    questionType: q.questionType,
-    answers: q.answers.map((a) => ({ text: translate(a.titel), isCorrect: a.isCorrect })),
-  };
-}
 
 export function ChapterQuizEditorScreen() {
   const { colors } = useTheme();

@@ -77,6 +77,27 @@ public class QuestionService
         return ServiceResult<QuestionListResponseModel>.Ok(Mappers.ToQuestionListModel(ql, true));
     }
 
+    public async Task<ServiceResult<QuestionListResponseModel>> UpdateQuestionListAsync(
+        string questionListId, UpdateQuestionListRequest req, string userId, bool isAdmin)
+    {
+        var ql = await _db.QuestionLists.Find(x => x.Id == questionListId).FirstOrDefaultAsync();
+        if (ql is null)
+            return ServiceResult<QuestionListResponseModel>.NotFound("QuestionList not found.");
+
+        var course = await _db.Courses.Find(c => c.Id == ql.CourseId).FirstOrDefaultAsync();
+        if (course is null)
+            return ServiceResult<QuestionListResponseModel>.NotFound("Course not found.");
+        if (!isAdmin && course.AuthorId != userId)
+            return ServiceResult<QuestionListResponseModel>.Forbidden("Not your course.");
+
+        // Fragen werden vollständig ersetzt (Replace-Semantik wie beim Kapitel-Quiz);
+        // neue Frage-Ids => zu ersetzten Fragen gehörende Attempts werden verwaist.
+        ql.Questions = (req.Questions ?? new()).Select(Mappers.ToQuestion).ToList();
+        await _db.QuestionLists.ReplaceOneAsync(x => x.Id == ql.Id, ql);
+
+        return ServiceResult<QuestionListResponseModel>.Ok(Mappers.ToQuestionListModel(ql, true));
+    }
+
     // ─── Attempt ──────────────────────────────────────────────────────────────
 
     public async Task<ServiceResult<AttemptResultDto>> GradeAttemptAsync(

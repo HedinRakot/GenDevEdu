@@ -23,7 +23,12 @@ export type AuthorStackParamList = {
     /** Gesetzt = Bearbeiten-Modus für diesen Inhalt (statt neu anlegen). */
     editContentId?: string;
   };
-  AddQuestionList: { chapterContentId: string; courseId: string };
+  AddQuestionList: {
+    chapterContentId: string;
+    courseId: string;
+    /** Gesetzt = bestehende Fragenliste bearbeiten (statt neu anlegen). */
+    questionListId?: string;
+  };
   ChapterQuizEditor: { chapterId: string; courseId: string; chapterName: string };
 };
 

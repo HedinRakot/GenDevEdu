@@ -48,6 +48,9 @@ public record CreateQuestionListRequest(
     string? ChapterContentId,
     List<CreateQuestionRequest>? Questions);
 
+public record UpdateQuestionListRequest(
+    List<CreateQuestionRequest>? Questions);
+
 public record CreateQuestionRequest(
     string? Name,
     List<TextItemDto>? TitelItems,

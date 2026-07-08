@@ -174,6 +174,17 @@ export async function createQuestionList(
   return data;
 }
 
+export async function updateQuestionList(
+  questionListId: string,
+  questions: CreateQuestionListRequest['questions'],
+): Promise<QuestionListModel> {
+  const { data } = await apiClient.put<QuestionListModel>(
+    `/api/questionlists/${encodeURIComponent(questionListId)}`,
+    { questions },
+  );
+  return data;
+}
+
 // ─── Kapitel-Abschlussquiz (F8) ───────────────────────────────────────────────
 
 export async function getChapterQuiz(chapterId: string): Promise<ChapterQuizView> {

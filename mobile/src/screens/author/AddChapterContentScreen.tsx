@@ -310,13 +310,27 @@ export function AddChapterContentScreen() {
             </>
           )}
 
-          {contentType === ChapterContentType.Questions && (
-            <Text style={[styles.hint, { color: colors.textTertiary }]}>
-              {isEdit
-                ? 'ℹ️ Die Fragen dieses Quiz werden separat verwaltet; hier lassen sich Titel & Reihenfolge anpassen.'
-                : 'ℹ️ Fragen werden im nächsten Schritt hinzugefügt.'}
-            </Text>
-          )}
+          {contentType === ChapterContentType.Questions &&
+            (isEdit ? (
+              <TouchableOpacity
+                style={[styles.questionsButton, { borderColor: colors.primary }]}
+                onPress={() =>
+                  navigation.navigate('AddQuestionList', {
+                    chapterContentId: editContentId!,
+                    courseId,
+                    questionListId: editing?.questionListId || undefined,
+                  })
+                }
+              >
+                <Text style={[styles.questionsButtonText, { color: colors.primary }]}>
+                  {editing?.questionListId ? '❓ Fragen bearbeiten' : '❓ Fragen hinzufügen'}
+                </Text>
+              </TouchableOpacity>
+            ) : (
+              <Text style={[styles.hint, { color: colors.textTertiary }]}>
+                ℹ️ Fragen werden im nächsten Schritt hinzugefügt.
+              </Text>
+            ))}
 
           <Text style={[styles.label, { color: colors.textSecondary }]}>Reihenfolge</Text>
           <TextInput style={inputStyle} value={sortOrder} onChangeText={setSortOrder}
@@ -376,6 +390,15 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
   },
   hint: { fontSize: FontSize.sm, fontStyle: 'italic', marginTop: Spacing.sm },
+  questionsButton: {
+    marginTop: Spacing.sm,
+    borderWidth: 1.5,
+    borderRadius: Radius.md,
+    borderStyle: 'dashed',
+    padding: Spacing.md,
+    alignItems: 'center',
+  },
+  questionsButtonText: { fontSize: FontSize.md, fontWeight: FontWeight.semibold },
   saveButton: { marginTop: Spacing.xl, borderRadius: Radius.md, padding: Spacing.md, alignItems: 'center' },
   saveButtonText: { color: 'white', fontWeight: FontWeight.bold, fontSize: FontSize.md },
   cancelButton: { marginTop: Spacing.sm, alignItems: 'center', padding: Spacing.sm },

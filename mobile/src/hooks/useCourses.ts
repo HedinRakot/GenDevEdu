@@ -20,6 +20,7 @@ import {
   addChapterContent,
   updateChapterContent,
   createQuestionList,
+  updateQuestionList,
   deleteCourse,
   deleteChapter,
   deleteChapterContent,
@@ -269,6 +270,23 @@ export function useCreateQuestionList() {
   return useMutation({
     mutationFn: (req: CreateQuestionListRequest) => createQuestionList(req),
     onSuccess: () => qc.invalidateQueries({ queryKey: courseKeys.all }),
+  });
+}
+
+export function useUpdateQuestionList() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      questionListId,
+      questions,
+    }: {
+      questionListId: string;
+      questions: CreateQuestionListRequest['questions'];
+    }) => updateQuestionList(questionListId, questions),
+    onSuccess: (_data, { questionListId }) => {
+      qc.invalidateQueries({ queryKey: courseKeys.questions(questionListId) });
+      qc.invalidateQueries({ queryKey: courseKeys.all });
+    },
   });
 }
 

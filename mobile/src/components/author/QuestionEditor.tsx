@@ -4,7 +4,9 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/context/ThemeContext';
 import { QuestionType } from '@/types/course';
+import type { Question } from '@/types/course';
 import type { CreateAnswerRequest, CreateQuestionRequest } from '@/types/author';
+import { translate } from '@/utils/textUtils';
 import { FontSize, FontWeight, Radius, Spacing } from '@/config/theme';
 
 // ─── Draft-Modelle (lokaler Editor-Zustand) ──────────────────────────────────
@@ -99,6 +101,36 @@ export function draftToCreateRequest(q: DraftQuestion, index: number): CreateQue
   if (answers.length < 2) throw new Error(`Frage ${index + 1}: mindestens zwei Antworten nötig`);
   if (!answers.some((a) => a.isCorrect)) throw new Error(`Frage ${index + 1}: keine korrekte Antwort markiert`);
   return { ...base, answers };
+}
+
+/**
+ * Wandelt eine geladene (Autor-)Frage in einen editierbaren Draft zurück —
+ * Umkehrung von draftToCreateRequest. Rekonstruiert bei Code-Fragen auch
+ * Lösungscode + Testfälle (der Autor-GET liefert diese vollständig).
+ */
+export function questionToDraft(q: Question): DraftQuestion {
+  const base: DraftQuestion = {
+    name: q.name ?? '',
+    titleDe: translate(q.titel),
+    questionType: q.questionType,
+    answers: (q.answers ?? []).map((a) => ({ text: translate(a.titel), isCorrect: a.isCorrect })),
+  };
+  if (q.questionType === QuestionType.Code && q.code) {
+    return {
+      ...base,
+      answers: [],
+      code: {
+        starterCode: q.code.starterCode ?? '',
+        solutionCode: q.code.solutionCode ?? '',
+        testCases: (q.code.testCases ?? []).map((tc) => ({
+          input: tc.input ?? '',
+          expectedOutput: tc.expectedOutput ?? '',
+          hidden: tc.hidden,
+        })),
+      },
+    };
+  }
+  return base;
 }
 
 // ─── Editor-Komponente ────────────────────────────────────────────────────────
