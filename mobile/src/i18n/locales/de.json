@@ -183,7 +183,12 @@
       "done": "Erledigt",
       "hint": "Hinweis-Code",
       "markDone": "Als erledigt markieren",
-      "alreadyDone": "Bereits erledigt"
+      "alreadyDone": "Bereits erledigt",
+      "difficulty": {
+        "easy": "Leicht",
+        "medium": "Mittel",
+        "hard": "Schwer"
+      }
     },
     "notes": {
       "title": "Meine Notizen",

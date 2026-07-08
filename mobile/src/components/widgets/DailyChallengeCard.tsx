@@ -30,6 +30,12 @@ export function DailyChallengeCard({ onCompleted }: Props) {
   const title = translate(challenge.title);
   const description = translate(challenge.description);
 
+  const difficultyColor = {
+    easy: { fg: colors.success, bg: colors.successSurface },
+    medium: { fg: colors.warning, bg: colors.warningSurface },
+    hard: { fg: colors.error, bg: colors.errorSurface },
+  }[challenge.difficulty];
+
   const onComplete = async () => {
     await complete();
     onCompleted?.();
@@ -56,10 +62,17 @@ export function DailyChallengeCard({ onCompleted }: Props) {
               </Text>
             </View>
           ) : (
-            <View style={[styles.badge, { backgroundColor: colors.accentSurface }]}>
-              <Text style={[styles.badgeText, { color: colors.accent }]}>
-                {challenge.estimatedMinutes} min
-              </Text>
+            <View style={styles.badgeRow}>
+              <View style={[styles.badge, { backgroundColor: difficultyColor.bg }]}>
+                <Text style={[styles.badgeText, { color: difficultyColor.fg }]}>
+                  {t(`dashboard.challenge.difficulty.${challenge.difficulty}`)}
+                </Text>
+              </View>
+              <View style={[styles.badge, { backgroundColor: colors.accentSurface }]}>
+                <Text style={[styles.badgeText, { color: colors.accent }]}>
+                  {challenge.estimatedMinutes} min
+                </Text>
+              </View>
             </View>
           )}
         </View>
@@ -99,7 +112,13 @@ export function DailyChallengeCard({ onCompleted }: Props) {
                     {t('dashboard.challenge.hint')}
                   </Text>
                   <MarkdownRenderer
-                    content={'```js\n' + challenge.exampleSnippet + '\n```'}
+                    content={
+                      '```' +
+                      (challenge.snippetLang ?? 'csharp') +
+                      '\n' +
+                      challenge.exampleSnippet +
+                      '\n```'
+                    }
                   />
                 </View>
               )}
@@ -133,6 +152,7 @@ const styles = StyleSheet.create({
   emoji: { fontSize: 28 },
   label: { fontSize: FontSize.xs, textTransform: 'uppercase', letterSpacing: 0.5 },
   title: { fontSize: FontSize.lg, fontWeight: FontWeight.bold },
+  badgeRow: { flexDirection: 'row', gap: Spacing.xs, alignItems: 'center' },
   badge: { paddingHorizontal: Spacing.sm, paddingVertical: 4, borderRadius: Radius.full },
   badgeText: { fontSize: FontSize.xs, fontWeight: FontWeight.bold },
   description: { fontSize: FontSize.sm, lineHeight: 20, marginBottom: Spacing.md },

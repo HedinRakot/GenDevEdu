@@ -183,7 +183,12 @@
       "done": "Done",
       "hint": "Hint code",
       "markDone": "Mark as done",
-      "alreadyDone": "Already done"
+      "alreadyDone": "Already done",
+      "difficulty": {
+        "easy": "Easy",
+        "medium": "Medium",
+        "hard": "Hard"
+      }
     },
     "notes": {
       "title": "My Notes",
