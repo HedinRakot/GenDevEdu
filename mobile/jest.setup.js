@@ -38,6 +38,27 @@ jest.mock('@react-native-async-storage/async-storage', () => {
   };
 });
 
+// @react-native-community/netinfo Mock: standardmäßig online; Tests können
+// den zuletzt registrierten Listener über __emit(state) gezielt triggern.
+jest.mock('@react-native-community/netinfo', () => {
+  let listener = null;
+  return {
+    __esModule: true,
+    default: {
+      addEventListener: jest.fn((cb) => {
+        listener = cb;
+        return () => {
+          listener = null;
+        };
+      }),
+      fetch: jest.fn(() =>
+        Promise.resolve({ isConnected: true, isInternetReachable: true }),
+      ),
+      __emit: (state) => listener && listener(state),
+    },
+  };
+});
+
 // react-native-safe-area-context Mock: liefert Null-Insets + Passthrough-Komponenten,
 // damit useSafeAreaInsets() ohne SafeAreaProvider im Test nicht wirft.
 jest.mock('react-native-safe-area-context', () => {
