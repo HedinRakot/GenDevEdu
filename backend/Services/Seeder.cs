@@ -18,6 +18,8 @@ public class Seeder
     {
         await _db.EnsureIndexesAsync();   // idempotent, unabhängig vom Seed-Stand
 
+        await SeedDailyChallengesAsync(); // eigener Bestand-Check, unabhängig von Kursen
+
         var hasCourses = await _db.Courses.Find(FilterDefinition<Course>.Empty).AnyAsync();
         if (hasCourses)
         {
@@ -258,6 +260,38 @@ public class Seeder
 
         _logger.LogInformation("Seeding complete. Course id: {CourseId}, QuestionList id: {QlId}",
             courseId, qlId);
+    }
+
+    /// <summary>
+    /// Lädt die Daily Challenges aus Seed/daily-challenges.json (einmalig, wenn
+    /// die Collection leer ist). Die Datei stammt aus dem früheren
+    /// Frontend-Pool (mobile/src/data/dailyChallenges.ts).
+    /// </summary>
+    private async Task SeedDailyChallengesAsync()
+    {
+        var hasChallenges = await _db.DailyChallenges
+            .Find(FilterDefinition<DailyChallenge>.Empty).AnyAsync();
+        if (hasChallenges) return;
+
+        var path = Path.Combine(AppContext.BaseDirectory, "Seed", "daily-challenges.json");
+        if (!File.Exists(path))
+        {
+            _logger.LogWarning("Daily-challenge seed file not found: {Path}", path);
+            return;
+        }
+
+        var json = await File.ReadAllTextAsync(path);
+        var challenges = System.Text.Json.JsonSerializer.Deserialize<List<DailyChallenge>>(
+            json,
+            new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        if (challenges is null || challenges.Count == 0)
+        {
+            _logger.LogWarning("Daily-challenge seed file was empty: {Path}", path);
+            return;
+        }
+
+        await _db.DailyChallenges.InsertManyAsync(challenges);
+        _logger.LogInformation("Seeded {Count} daily challenges.", challenges.Count);
     }
 
     private static Texte Bi(string de, string en) => new()

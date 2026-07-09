@@ -12,23 +12,24 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-import { useCourses, useDeleteCourse } from '@/hooks/useCourses';
-import { useAuth } from '@/context/AuthContext';
+import { useAdminChallenges, useDeleteChallenge } from '@/hooks/useDailyChallengeAdmin';
 import { useTheme } from '@/context/ThemeContext';
 import { translate } from '@/utils/textUtils';
+import type { ApiDailyChallenge } from '@/types/challenges';
 import type { AuthorStackParamList } from '@/navigation/AuthorStack';
-import type { Course } from '@/types/course';
 import { FontSize, FontWeight, Radius, Shadow, Spacing } from '@/config/theme';
 
-type NavProp = NativeStackNavigationProp<AuthorStackParamList, 'AuthorCourses'>;
+type NavProp = NativeStackNavigationProp<AuthorStackParamList, 'DailyChallenges'>;
 
-function CourseRow({
-  course,
+const DIFFICULTY_EMOJI: Record<string, string> = { easy: '🟢', medium: '🟡', hard: '🔴' };
+
+function ChallengeRow({
+  challenge,
   onPress,
   onDelete,
   deleting,
 }: {
-  course: Course;
+  challenge: ApiDailyChallenge;
   onPress: () => void;
   onDelete: () => void;
   deleting: boolean;
@@ -36,21 +37,30 @@ function CourseRow({
   const { colors } = useTheme();
   return (
     <TouchableOpacity
-      style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}
+      style={[
+        styles.row,
+        {
+          backgroundColor: colors.surface,
+          borderColor: colors.borderLight,
+          opacity: challenge.active ? 1 : 0.5,
+        },
+      ]}
       onPress={onPress}
       activeOpacity={0.8}
     >
       <View style={styles.rowBody}>
-        <Text style={[styles.rowTitle, { color: colors.textPrimary }]}>
-          {translate(course.titel) || course.name}
+        <Text style={[styles.rowTitle, { color: colors.textPrimary }]} numberOfLines={1}>
+          {DIFFICULTY_EMOJI[challenge.difficulty] ?? ''} {translate(challenge.title) || challenge.id}
         </Text>
-        <Text style={[styles.rowMeta, { color: colors.textTertiary }]}>{course.name}</Text>
+        <Text style={[styles.rowMeta, { color: colors.textTertiary }]} numberOfLines={1}>
+          {challenge.category} · ~{challenge.estimatedMinutes} min
+          {challenge.active ? '' : ' · inaktiv'}
+        </Text>
       </View>
       <TouchableOpacity
         onPress={onDelete}
         disabled={deleting}
         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        style={styles.deleteButton}
       >
         <Text style={[styles.deleteIcon, { color: deleting ? colors.textTertiary : colors.error }]}>
           🗑
@@ -61,30 +71,24 @@ function CourseRow({
   );
 }
 
-export function AuthorCoursesScreen() {
+export function DailyChallengesScreen() {
   const { colors } = useTheme();
   const navigation = useNavigation<NavProp>();
-  const { user } = useAuth();
-  const { data: courses, isLoading, error, refetch } = useCourses();
-  const { mutate: removeCourse, isPending: isDeleting } = useDeleteCourse();
+  const { data: challenges, isLoading, error, refetch } = useAdminChallenges();
+  const { mutate: remove, isPending: isDeleting } = useDeleteChallenge();
 
-  const myCourses = courses?.filter(
-    (c) => user?.role === 'admin' || (c as any).authorId === user?.id,
-  ) ?? [];
-
-  const onDeleteCourse = (course: Course) => {
-    const label = translate(course.titel) || course.name;
+  const onDelete = (c: ApiDailyChallenge) => {
     Alert.alert(
-      'Kurs löschen?',
-      `„${label}" und alle Kapitel, Inhalte und Lernfortschritte werden unwiderruflich gelöscht.`,
+      'Challenge löschen?',
+      `„${translate(c.title) || c.id}" wird unwiderruflich gelöscht. Tipp: Deaktivieren statt löschen erhält sie für später.`,
       [
         { text: 'Abbrechen', style: 'cancel' },
         {
           text: 'Löschen',
           style: 'destructive',
           onPress: () =>
-            removeCourse(course.elementId, {
-              onError: () => Alert.alert('Fehler', 'Kurs konnte nicht gelöscht werden.'),
+            remove(c.id, {
+              onError: () => Alert.alert('Fehler', 'Challenge konnte nicht gelöscht werden.'),
             }),
         },
       ],
@@ -94,23 +98,14 @@ export function AuthorCoursesScreen() {
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['bottom']}>
       <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <Text style={[styles.title, { color: colors.textPrimary }]}>✏️ Meine Kurse</Text>
-        <View style={styles.headerActions}>
-          <TouchableOpacity
-            testID="author-daily-challenges"
-            style={[styles.secondaryButton, { borderColor: colors.primary }]}
-            onPress={() => navigation.navigate('DailyChallenges')}
-          >
-            <Text style={[styles.secondaryButtonText, { color: colors.primary }]}>⚡ Challenges</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            testID="author-new-course"
-            style={[styles.addButton, { backgroundColor: colors.primary }]}
-            onPress={() => navigation.navigate('CreateCourse')}
-          >
-            <Text style={styles.addButtonText}>+ Neu</Text>
-          </TouchableOpacity>
-        </View>
+        <Text style={[styles.title, { color: colors.textPrimary }]}>⚡ Daily Challenges</Text>
+        <TouchableOpacity
+          testID="challenge-new"
+          style={[styles.addButton, { backgroundColor: colors.primary }]}
+          onPress={() => navigation.navigate('DailyChallengeEditor', {})}
+        >
+          <Text style={styles.addButtonText}>+ Neu</Text>
+        </TouchableOpacity>
       </View>
 
       {isLoading && (
@@ -119,36 +114,33 @@ export function AuthorCoursesScreen() {
         </View>
       )}
 
-      {error && (
+      {!!error && (
         <View style={styles.centered}>
-          <Text style={[styles.errorText, { color: colors.error }]}>Fehler beim Laden</Text>
+          <Text style={{ color: colors.error }}>Fehler beim Laden</Text>
           <TouchableOpacity onPress={() => refetch()}>
-            <Text style={[styles.retryText, { color: colors.primary }]}>Erneut versuchen</Text>
+            <Text style={{ color: colors.primary, fontWeight: FontWeight.semibold }}>
+              Erneut versuchen
+            </Text>
           </TouchableOpacity>
         </View>
       )}
 
       {!isLoading && !error && (
         <FlatList
-          data={myCourses}
-          keyExtractor={(c) => c.elementId}
+          data={challenges ?? []}
+          keyExtractor={(c) => c.id}
           contentContainerStyle={styles.list}
           renderItem={({ item }) => (
-            <CourseRow
-              course={item}
+            <ChallengeRow
+              challenge={item}
               deleting={isDeleting}
-              onPress={() =>
-                navigation.navigate('CourseEditor', {
-                  courseId: item.elementId,
-                  courseName: translate(item.titel) || item.name,
-                })
-              }
-              onDelete={() => onDeleteCourse(item)}
+              onPress={() => navigation.navigate('DailyChallengeEditor', { challengeId: item.id })}
+              onDelete={() => onDelete(item)}
             />
           )}
           ListEmptyComponent={
             <Text style={[styles.empty, { color: colors.textSecondary }]}>
-              Noch keine Kurse. Erstelle deinen ersten Kurs!
+              Noch keine Challenges vorhanden.
             </Text>
           }
         />
@@ -168,16 +160,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   title: { fontSize: FontSize.xl, fontWeight: FontWeight.bold },
-  headerActions: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
   addButton: { borderRadius: Radius.md, paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm },
   addButtonText: { color: 'white', fontWeight: FontWeight.bold, fontSize: FontSize.sm },
-  secondaryButton: {
-    borderRadius: Radius.md,
-    borderWidth: 1.5,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-  },
-  secondaryButtonText: { fontWeight: FontWeight.bold, fontSize: FontSize.sm },
   list: { padding: Spacing.lg, gap: Spacing.sm },
   row: {
     flexDirection: 'row',
@@ -189,12 +173,9 @@ const styles = StyleSheet.create({
     ...Shadow.sm,
   },
   rowBody: { flex: 1 },
-  rowTitle: { fontSize: FontSize.md, fontWeight: FontWeight.bold },
+  rowTitle: { fontSize: FontSize.md, fontWeight: FontWeight.medium },
   rowMeta: { fontSize: FontSize.xs, marginTop: 2 },
-  deleteButton: { padding: Spacing.xs },
   deleteIcon: { fontSize: FontSize.lg },
   arrow: { fontSize: 24 },
   empty: { textAlign: 'center', marginTop: Spacing.xxxl, fontSize: FontSize.md },
-  errorText: { fontSize: FontSize.md },
-  retryText: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
 });

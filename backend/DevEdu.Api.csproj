@@ -10,6 +10,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Seed-Daten (z.B. Daily Challenges) neben die Assembly kopieren. -->
+    <Content Update="Seed\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.*" />
     <PackageReference Include="MongoDB.Driver" Version="3.*" />
     <PackageReference Include="Docker.DotNet" Version="3.125.*" />

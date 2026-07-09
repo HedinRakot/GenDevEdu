@@ -1,0 +1,1068 @@
+[
+  {
+    "id": "cs-datentypen",
+    "title": {
+      "items": [
+        {
+          "text": "Datentypen deklarieren",
+          "language": 1
+        },
+        {
+          "text": "Declare data types",
+          "language": 2
+        },
+        {
+          "text": "Объявление типов",
+          "language": 0
+        }
+      ]
+    },
+    "description": {
+      "items": [
+        {
+          "text": "Deklariere je eine Variable vom Typ `int`, `double`, `bool` und `string` und gib alle mit `Console.WriteLine` aus.",
+          "language": 1
+        },
+        {
+          "text": "Declare one variable each of type `int`, `double`, `bool` and `string` and print them all with `Console.WriteLine`.",
+          "language": 2
+        },
+        {
+          "text": "Объявите по одной переменной типа `int`, `double`, `bool` и `string` и выведите их через `Console.WriteLine`.",
+          "language": 0
+        }
+      ]
+    },
+    "exampleSnippet": "int age = 30;\ndouble price = 9.99;\nbool isActive = true;\nstring name = \"Ada\";\nConsole.WriteLine($\"{name} {age} {price} {isActive}\");",
+    "snippetLang": "csharp",
+    "estimatedMinutes": 4,
+    "difficulty": "easy",
+    "category": "types",
+    "active": true
+  },
+  {
+    "id": "cs-var-typinferenz",
+    "title": {
+      "items": [
+        {
+          "text": "var & Typinferenz",
+          "language": 1
+        },
+        {
+          "text": "var & type inference",
+          "language": 2
+        },
+        {
+          "text": "var и вывод типов",
+          "language": 0
+        }
+      ]
+    },
+    "description": {
+      "items": [
+        {
+          "text": "Nutze `var`, damit der Compiler den Typ selbst ableitet. Erkläre in einem Kommentar, welcher Typ jeweils entsteht.",
+          "language": 1
+        },
+        {
+          "text": "Use `var` so the compiler infers the type. In a comment, note which type each variable gets.",
+          "language": 2
+        },
+        {
+          "text": "Используйте `var`, чтобы компилятор сам вывел тип. В комментарии укажите получившийся тип.",
+          "language": 0
+        }
+      ]
+    },
+    "exampleSnippet": "var count = 42;        // int\nvar ratio = 3.14;      // double\nvar label = \"Kurs\";    // string",
+    "snippetLang": "csharp",
+    "estimatedMinutes": 4,
+    "difficulty": "easy",
+    "category": "types",
+    "active": true
+  },
+  {
+    "id": "cs-swap",
+    "title": {
+      "items": [
+        {
+          "text": "Werte tauschen",
+          "language": 1
+        },
+        {
+          "text": "Swap two values",
+          "language": 2
+        },
+        {
+          "text": "Обмен значений",
+          "language": 0
+        }
+      ]
+    },
+    "description": {
+      "items": [
+        {
+          "text": "Tausche die Werte zweier `int`-Variablen – zuerst mit Hilfsvariable, dann per Tupel-Zuweisung.",
+          "language": 1
+        },
+        {
+          "text": "Swap the values of two `int` variables – first with a temp variable, then via tuple assignment.",
+          "language": 2
+        },
+        {
+          "text": "Поменяйте местами значения двух `int`-переменных: сначала через временную переменную, затем через кортеж.",
+          "language": 0
+        }
+      ]
+    },
+    "exampleSnippet": "int a = 1, b = 2;\n(a, b) = (b, a);\nConsole.WriteLine($\"{a} {b}\"); // 2 1",
+    "snippetLang": "csharp",
+    "estimatedMinutes": 4,
+    "difficulty": "easy",
+    "category": "variables",
+    "active": true
+  },
+  {
+    "id": "cs-string-interpolation",
+    "title": {
+      "items": [
+        {
+          "text": "String-Interpolation",
+          "language": 1
+        },
+        {
+          "text": "String interpolation",
+          "language": 2
+        },
+        {
+          "text": "Интерполяция строк",
+          "language": 0
+        }
+      ]
+    },
+    "description": {
+      "items": [
+        {
+          "text": "Baue aus Vorname, Nachname und Alter einen Begrüßungssatz mit `$\"...\"`.",
+          "language": 1
+        },
+        {
+          "text": "Build a greeting sentence from first name, last name and age using `$\"...\"`.",
+          "language": 2
+        },
+        {
+          "text": "Составьте приветствие из имени, фамилии и возраста с помощью `$\"...\"`.",
+          "language": 0
+        }
+      ]
+    },
+    "exampleSnippet": "string first = \"Grace\", last = \"Hopper\";\nint age = 45;\nConsole.WriteLine($\"Hallo {first} {last}, {age} Jahre alt.\");",
+    "snippetLang": "csharp",
+    "estimatedMinutes": 3,
+    "difficulty": "easy",
+    "category": "variables",
+    "active": true
+  },
+  {
+    "id": "cs-fizzbuzz",
+    "title": {
+      "items": [
+        {
+          "text": "FizzBuzz",
+          "language": 1
+        },
+        {
+          "text": "FizzBuzz",
+          "language": 2
+        },
+        {
+          "text": "FizzBuzz",
+          "language": 0
+        }
+      ]
+    },
+    "description": {
+      "items": [
+        {
+          "text": "Gib die Zahlen 1–20 aus: \"Fizz\" für Vielfache von 3, \"Buzz\" für 5, \"FizzBuzz\" für beide.",
+          "language": 1
+        },
+        {
+          "text": "Print numbers 1–20: \"Fizz\" for multiples of 3, \"Buzz\" for 5, \"FizzBuzz\" for both.",
+          "language": 2
+        },
+        {
+          "text": "Выведите числа 1–20: «Fizz» для кратных 3, «Buzz» для 5, «FizzBuzz» для обоих.",
+          "language": 0
+        }
+      ]
+    },
+    "exampleSnippet": "for (int i = 1; i <= 20; i++)\n{\n    string s = \"\";\n    if (i % 3 == 0) s += \"Fizz\";\n    if (i % 5 == 0) s += \"Buzz\";\n    Console.WriteLine(s == \"\" ? i.ToString() : s);\n}",
+    "snippetLang": "csharp",
+    "estimatedMinutes": 6,
+    "difficulty": "easy",
+    "category": "conditions",
+    "active": true
+  },
+  {
+    "id": "cs-note-switch",
+    "title": {
+      "items": [
+        {
+          "text": "Noten mit switch",
+          "language": 1
+        },
+        {
+          "text": "Grades with switch",
+          "language": 2
+        },
+        {
+          "text": "Оценки через switch",
+          "language": 0
+        }
+      ]
+    },
+    "description": {
+      "items": [
+        {
+          "text": "Wandle eine Punktzahl (0–100) mit einem `switch`-Ausdruck in eine Schulnote 1–6 um.",
+          "language": 1
+        },
+        {
+          "text": "Convert a score (0–100) into a school grade 1–6 using a `switch` expression.",
+          "language": 2
+        },
+        {
+          "text": "Преобразуйте баллы (0–100) в оценку 1–6 с помощью выражения `switch`.",
+          "language": 0
+        }
+      ]
+    },
+    "exampleSnippet": "int score = 82;\nint grade = score switch\n{\n    >= 90 => 1,\n    >= 75 => 2,\n    >= 60 => 3,\n    >= 45 => 4,\n    >= 30 => 5,\n    _ => 6,\n};\nConsole.WriteLine(grade);",
+    "snippetLang": "csharp",
+    "estimatedMinutes": 7,
+    "difficulty": "medium",
+    "category": "conditions",
+    "active": true
+  },
+  {
+    "id": "cs-sum-1-100",
+    "title": {
+      "items": [
+        {
+          "text": "Summe 1 bis 100",
+          "language": 1
+        },
+        {
+          "text": "Sum 1 to 100",
+          "language": 2
+        },
+        {
+          "text": "Сумма от 1 до 100",
+          "language": 0
+        }
+      ]
+    },
+    "description": {
+      "items": [
+        {
+          "text": "Berechne mit einer `for`-Schleife die Summe aller Zahlen von 1 bis 100.",
+          "language": 1
+        },
+        {
+          "text": "Use a `for` loop to compute the sum of all numbers from 1 to 100.",
+          "language": 2
+        },
+        {
+          "text": "С помощью цикла `for` вычислите сумму всех чисел от 1 до 100.",
+          "language": 0
+        }
+      ]
+    },
+    "exampleSnippet": "int sum = 0;\nfor (int i = 1; i <= 100; i++) sum += i;\nConsole.WriteLine(sum); // 5050",
+    "snippetLang": "csharp",
+    "estimatedMinutes": 4,
+    "difficulty": "easy",
+    "category": "loops",
+    "active": true
+  },
+  {
+    "id": "cs-multiplication-table",
+    "title": {
+      "items": [
+        {
+          "text": "Kleines Einmaleins",
+          "language": 1
+        },
+        {
+          "text": "Times table",
+          "language": 2
+        },
+        {
+          "text": "Таблица умножения",
+          "language": 0
+        }
+      ]
+    },
+    "description": {
+      "items": [
+        {
+          "text": "Gib mit zwei verschachtelten Schleifen das Einmaleins von 1×1 bis 5×5 aus.",
+          "language": 1
+        },
+        {
+          "text": "Use two nested loops to print the times table from 1×1 up to 5×5.",
+          "language": 2
+        },
+        {
+          "text": "С помощью двух вложенных циклов выведите таблицу умножения от 1×1 до 5×5.",
+          "language": 0
+        }
+      ]
+    },
+    "exampleSnippet": "for (int i = 1; i <= 5; i++)\n{\n    for (int j = 1; j <= 5; j++)\n        Console.Write($\"{i * j,3}\");\n    Console.WriteLine();\n}",
+    "snippetLang": "csharp",
+    "estimatedMinutes": 7,
+    "difficulty": "medium",
+    "category": "loops",
+    "active": true
+  },
+  {
+    "id": "cs-count-vowels",
+    "title": {
+      "items": [
+        {
+          "text": "Vokale zählen",
+          "language": 1
+        },
+        {
+          "text": "Count vowels",
+          "language": 2
+        },
+        {
+          "text": "Подсчёт гласных",
+          "language": 0
+        }
+      ]
+    },
+    "description": {
+      "items": [
+        {
+          "text": "Zähle in einem `foreach` über einen String, wie viele Vokale (a, e, i, o, u) er enthält.",
+          "language": 1
+        },
+        {
+          "text": "Use a `foreach` over a string to count how many vowels (a, e, i, o, u) it contains.",
+          "language": 2
+        },
+        {
+          "text": "С помощью `foreach` по строке посчитайте, сколько в ней гласных (a, e, i, o, u).",
+          "language": 0
+        }
+      ]
+    },
+    "exampleSnippet": "string text = \"Programmieren\";\nint vowels = 0;\nforeach (char c in text.ToLower())\n    if (\"aeiou\".Contains(c)) vowels++;\nConsole.WriteLine(vowels);",
+    "snippetLang": "csharp",
+    "estimatedMinutes": 8,
+    "difficulty": "medium",
+    "category": "loops",
+    "active": true
+  },
+  {
+    "id": "cs-factorial",
+    "title": {
+      "items": [
+        {
+          "text": "Fakultät berechnen",
+          "language": 1
+        },
+        {
+          "text": "Compute factorial",
+          "language": 2
+        },
+        {
+          "text": "Вычисление факториала",
+          "language": 0
+        }
+      ]
+    },
+    "description": {
+      "items": [
+        {
+          "text": "Schreibe eine Methode `long Factorial(int n)`, die n! iterativ berechnet.",
+          "language": 1
+        },
+        {
+          "text": "Write a method `long Factorial(int n)` that computes n! iteratively.",
+          "language": 2
+        },
+        {
+          "text": "Напишите метод `long Factorial(int n)`, вычисляющий n! итеративно.",
+          "language": 0
+        }
+      ]
+    },
+    "exampleSnippet": "long Factorial(int n)\n{\n    long result = 1;\n    for (int i = 2; i <= n; i++) result *= i;\n    return result;\n}\nConsole.WriteLine(Factorial(5)); // 120",
+    "snippetLang": "csharp",
+    "estimatedMinutes": 7,
+    "difficulty": "medium",
+    "category": "functions",
+    "active": true
+  },
+  {
+    "id": "cs-fibonacci",
+    "title": {
+      "items": [
+        {
+          "text": "Fibonacci (rekursiv)",
+          "language": 1
+        },
+        {
+          "text": "Fibonacci (recursive)",
+          "language": 2
+        },
+        {
+          "text": "Фибоначчи (рекурсия)",
+          "language": 0
+        }
+      ]
+    },
+    "description": {
+      "items": [
+        {
+          "text": "Implementiere `int Fib(int n)` rekursiv. Überlege, warum das für große n langsam ist.",
+          "language": 1
+        },
+        {
+          "text": "Implement `int Fib(int n)` recursively. Consider why this is slow for large n.",
+          "language": 2
+        },
+        {
+          "text": "Реализуйте `int Fib(int n)` рекурсивно. Подумайте, почему это медленно для больших n.",
+          "language": 0
+        }
+      ]
+    },
+    "exampleSnippet": "int Fib(int n) => n < 2 ? n : Fib(n - 1) + Fib(n - 2);\nConsole.WriteLine(Fib(10)); // 55",
+    "snippetLang": "csharp",
+    "estimatedMinutes": 10,
+    "difficulty": "hard",
+    "category": "functions",
+    "active": true
+  },
+  {
+    "id": "cs-optional-params",
+    "title": {
+      "items": [
+        {
+          "text": "Optionale Parameter",
+          "language": 1
+        },
+        {
+          "text": "Optional parameters",
+          "language": 2
+        },
+        {
+          "text": "Необязательные параметры",
+          "language": 0
+        }
+      ]
+    },
+    "description": {
+      "items": [
+        {
+          "text": "Schreibe `Greet(string name, string greeting = \"Hallo\")` und rufe sie mit und ohne zweites Argument auf.",
+          "language": 1
+        },
+        {
+          "text": "Write `Greet(string name, string greeting = \"Hello\")` and call it with and without the second argument.",
+          "language": 2
+        },
+        {
+          "text": "Напишите `Greet(string name, string greeting = \"Привет\")` и вызовите её с и без второго аргумента.",
+          "language": 0
+        }
+      ]
+    },
+    "exampleSnippet": "void Greet(string name, string greeting = \"Hallo\")\n    => Console.WriteLine($\"{greeting}, {name}!\");\nGreet(\"Ada\");\nGreet(\"Ada\", \"Moin\");",
+    "snippetLang": "csharp",
+    "estimatedMinutes": 5,
+    "difficulty": "easy",
+    "category": "functions",
+    "active": true
+  },
+  {
+    "id": "cs-class-person",
+    "title": {
+      "items": [
+        {
+          "text": "Klasse Person",
+          "language": 1
+        },
+        {
+          "text": "Person class",
+          "language": 2
+        },
+        {
+          "text": "Класс Person",
+          "language": 0
+        }
+      ]
+    },
+    "description": {
+      "items": [
+        {
+          "text": "Definiere eine Klasse `Person` mit Auto-Properties `Name` und `Age` und erzeuge ein Objekt per Objekt-Initializer.",
+          "language": 1
+        },
+        {
+          "text": "Define a class `Person` with auto-properties `Name` and `Age` and create an object using an object initializer.",
+          "language": 2
+        },
+        {
+          "text": "Определите класс `Person` со свойствами `Name` и `Age` и создайте объект через инициализатор.",
+          "language": 0
+        }
+      ]
+    },
+    "exampleSnippet": "class Person\n{\n    public string Name { get; set; }\n    public int Age { get; set; }\n}\nvar p = new Person { Name = \"Ada\", Age = 36 };",
+    "snippetLang": "csharp",
+    "estimatedMinutes": 6,
+    "difficulty": "easy",
+    "category": "classes",
+    "active": true
+  },
+  {
+    "id": "cs-constructor-method",
+    "title": {
+      "items": [
+        {
+          "text": "Konstruktor & Methode",
+          "language": 1
+        },
+        {
+          "text": "Constructor & method",
+          "language": 2
+        },
+        {
+          "text": "Конструктор и метод",
+          "language": 0
+        }
+      ]
+    },
+    "description": {
+      "items": [
+        {
+          "text": "Gib `Person` einen Konstruktor und eine Methode `Describe()`, die einen Vorstellungssatz zurückgibt.",
+          "language": 1
+        },
+        {
+          "text": "Give `Person` a constructor and a method `Describe()` that returns an introduction sentence.",
+          "language": 2
+        },
+        {
+          "text": "Добавьте `Person` конструктор и метод `Describe()`, возвращающий строку-представление.",
+          "language": 0
+        }
+      ]
+    },
+    "exampleSnippet": "class Person\n{\n    public string Name;\n    public Person(string name) => Name = name;\n    public string Describe() => $\"Ich bin {Name}.\";\n}",
+    "snippetLang": "csharp",
+    "estimatedMinutes": 8,
+    "difficulty": "medium",
+    "category": "classes",
+    "active": true
+  },
+  {
+    "id": "cs-list-basics",
+    "title": {
+      "items": [
+        {
+          "text": "Liste befüllen",
+          "language": 1
+        },
+        {
+          "text": "Fill a list",
+          "language": 2
+        },
+        {
+          "text": "Заполнение списка",
+          "language": 0
+        }
+      ]
+    },
+    "description": {
+      "items": [
+        {
+          "text": "Erstelle eine `List<int>`, füge drei Zahlen hinzu und gib sie per `foreach` aus.",
+          "language": 1
+        },
+        {
+          "text": "Create a `List<int>`, add three numbers and print them with `foreach`.",
+          "language": 2
+        },
+        {
+          "text": "Создайте `List<int>`, добавьте три числа и выведите их через `foreach`.",
+          "language": 0
+        }
+      ]
+    },
+    "exampleSnippet": "var numbers = new List<int> { 10, 20 };\nnumbers.Add(30);\nforeach (int n in numbers) Console.WriteLine(n);",
+    "snippetLang": "csharp",
+    "estimatedMinutes": 5,
+    "difficulty": "easy",
+    "category": "lists",
+    "active": true
+  },
+  {
+    "id": "cs-dictionary-count",
+    "title": {
+      "items": [
+        {
+          "text": "Wörter zählen",
+          "language": 1
+        },
+        {
+          "text": "Count words",
+          "language": 2
+        },
+        {
+          "text": "Подсчёт слов",
+          "language": 0
+        }
+      ]
+    },
+    "description": {
+      "items": [
+        {
+          "text": "Zähle mit einem `Dictionary<string,int>`, wie oft jedes Wort in einem Satz vorkommt.",
+          "language": 1
+        },
+        {
+          "text": "Use a `Dictionary<string,int>` to count how often each word appears in a sentence.",
+          "language": 2
+        },
+        {
+          "text": "С помощью `Dictionary<string,int>` посчитайте, сколько раз встречается каждое слово.",
+          "language": 0
+        }
+      ]
+    },
+    "exampleSnippet": "var counts = new Dictionary<string, int>();\nforeach (var w in \"a b a c b a\".Split(' '))\n    counts[w] = counts.GetValueOrDefault(w) + 1;\n// a=3, b=2, c=1",
+    "snippetLang": "csharp",
+    "estimatedMinutes": 10,
+    "difficulty": "hard",
+    "category": "lists",
+    "active": true
+  },
+  {
+    "id": "cs-inheritance-override",
+    "title": {
+      "items": [
+        {
+          "text": "Vererbung & override",
+          "language": 1
+        },
+        {
+          "text": "Inheritance & override",
+          "language": 2
+        },
+        {
+          "text": "Наследование и override",
+          "language": 0
+        }
+      ]
+    },
+    "description": {
+      "items": [
+        {
+          "text": "Erstelle eine Basisklasse `Animal` mit virtueller Methode `Sound()` und eine Klasse `Dog`, die sie überschreibt.",
+          "language": 1
+        },
+        {
+          "text": "Create a base class `Animal` with a virtual method `Sound()` and a `Dog` class that overrides it.",
+          "language": 2
+        },
+        {
+          "text": "Создайте базовый класс `Animal` с виртуальным методом `Sound()` и класс `Dog`, переопределяющий его.",
+          "language": 0
+        }
+      ]
+    },
+    "exampleSnippet": "class Animal { public virtual string Sound() => \"...\"; }\nclass Dog : Animal { public override string Sound() => \"Wuff\"; }\nAnimal a = new Dog();\nConsole.WriteLine(a.Sound()); // Wuff",
+    "snippetLang": "csharp",
+    "estimatedMinutes": 9,
+    "difficulty": "medium",
+    "category": "inheritance",
+    "active": true
+  },
+  {
+    "id": "cs-interface-area",
+    "title": {
+      "items": [
+        {
+          "text": "Interface IShape",
+          "language": 1
+        },
+        {
+          "text": "IShape interface",
+          "language": 2
+        },
+        {
+          "text": "Интерфейс IShape",
+          "language": 0
+        }
+      ]
+    },
+    "description": {
+      "items": [
+        {
+          "text": "Definiere ein Interface `IShape` mit `double Area()` und implementiere es in `Circle`.",
+          "language": 1
+        },
+        {
+          "text": "Define an interface `IShape` with `double Area()` and implement it in `Circle`.",
+          "language": 2
+        },
+        {
+          "text": "Определите интерфейс `IShape` с `double Area()` и реализуйте его в `Circle`.",
+          "language": 0
+        }
+      ]
+    },
+    "exampleSnippet": "interface IShape { double Area(); }\nclass Circle : IShape\n{\n    public double R;\n    public double Area() => Math.PI * R * R;\n}",
+    "snippetLang": "csharp",
+    "estimatedMinutes": 9,
+    "difficulty": "medium",
+    "category": "interfaces",
+    "active": true
+  },
+  {
+    "id": "cs-enum-weekday",
+    "title": {
+      "items": [
+        {
+          "text": "Enum Wochentag",
+          "language": 1
+        },
+        {
+          "text": "Weekday enum",
+          "language": 2
+        },
+        {
+          "text": "Enum «день недели»",
+          "language": 0
+        }
+      ]
+    },
+    "description": {
+      "items": [
+        {
+          "text": "Definiere ein `enum Weekday` und prüfe mit einem `switch`, ob ein Tag ein Wochenende ist.",
+          "language": 1
+        },
+        {
+          "text": "Define an `enum Weekday` and use a `switch` to check whether a day is on the weekend.",
+          "language": 2
+        },
+        {
+          "text": "Определите `enum Weekday` и через `switch` проверьте, выходной ли это день.",
+          "language": 0
+        }
+      ]
+    },
+    "exampleSnippet": "enum Weekday { Mon, Tue, Wed, Thu, Fri, Sat, Sun }\nbool IsWeekend(Weekday d) => d is Weekday.Sat or Weekday.Sun;\nConsole.WriteLine(IsWeekend(Weekday.Sat)); // True",
+    "snippetLang": "csharp",
+    "estimatedMinutes": 6,
+    "difficulty": "easy",
+    "category": "enums",
+    "active": true
+  },
+  {
+    "id": "cs-try-catch",
+    "title": {
+      "items": [
+        {
+          "text": "try / catch",
+          "language": 1
+        },
+        {
+          "text": "try / catch",
+          "language": 2
+        },
+        {
+          "text": "try / catch",
+          "language": 0
+        }
+      ]
+    },
+    "description": {
+      "items": [
+        {
+          "text": "Fange beim Parsen einer ungültigen Zahl die `FormatException` ab und gib eine freundliche Meldung aus.",
+          "language": 1
+        },
+        {
+          "text": "Catch the `FormatException` when parsing an invalid number and print a friendly message.",
+          "language": 2
+        },
+        {
+          "text": "Перехватите `FormatException` при разборе неверного числа и выведите понятное сообщение.",
+          "language": 0
+        }
+      ]
+    },
+    "exampleSnippet": "try\n{\n    int n = int.Parse(\"abc\");\n}\ncatch (FormatException)\n{\n    Console.WriteLine(\"Keine gültige Zahl.\");\n}",
+    "snippetLang": "csharp",
+    "estimatedMinutes": 6,
+    "difficulty": "easy",
+    "category": "errors",
+    "active": true
+  },
+  {
+    "id": "cs-throw-custom",
+    "title": {
+      "items": [
+        {
+          "text": "Eigene Exception",
+          "language": 1
+        },
+        {
+          "text": "Custom exception",
+          "language": 2
+        },
+        {
+          "text": "Своё исключение",
+          "language": 0
+        }
+      ]
+    },
+    "description": {
+      "items": [
+        {
+          "text": "Wirf bei negativem Alter eine `ArgumentException` und fange sie im Aufrufer wieder ab.",
+          "language": 1
+        },
+        {
+          "text": "Throw an `ArgumentException` for a negative age and catch it again in the caller.",
+          "language": 2
+        },
+        {
+          "text": "Бросьте `ArgumentException` при отрицательном возрасте и перехватите его в вызывающем коде.",
+          "language": 0
+        }
+      ]
+    },
+    "exampleSnippet": "void SetAge(int age)\n{\n    if (age < 0) throw new ArgumentException(\"Alter < 0\");\n}\ntry { SetAge(-1); }\ncatch (ArgumentException ex) { Console.WriteLine(ex.Message); }",
+    "snippetLang": "csharp",
+    "estimatedMinutes": 10,
+    "difficulty": "hard",
+    "category": "errors",
+    "active": true
+  },
+  {
+    "id": "cs-debug-offbyone",
+    "title": {
+      "items": [
+        {
+          "text": "Bug finden: Off-by-one",
+          "language": 1
+        },
+        {
+          "text": "Find the bug: off-by-one",
+          "language": 2
+        },
+        {
+          "text": "Найдите баг: off-by-one",
+          "language": 0
+        }
+      ]
+    },
+    "description": {
+      "items": [
+        {
+          "text": "Diese Schleife wirft eine IndexOutOfRangeException. Finde und behebe den Fehler in der Abbruchbedingung.",
+          "language": 1
+        },
+        {
+          "text": "This loop throws an IndexOutOfRangeException. Find and fix the error in the loop condition.",
+          "language": 2
+        },
+        {
+          "text": "Этот цикл бросает IndexOutOfRangeException. Найдите и исправьте ошибку в условии.",
+          "language": 0
+        }
+      ]
+    },
+    "exampleSnippet": "int[] arr = { 1, 2, 3 };\n// Bug: <= greift auf arr[3] zu\nfor (int i = 0; i <= arr.Length; i++)\n    Console.WriteLine(arr[i]);\n// Fix: i < arr.Length",
+    "snippetLang": "csharp",
+    "estimatedMinutes": 7,
+    "difficulty": "medium",
+    "category": "debugging",
+    "active": true
+  },
+  {
+    "id": "cs-reverse-string",
+    "title": {
+      "items": [
+        {
+          "text": "String umkehren",
+          "language": 1
+        },
+        {
+          "text": "Reverse a string",
+          "language": 2
+        },
+        {
+          "text": "Перевернуть строку",
+          "language": 0
+        }
+      ]
+    },
+    "description": {
+      "items": [
+        {
+          "text": "Kehre einen String um – z. B. mit `Array.Reverse` oder LINQ.",
+          "language": 1
+        },
+        {
+          "text": "Reverse a string – e.g. with `Array.Reverse` or LINQ.",
+          "language": 2
+        },
+        {
+          "text": "Переверните строку – например, через `Array.Reverse` или LINQ.",
+          "language": 0
+        }
+      ]
+    },
+    "exampleSnippet": "string s = \"hallo\";\nstring reversed = new string(s.Reverse().ToArray());\nConsole.WriteLine(reversed); // ollah",
+    "snippetLang": "csharp",
+    "estimatedMinutes": 4,
+    "difficulty": "easy",
+    "category": "strings",
+    "active": true
+  },
+  {
+    "id": "cs-palindrome",
+    "title": {
+      "items": [
+        {
+          "text": "Palindrom prüfen",
+          "language": 1
+        },
+        {
+          "text": "Palindrome check",
+          "language": 2
+        },
+        {
+          "text": "Проверка палиндрома",
+          "language": 0
+        }
+      ]
+    },
+    "description": {
+      "items": [
+        {
+          "text": "Prüfe, ob ein Wort ein Palindrom ist (Groß-/Kleinschreibung ignorieren).",
+          "language": 1
+        },
+        {
+          "text": "Check whether a word is a palindrome (ignore case).",
+          "language": 2
+        },
+        {
+          "text": "Проверьте, является ли слово палиндромом (без учёта регистра).",
+          "language": 0
+        }
+      ]
+    },
+    "exampleSnippet": "bool IsPalindrome(string s)\n{\n    var x = s.ToLower();\n    return x.SequenceEqual(x.Reverse());\n}\nConsole.WriteLine(IsPalindrome(\"Otto\")); // True",
+    "snippetLang": "csharp",
+    "estimatedMinutes": 6,
+    "difficulty": "medium",
+    "category": "strings",
+    "active": true
+  },
+  {
+    "id": "cs-linq-filter",
+    "title": {
+      "items": [
+        {
+          "text": "LINQ: Filtern & Sortieren",
+          "language": 1
+        },
+        {
+          "text": "LINQ: filter & sort",
+          "language": 2
+        },
+        {
+          "text": "LINQ: фильтр и сортировка",
+          "language": 0
+        }
+      ]
+    },
+    "description": {
+      "items": [
+        {
+          "text": "Filtere aus einer Zahlenliste die geraden Zahlen und sortiere sie absteigend – mit `Where` und `OrderByDescending`.",
+          "language": 1
+        },
+        {
+          "text": "From a list of numbers, filter the even ones and sort them descending – using `Where` and `OrderByDescending`.",
+          "language": 2
+        },
+        {
+          "text": "Из списка чисел отберите чётные и отсортируйте по убыванию – через `Where` и `OrderByDescending`.",
+          "language": 0
+        }
+      ]
+    },
+    "exampleSnippet": "var nums = new[] { 5, 2, 8, 3, 10 };\nvar result = nums.Where(n => n % 2 == 0)\n                 .OrderByDescending(n => n);\n// 10, 8, 2",
+    "snippetLang": "csharp",
+    "estimatedMinutes": 8,
+    "difficulty": "medium",
+    "category": "linq",
+    "active": true
+  },
+  {
+    "id": "cs-linq-aggregate",
+    "title": {
+      "items": [
+        {
+          "text": "LINQ: Summe & Durchschnitt",
+          "language": 1
+        },
+        {
+          "text": "LINQ: sum & average",
+          "language": 2
+        },
+        {
+          "text": "LINQ: сумма и среднее",
+          "language": 0
+        }
+      ]
+    },
+    "description": {
+      "items": [
+        {
+          "text": "Berechne aus einer Zahlenliste Summe, Durchschnitt und Maximum mit den LINQ-Methoden `Sum`, `Average`, `Max`.",
+          "language": 1
+        },
+        {
+          "text": "Compute sum, average and maximum of a number list using the LINQ methods `Sum`, `Average`, `Max`.",
+          "language": 2
+        },
+        {
+          "text": "Вычислите сумму, среднее и максимум списка чисел через методы LINQ `Sum`, `Average`, `Max`.",
+          "language": 0
+        }
+      ]
+    },
+    "exampleSnippet": "var nums = new[] { 4, 8, 15, 16, 23, 42 };\nConsole.WriteLine(nums.Sum());\nConsole.WriteLine(nums.Average());\nConsole.WriteLine(nums.Max());",
+    "snippetLang": "csharp",
+    "estimatedMinutes": 7,
+    "difficulty": "medium",
+    "category": "linq",
+    "active": true
+  }
+]

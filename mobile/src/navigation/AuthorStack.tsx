@@ -8,6 +8,8 @@ import { AddChapterScreen } from '@/screens/author/AddChapterScreen';
 import { AddChapterContentScreen } from '@/screens/author/AddChapterContentScreen';
 import { AddQuestionListScreen } from '@/screens/author/AddQuestionListScreen';
 import { ChapterQuizEditorScreen } from '@/screens/author/ChapterQuizEditorScreen';
+import { DailyChallengesScreen } from '@/screens/author/DailyChallengesScreen';
+import { DailyChallengeEditorScreen } from '@/screens/author/DailyChallengeEditorScreen';
 import { useTheme } from '@/context/ThemeContext';
 import { FontWeight } from '@/config/theme';
 
@@ -30,6 +32,11 @@ export type AuthorStackParamList = {
     questionListId?: string;
   };
   ChapterQuizEditor: { chapterId: string; courseId: string; chapterName: string };
+  DailyChallenges: undefined;
+  DailyChallengeEditor: {
+    /** Gesetzt = bestehende Challenge bearbeiten (statt neu anlegen). */
+    challengeId?: string;
+  };
 };
 
 const Stack = createNativeStackNavigator<AuthorStackParamList>();
@@ -80,6 +87,16 @@ export function AuthorStack() {
         name="ChapterQuizEditor"
         component={ChapterQuizEditorScreen}
         options={{ title: 'Abschlussquiz' }}
+      />
+      <Stack.Screen
+        name="DailyChallenges"
+        component={DailyChallengesScreen}
+        options={{ title: 'Daily Challenges' }}
+      />
+      <Stack.Screen
+        name="DailyChallengeEditor"
+        component={DailyChallengeEditorScreen}
+        options={{ title: 'Challenge bearbeiten' }}
       />
     </Stack.Navigator>
   );

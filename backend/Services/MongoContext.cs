@@ -39,6 +39,7 @@ public class MongoContext
     public IMongoCollection<ChapterQuizAttempt> ChapterQuizAttempts => Database.GetCollection<ChapterQuizAttempt>("chapterquizattempts");
     public IMongoCollection<Certificate> Certificates => Database.GetCollection<Certificate>("certificates");
     public IMongoCollection<CourseEmbedding> CourseEmbeddings => Database.GetCollection<CourseEmbedding>("courseembeddings");
+    public IMongoCollection<DailyChallenge> DailyChallenges => Database.GetCollection<DailyChallenge>("dailychallenges");
 
     // F14: AZAV-Anwesenheitsnachweis
     public IMongoCollection<AttendanceEvent> AttendanceEvents => Database.GetCollection<AttendanceEvent>("attendanceevents");

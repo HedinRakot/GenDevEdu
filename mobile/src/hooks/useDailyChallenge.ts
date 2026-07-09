@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   isDailyChallengeDone,
   markDailyChallengeDone,
@@ -6,6 +7,7 @@ import {
 } from '@/store/storage';
 import { toDateKey } from '@/utils/streakUtils';
 import { pickDailyChallenge, type DailyChallenge } from '@/data/dailyChallenges';
+import { fetchTodayChallenge } from '@/api/challenges';
 
 interface UseDailyChallengeResult {
   challenge: DailyChallenge;
@@ -18,7 +20,28 @@ interface UseDailyChallengeResult {
 
 export function useDailyChallenge(): UseDailyChallengeResult {
   const dateKey = toDateKey(new Date());
-  const challenge = pickDailyChallenge();
+
+  // Server-verwaltete Tages-Challenge; der lokale Pool bleibt als
+  // Offline-/Fehler-Fallback erhalten (dann ggf. eine andere Challenge).
+  const { data: serverChallenge } = useQuery({
+    queryKey: ['daily-challenge', 'today', dateKey] as const,
+    queryFn: fetchTodayChallenge,
+    staleTime: 1000 * 60 * 60, // innerhalb des Tages stabil
+    retry: 1,
+  });
+
+  const challenge: DailyChallenge = serverChallenge
+    ? {
+        id: serverChallenge.id,
+        title: serverChallenge.title,
+        description: serverChallenge.description,
+        exampleSnippet: serverChallenge.exampleSnippet ?? undefined,
+        snippetLang: serverChallenge.snippetLang,
+        estimatedMinutes: serverChallenge.estimatedMinutes,
+        difficulty: serverChallenge.difficulty as DailyChallenge['difficulty'],
+        category: serverChallenge.category as DailyChallenge['category'],
+      }
+    : pickDailyChallenge();
 
   const [isDone, setDone] = useState(false);
   const [isLoading, setLoading] = useState(true);

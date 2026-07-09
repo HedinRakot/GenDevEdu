@@ -28,6 +28,7 @@ builder.Services.AddScoped<ChapterQuizService>();
 builder.Services.AddScoped<EnrollmentService>();
 builder.Services.AddScoped<StatsService>();
 builder.Services.AddScoped<CertificateService>();
+builder.Services.AddScoped<DailyChallengeService>();
 builder.Services.AddScoped<Seeder>();
 
 // ---- F7: Code-Aufgaben & Sandbox ----
@@ -171,6 +172,7 @@ app.MapCodeSubmissionEndpoints();
 app.MapChapterQuizEndpoints();
 app.MapChatEndpoints();
 app.MapAttendanceEndpoints();
+app.MapDailyChallengeEndpoints();
 
 using (var scope = app.Services.CreateScope())
 {
