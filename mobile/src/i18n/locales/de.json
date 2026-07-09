@@ -334,7 +334,9 @@
       "admin": "Nutzerverwaltung",
       "adminSubtitle": "Rollen und Konten verwalten",
       "attendance": "Anwesenheit",
-      "attendanceSubtitle": "Aktivität, Fehlzeiten und Nachweise (AZAV)"
+      "attendanceSubtitle": "Aktivität, Fehlzeiten und Nachweise (AZAV)",
+      "webOnly": "Nur im Web verfügbar",
+      "webOnlySubtitle": "Die Verwaltung ist über die Web-Version der App erreichbar"
     },
     "account": {
       "title": "Konto",

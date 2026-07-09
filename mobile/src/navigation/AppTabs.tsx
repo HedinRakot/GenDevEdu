@@ -14,6 +14,7 @@ import { AttendanceStack } from './AttendanceStack';
 import { AdminUsersScreen } from '@/screens/admin/AdminUsersScreen';
 import { useTheme } from '@/context/ThemeContext';
 import { useAuth } from '@/context/AuthContext';
+import { isManagementPlatform } from '@/utils/platform';
 import { FontSize, FontWeight, Radius, Shadow, Spacing } from '@/config/theme';
 
 export type AppTabsParamList = {
@@ -67,8 +68,11 @@ export function AppTabs() {
   const { colors } = useTheme();
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
-  const isAuthor = user?.role === 'instructor' || user?.role === 'admin';
-  const isAdmin = user?.role === 'admin';
+  // Verwaltung ist web-only: auf iOS/Android werden die Bereiche gar nicht
+  // erst registriert (siehe utils/platform.ts).
+  const isAuthor =
+    isManagementPlatform && (user?.role === 'instructor' || user?.role === 'admin');
+  const isAdmin = isManagementPlatform && user?.role === 'admin';
 
   return (
     <Tab.Navigator

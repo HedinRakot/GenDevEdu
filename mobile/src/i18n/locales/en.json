@@ -334,7 +334,9 @@
       "admin": "User management",
       "adminSubtitle": "Manage roles and accounts",
       "attendance": "Attendance",
-      "attendanceSubtitle": "Activity, absences and evidence (AZAV)"
+      "attendanceSubtitle": "Activity, absences and evidence (AZAV)",
+      "webOnly": "Available on the web only",
+      "webOnlySubtitle": "Management is accessible via the web version of the app"
     },
     "account": {
       "title": "Account",

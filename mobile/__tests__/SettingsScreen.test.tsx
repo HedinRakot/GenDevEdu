@@ -27,6 +27,14 @@ jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({ navigate: mockNavigate, goBack: jest.fn() }),
 }));
 
+// Verwaltung ist web-only; per Mock steuerbar (Jest simuliert sonst iOS).
+let mockIsManagementPlatform = true;
+jest.mock('@/utils/platform', () => ({
+  get isManagementPlatform() {
+    return mockIsManagementPlatform;
+  },
+}));
+
 import i18n from '@/i18n';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { SettingsScreen } from '@/screens/SettingsScreen';
@@ -46,6 +54,7 @@ beforeEach(async () => {
   // damit der Sprachwechsel-Test andere Tests nicht beeinflusst.
   await i18n.changeLanguage('de');
   mockUser = { name: 'Ada Lovelace', email: 'ada@devedu.test', role: 'learner' };
+  mockIsManagementPlatform = true;
 });
 
 describe('SettingsScreen', () => {
@@ -78,9 +87,17 @@ describe('SettingsScreen', () => {
     expect(queryByText('Autorenbereich')).toBeNull();
   });
 
-  it('shows the author entry for instructors', () => {
+  it('shows the author entry for instructors (web)', () => {
     mockUser = { name: 'Tom', email: 'tom@devedu.test', role: 'instructor' };
     const { getByText } = renderScreen();
     expect(getByText('Autorenbereich')).toBeTruthy();
+  });
+
+  it('shows a web-only hint instead of management entries on native', () => {
+    mockUser = { name: 'Tom', email: 'tom@devedu.test', role: 'instructor' };
+    mockIsManagementPlatform = false;
+    const { getByText, queryByText } = renderScreen();
+    expect(queryByText('Autorenbereich')).toBeNull();
+    expect(getByText('Nur im Web verfügbar')).toBeTruthy();
   });
 });

@@ -16,6 +16,7 @@ import i18n, { SUPPORTED_LANGUAGES, type SupportedLanguage } from '@/i18n';
 import { saveLanguage } from '@/store/storage';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
+import { isManagementPlatform } from '@/utils/platform';
 import {
   cancelStreakReminder,
   isStreakReminderEnabled,
@@ -273,8 +274,8 @@ export function SettingsScreen() {
           />
         </SettingsSection>
 
-        {/* Verwaltung (rollenabhängig) */}
-        {(isAuthor || isAdmin) && (
+        {/* Verwaltung (rollenabhängig, nur im Web — siehe utils/platform.ts) */}
+        {(isAuthor || isAdmin) && isManagementPlatform && (
           <SettingsSection title={t('settings.management.title')}>
             {isAuthor && (
               <SettingsRow
@@ -302,6 +303,16 @@ export function SettingsScreen() {
                 isLast
               />
             )}
+          </SettingsSection>
+        )}
+        {(isAuthor || isAdmin) && !isManagementPlatform && (
+          <SettingsSection title={t('settings.management.title')}>
+            <SettingsRow
+              icon="🖥️"
+              label={t('settings.management.webOnly')}
+              subtitle={t('settings.management.webOnlySubtitle')}
+              isLast
+            />
           </SettingsSection>
         )}
 
