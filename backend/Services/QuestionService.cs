@@ -114,6 +114,11 @@ public class QuestionService
         bool isCorrect = Grading.IsCorrect(q, req.AnswerId, req.AnswerIds);
         var score = isCorrect ? 1 : 0;
 
+        // Gewählte Antworten mitschreiben (Falsch-Antwort-Analyse im Dashboard).
+        var selected = req.AnswerIds ?? new List<string>();
+        if (selected.Count == 0 && !string.IsNullOrEmpty(req.AnswerId))
+            selected = new List<string> { req.AnswerId };
+
         await _db.Attempts.InsertOneAsync(new Attempt
         {
             UserId = userId,
@@ -121,6 +126,8 @@ public class QuestionService
             CourseId = ql.CourseId,
             IsCorrect = isCorrect,
             Score = score,
+            SelectedAnswerIds = selected,
+            SubmittedText = string.IsNullOrWhiteSpace(req.TextAnswer) ? null : req.TextAnswer,
         });
 
         var revealedAnswers = q.Answers.Select(a => Mappers.ToAnswerDto(a, reveal: true)).ToList();

@@ -76,6 +76,11 @@ public class EnrollmentService
         if (!progress.CompletedChapterContentIds.Contains(chapterContentId))
             progress.CompletedChapterContentIds.Add(chapterContentId);
 
+        // Zeitstempel je Abschluss mitschreiben (Teilnehmer-Dashboard: echter
+        // Bearbeitungszeitpunkt statt nur "irgendwann abgehakt"). Idempotent.
+        if (!progress.ContentCompletions.Any(cc => cc.ContentId == chapterContentId))
+            progress.ContentCompletions.Add(new ContentCompletion { ContentId = chapterContentId });
+
         progress.LastVisited = DateTime.UtcNow;
         await _db.Progress.ReplaceOneAsync(p => p.Id == progress.Id, progress);
 

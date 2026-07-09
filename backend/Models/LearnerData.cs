@@ -28,6 +28,21 @@ public class Progress
     /// <summary>Kapitel-IDs, deren Abschlussquiz bestanden wurde (F8, Basis für F10).</summary>
     public List<string> PassedChapterQuizIds { get; set; } = new();
     public DateTime LastVisited { get; set; } = DateTime.UtcNow;
+
+    /// <summary>
+    /// Abschluss-Zeitstempel je Content-Element (Basis für das Teilnehmer-Dashboard:
+    /// Abgleich "abgeschlossen geklickt" vs. tatsächliche Lernzeit aus F14).
+    /// Wird parallel zu <see cref="CompletedChapterContentIds"/> gepflegt
+    /// (Doppelschreibung, abwärtskompatibel — Altbestand hat hier keine Einträge).
+    /// </summary>
+    public List<ContentCompletion> ContentCompletions { get; set; } = new();
+}
+
+/// <summary>Ein einzelner Content-Abschluss mit Zeitpunkt.</summary>
+public class ContentCompletion
+{
+    public string ContentId { get; set; } = string.Empty;
+    public DateTime CompletedAtUtc { get; set; } = DateTime.UtcNow;
 }
 
 public class Attempt
@@ -42,6 +57,17 @@ public class Attempt
     public string CourseId { get; set; } = string.Empty;
     public bool IsCorrect { get; set; }
     public int Score { get; set; }
+
+    /// <summary>
+    /// Vom Lerner gewählte Antwort-IDs (OneChoice: genau eine; MultipleChoice: mehrere).
+    /// Ermöglicht Falsch-Antwort-Analyse im Teilnehmer-Dashboard.
+    /// Altbestand vor Juli 2026 hat hier keine Einträge.
+    /// </summary>
+    public List<string> SelectedAnswerIds { get; set; } = new();
+
+    /// <summary>Eingereichter Freitext bei OwnAnswer-Fragen (sonst null).</summary>
+    public string? SubmittedText { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
 
