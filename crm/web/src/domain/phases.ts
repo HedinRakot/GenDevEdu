@@ -24,15 +24,23 @@ export const PHASE_LABELS: Record<PipelinePhase, string> = {
   abgelehnt: 'Abgelehnt',
 };
 
+/**
+ * Semantische Pipeline-Stufen-Farben (Board). Auf die „Akademie"-Palette abgestimmt,
+ * aber bewusst gegenseitig unterscheidbar gehalten (NICHT in die Marken-Rampe gefaltet –
+ * ein einfarbiges Board wäre unlesbar). Gespiegelt aus design/tokens.json (phaseColors.light).
+ */
 export const PHASE_COLORS: Record<PipelinePhase, string> = {
-  erstgespraech: '#6366f1',
-  eignungstest: '#0ea5e9',
-  gutscheinBeantragt: '#f59e0b',
-  gutscheinGenehmigt: '#10b981',
-  ausbildungGestartet: '#22c55e',
-  abgebrochen: '#9ca3af',
-  abgelehnt: '#ef4444',
+  erstgespraech: '#6d5ac6',
+  eignungstest: '#3b82b8',
+  gutscheinBeantragt: '#c08a2e',
+  gutscheinGenehmigt: '#4e9c6b',
+  ausbildungGestartet: '#3f8f53',
+  abgebrochen: '#83718e',
+  abgelehnt: '#c0453c',
 };
+
+/** Farbe der Sammel-Spalte „Beendet" (Terminalzustände). */
+export const TERMINAL_COLOR = '#83718e';
 
 export const KIND_LABELS: Record<string, string> = {
   note: 'Notiz',

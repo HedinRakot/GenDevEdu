@@ -6,7 +6,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
-  Text,
   TextInput,
   TouchableOpacity,
   View,
@@ -20,75 +19,68 @@ import type { ChatMessage } from '@/types/chat';
 import { useChat } from '@/hooks/useChat';
 import { useTheme } from '@/context/ThemeContext';
 import { useSnippets } from '@/hooks/useSnippets';
-import { MarkdownRenderer } from '@/components/common/MarkdownRenderer';
-import { FontSize, FontWeight, Radius, Shadow, Spacing } from '@/config/theme';
+import { ChatBubble, Icon, Typography } from '@/components/common';
+import { FontFamily, FontSize, Radius, Shadow, Spacing } from '@/config/theme';
 
-interface BubbleProps {
+interface MessageRowProps {
   message: ChatMessage;
   onFavorite: (msg: ChatMessage) => void;
   isFavorited: boolean;
 }
 
-function ChatBubble({ message, onFavorite, isFavorited }: BubbleProps) {
+function MessageRow({ message, onFavorite, isFavorited }: MessageRowProps) {
   const { colors } = useTheme();
   const isUser = message.role === 'user';
+  const role: 'user' | 'ai' = isUser ? 'user' : 'ai';
   const time = new Date(message.timestamp).toLocaleTimeString([], {
     hour: '2-digit',
     minute: '2-digit',
   });
+  const isEmptyStreaming = message.isStreaming === true && message.content.length === 0;
 
   return (
-    <View style={[styles.bubbleWrapper, isUser && styles.bubbleWrapperUser]}>
-      {!isUser && (
-        <View style={[styles.aiAvatar, { backgroundColor: colors.primarySurface }]}>
-          <Text style={styles.aiAvatarText}>🤖</Text>
+    <View style={styles.messageRow}>
+      {isEmptyStreaming ? (
+        <View style={styles.streamingRow}>
+          <View style={[styles.aiAvatar, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <Icon name="chat" size={16} color={colors.accent} strokeWidth={1.75} />
+          </View>
+          <ActivityIndicator size="small" color={colors.textSecondary} />
+        </View>
+      ) : (
+        <ChatBubble role={role} content={isUser ? message.content : message.content || '...'} />
+      )}
+
+      {!isUser && message.sources && message.sources.length > 0 && (
+        <View style={styles.sourceRow}>
+          {message.sources.map((s, i) => (
+            <View
+              key={`${s.chapterId}-${i}`}
+              style={[styles.sourceChip, { backgroundColor: colors.primarySurface }]}
+            >
+              <Icon name="courses" size={12} color={colors.primary} strokeWidth={1.75} />
+              <Typography variant="caption" color={colors.primary} numberOfLines={1}>
+                {s.title}
+              </Typography>
+            </View>
+          ))}
         </View>
       )}
-      <View
-        style={[
-          styles.bubble,
-          isUser
-            ? { backgroundColor: colors.chatUserBubble, borderBottomRightRadius: Radius.xs }
-            : { backgroundColor: colors.chatAiBubble, borderBottomLeftRadius: Radius.xs },
-        ]}
-      >
-        {message.isStreaming && message.content.length === 0 ? (
-          <ActivityIndicator size="small" color={colors.textSecondary} />
-        ) : isUser ? (
-          <Text style={[styles.bubbleText, { color: colors.chatUserText }]}>{message.content}</Text>
-        ) : (
-          <MarkdownRenderer content={message.content || '...'} />
-        )}
 
-        {!isUser && message.sources && message.sources.length > 0 && (
-          <View style={styles.sourceRow}>
-            {message.sources.map((s, i) => (
-              <View key={`${s.chapterId}-${i}`} style={[styles.sourceChip, { backgroundColor: colors.primarySurface }]}>
-                <Text style={[styles.sourceChipText, { color: colors.primary }]} numberOfLines={1}>
-                  📄 {s.title}
-                </Text>
-              </View>
-            ))}
-          </View>
+      <View style={[styles.footer, isUser ? styles.footerUser : styles.footerAi]}>
+        <Typography variant="caption" color="tertiary">
+          {time}
+        </Typography>
+        {!isUser && !message.isStreaming && message.content.length > 0 && (
+          <TouchableOpacity onPress={() => onFavorite(message)} hitSlop={8}>
+            <Icon
+              name="snippets"
+              size={16}
+              color={isFavorited ? colors.accent : colors.textTertiary}
+              strokeWidth={1.75}
+            />
+          </TouchableOpacity>
         )}
-
-        <View style={styles.bubbleFooter}>
-          <Text
-            style={[
-              styles.bubbleTime,
-              { color: isUser ? 'rgba(255,255,255,0.6)' : colors.textTertiary },
-            ]}
-          >
-            {time}
-          </Text>
-          {!isUser && !message.isStreaming && message.content.length > 0 && (
-            <TouchableOpacity onPress={() => onFavorite(message)} hitSlop={8}>
-              <Text style={[styles.favStar, { color: isFavorited ? colors.accent : colors.textTertiary }]}>
-                {isFavorited ? '★' : '☆'}
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
       </View>
     </View>
   );
@@ -173,24 +165,29 @@ export function ChatScreen() {
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <View>
-          <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>{t('chat.title')}</Text>
-          <Text style={[styles.headerSubtitle, { color: colors.textTertiary }]}>
+          <Typography variant="h3" color="primary">
+            {t('chat.title')}
+          </Typography>
+          <Typography variant="bodySm" color="tertiary">
             {t('chat.subtitle')}
-          </Text>
+          </Typography>
         </View>
         <TouchableOpacity
           style={[styles.clearButton, { backgroundColor: colors.surfaceElevated }]}
           onPress={handleClearHistory}
         >
-          <Text style={styles.clearButtonText}>🗑️</Text>
+          <Icon name="delete" size={20} color={colors.textSecondary} strokeWidth={1.75} />
         </TouchableOpacity>
       </View>
 
       {context && (
-        <View testID="chat-context-banner" style={[styles.contextBanner, { backgroundColor: colors.primarySurface }]}>
-          <Text style={[styles.contextBannerText, { color: colors.primary }]}>
+        <View
+          testID="chat-context-banner"
+          style={[styles.contextBanner, { backgroundColor: colors.accentSurface }]}
+        >
+          <Typography variant="label" color="accent">
             {t('chat.contextBanner')}
-          </Text>
+          </Typography>
         </View>
       )}
 
@@ -200,10 +197,10 @@ export function ChatScreen() {
       >
         {messages.length === 0 ? (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyEmoji}>🤖</Text>
-            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+            <Icon name="chat" size={64} color={colors.accent} strokeWidth={1.5} />
+            <Typography variant="body" color="secondary" center style={styles.emptyText}>
               {t('chat.emptyState')}
-            </Text>
+            </Typography>
           </View>
         ) : (
           <FlatList
@@ -213,7 +210,7 @@ export function ChatScreen() {
             contentContainerStyle={styles.messageList}
             showsVerticalScrollIndicator={false}
             renderItem={({ item }) => (
-              <ChatBubble
+              <MessageRow
                 message={item}
                 onFavorite={handleFavorite}
                 isFavorited={favoritedIds.has(item.id)}
@@ -261,7 +258,7 @@ export function ChatScreen() {
             {isSending ? (
               <ActivityIndicator size="small" color={colors.textInverted} />
             ) : (
-              <Text style={[styles.sendIcon, { color: colors.textInverted }]}>↑</Text>
+              <Icon name="arrow-right" size={20} color={colors.textInverted} strokeWidth={2} />
             )}
           </TouchableOpacity>
         </View>
@@ -282,8 +279,6 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     borderBottomWidth: 1,
   },
-  headerTitle: { fontSize: FontSize.xl, fontWeight: FontWeight.bold },
-  headerSubtitle: { fontSize: FontSize.sm },
   clearButton: {
     width: 40,
     height: 40,
@@ -291,48 +286,60 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  clearButtonText: { fontSize: 18 },
 
-  apiKeyWarning: { paddingHorizontal: Spacing.lg, paddingVertical: Spacing.sm },
-  apiKeyWarningText: { fontSize: FontSize.sm, fontWeight: FontWeight.medium },
-  contextBanner: { paddingHorizontal: Spacing.lg, paddingVertical: Spacing.sm },
-  contextBannerText: { fontSize: FontSize.sm, fontWeight: FontWeight.medium },
+  contextBanner: {
+    alignSelf: 'flex-start',
+    marginHorizontal: Spacing.lg,
+    marginTop: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    borderRadius: Radius.full,
+  },
 
-  emptyState: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: Spacing.xl },
-  emptyEmoji: { fontSize: 64, marginBottom: Spacing.md },
-  emptyText: { fontSize: FontSize.md, textAlign: 'center', lineHeight: 24 },
+  emptyState: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: Spacing.xl, gap: Spacing.md },
+  emptyText: { lineHeight: 24 },
 
   messageList: { padding: Spacing.md, paddingBottom: Spacing.sm },
 
-  bubbleWrapper: {
+  messageRow: { marginBottom: Spacing.md },
+  streamingRow: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
-    marginBottom: Spacing.sm,
-    gap: Spacing.xs,
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: Spacing.sm + 2,
   },
-  bubbleWrapperUser: { flexDirection: 'row-reverse' },
   aiAvatar: {
     width: 32,
     height: 32,
-    borderRadius: Radius.full,
+    borderRadius: 16,
+    borderWidth: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 4,
   },
-  aiAvatarText: { fontSize: 16 },
-  bubble: { maxWidth: '78%', borderRadius: Radius.lg, padding: Spacing.md, ...Shadow.sm },
-  bubbleText: { fontSize: FontSize.md, lineHeight: 22 },
-  bubbleFooter: {
+  footer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 4,
+    gap: Spacing.sm,
+    marginTop: Spacing.xs,
   },
-  bubbleTime: { fontSize: FontSize.xs, textAlign: 'right' },
-  favStar: { fontSize: 18, marginLeft: Spacing.sm },
-  sourceRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.xs, marginTop: Spacing.xs },
-  sourceChip: { paddingHorizontal: Spacing.sm, paddingVertical: 2, borderRadius: Radius.full, maxWidth: 200 },
-  sourceChipText: { fontSize: FontSize.xs, fontWeight: FontWeight.medium },
+  footerUser: { alignSelf: 'flex-end' },
+  footerAi: { paddingLeft: 42 },
+  sourceRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.xs,
+    marginTop: Spacing.sm,
+    paddingLeft: 42,
+  },
+  sourceChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 2,
+    borderRadius: Radius.full,
+    maxWidth: 220,
+  },
 
   inputRow: {
     flexDirection: 'row',
@@ -347,6 +354,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.xl,
     paddingHorizontal: Spacing.md,
     paddingVertical: 10,
+    fontFamily: FontFamily.sans,
     fontSize: FontSize.md,
     maxHeight: 120,
   },
@@ -358,5 +366,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     ...Shadow.sm,
   },
-  sendIcon: { fontSize: 20, fontWeight: FontWeight.bold },
 });

@@ -1,14 +1,5 @@
 import React, { useState } from 'react';
-import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
@@ -16,7 +7,8 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSignIn } from '@clerk/expo';
 
 import { useTheme } from '@/context/ThemeContext';
-import { FontSize, FontWeight, Radius, Shadow, Spacing } from '@/config/theme';
+import { Radius, Shadow, Spacing } from '@/config/theme';
+import { Button, Card, Icon, Input, Typography } from '@/components/common';
 import type { AuthStackParamList } from '@/navigation/AuthStack';
 
 type LoginNavProp = NativeStackNavigationProp<AuthStackParamList, 'Login'>;
@@ -71,96 +63,91 @@ export function LoginScreen() {
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <View style={styles.header}>
-          <Text style={styles.logo}>🎓</Text>
-          <Text style={[styles.appName, { color: colors.primary }]}>EduCode</Text>
-          <Text style={[styles.tagline, { color: colors.textSecondary }]}>
-            {t('auth.tagline')}
-          </Text>
-        </View>
+        <View style={styles.stage}>
+          <View style={styles.header}>
+            <View style={[styles.logoBadge, { backgroundColor: colors.primarySurface }]}>
+              <Icon name="logo" size={34} color={colors.accent} strokeWidth={1.75} />
+            </View>
+            <Typography variant="h1" style={{ marginTop: Spacing.md }}>
+              EduCode
+            </Typography>
+            <Typography variant="body" color="secondary" center style={{ marginTop: Spacing.xs }}>
+              {t('auth.tagline')}
+            </Typography>
+          </View>
 
-        <View style={[styles.card, { backgroundColor: colors.surface }]}>
-          <Text style={[styles.welcomeText, { color: colors.textPrimary }]}>
-            {t('auth.welcome')}
-          </Text>
+          <Card style={styles.card}>
+            <Typography variant="h3" style={{ marginBottom: Spacing.lg }}>
+              {t('auth.welcome')}
+            </Typography>
 
-          <TextInput
-            testID="login-email-input"
-            style={[
-              styles.input,
-              { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border },
-            ]}
-            placeholder={t('auth.emailPlaceholder')}
-            placeholderTextColor={colors.textSecondary}
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
-            textContentType="emailAddress"
-            autoComplete="email"
-          />
+            <Input
+              testID="login-email-input"
+              containerStyle={{ marginBottom: Spacing.md }}
+              placeholder={t('auth.emailPlaceholder')}
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              keyboardType="email-address"
+              textContentType="emailAddress"
+              autoComplete="email"
+              leftIcon="mail"
+            />
 
-          <TextInput
-            testID="login-password-input"
-            style={[
-              styles.input,
-              { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border },
-            ]}
-            placeholder={t('auth.passwordPlaceholder')}
-            placeholderTextColor={colors.textSecondary}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            textContentType="password"
-            autoComplete="current-password"
-          />
+            <Input
+              testID="login-password-input"
+              containerStyle={{ marginBottom: Spacing.md }}
+              placeholder={t('auth.passwordPlaceholder')}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              textContentType="password"
+              autoComplete="current-password"
+              leftIcon="lock"
+            />
 
-          {errorMsg && (
-            <Text testID="login-error" style={[styles.errorText, { color: colors.error }]}>
-              {errorMsg}
-            </Text>
-          )}
-
-          <TouchableOpacity
-            accessibilityRole="button"
-            testID="oidc-login-button"
-            style={[
-              styles.loginButton,
-              { backgroundColor: colors.primary },
-              isSubmitting && { opacity: 0.7 },
-            ]}
-            onPress={handleLogin}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <ActivityIndicator color={colors.textInverted} />
-            ) : (
-              <Text style={[styles.loginButtonText, { color: colors.textInverted }]}>
-                {t('auth.loginButton')}
-              </Text>
+            {errorMsg && (
+              <Typography
+                testID="login-error"
+                variant="bodySm"
+                style={{ color: colors.error, marginBottom: Spacing.md }}
+              >
+                {errorMsg}
+              </Typography>
             )}
-          </TouchableOpacity>
 
-          <TouchableOpacity
-            testID="forgot-password-link"
-            style={styles.forgotPassword}
-            onPress={() => navigation.navigate('ForgotPassword')}
-          >
-            <Text style={[styles.linkText, { color: colors.primary }]}>
-              {t('auth.forgotPassword')}
-            </Text>
-          </TouchableOpacity>
-        </View>
+            <Button
+              testID="oidc-login-button"
+              title={t('auth.loginButton')}
+              onPress={handleLogin}
+              loading={isSubmitting}
+              disabled={isSubmitting}
+              fullWidth
+              iconRight="arrow-right"
+              style={{ marginTop: Spacing.sm }}
+            />
 
-        <View style={styles.footer}>
-          <Text style={[styles.footerText, { color: colors.textSecondary }]}>
-            {t('auth.signUpPrompt')}{' '}
-          </Text>
-          <TouchableOpacity testID="sign-up-link" onPress={() => navigation.navigate('SignUp')}>
-            <Text style={[styles.linkText, { color: colors.primary }]}>
-              {t('auth.signUpLink')}
-            </Text>
-          </TouchableOpacity>
+            <Button
+              testID="forgot-password-link"
+              title={t('auth.forgotPassword')}
+              variant="ghost"
+              onPress={() => navigation.navigate('ForgotPassword')}
+              style={{ alignSelf: 'center', marginTop: Spacing.sm }}
+            />
+          </Card>
+
+          <View style={styles.footer}>
+            <Typography variant="body" color="secondary">
+              {t('auth.signUpPrompt')}{' '}
+            </Typography>
+            <Button
+              testID="sign-up-link"
+              title={t('auth.signUpLink')}
+              variant="ghost"
+              size="sm"
+              onPress={() => navigation.navigate('SignUp')}
+            />
+          </View>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -170,40 +157,21 @@ export function LoginScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   container: { flex: 1, justifyContent: 'center', paddingHorizontal: Spacing.lg },
+  stage: { width: '100%', maxWidth: 440, alignSelf: 'center' },
   header: { alignItems: 'center', marginBottom: Spacing.xl },
-  logo: { fontSize: 64, marginBottom: Spacing.sm },
-  appName: {
-    fontSize: FontSize.xxxl,
-    fontWeight: FontWeight.extrabold,
-    letterSpacing: -1,
-  },
-  tagline: { fontSize: FontSize.md, marginTop: Spacing.xs },
-  card: { borderRadius: Radius.xl, padding: Spacing.xl, ...Shadow.md },
-  welcomeText: { fontSize: FontSize.xl, fontWeight: FontWeight.bold, marginBottom: Spacing.lg },
-  errorText: { fontSize: FontSize.sm, marginBottom: Spacing.md, fontWeight: FontWeight.semibold },
-  input: {
-    borderWidth: 1,
-    borderRadius: Radius.md,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    marginBottom: Spacing.md,
-    fontSize: FontSize.md,
-  },
-  loginButton: {
-    borderRadius: Radius.md,
-    paddingVertical: 16,
+  logoBadge: {
+    width: 72,
+    height: 72,
+    borderRadius: Radius.lg,
     alignItems: 'center',
-    marginTop: Spacing.sm,
+    justifyContent: 'center',
     ...Shadow.sm,
   },
-  loginButtonText: { fontSize: FontSize.md, fontWeight: FontWeight.bold },
-  forgotPassword: { alignSelf: 'center', marginTop: Spacing.md },
+  card: { padding: Spacing.xl },
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: Spacing.xl,
   },
-  footerText: { fontSize: FontSize.md },
-  linkText: { fontSize: FontSize.md, fontWeight: FontWeight.semibold },
 });

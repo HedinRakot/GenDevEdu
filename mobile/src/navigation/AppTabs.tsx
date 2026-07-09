@@ -1,6 +1,6 @@
 import React from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { StyleSheet, Text, View } from 'react-native';
+import { BottomTabBar, createBottomTabNavigator, type BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
@@ -15,8 +15,11 @@ import { LearnersStack } from './LearnersStack';
 import { AdminUsersScreen } from '@/screens/admin/AdminUsersScreen';
 import { useTheme } from '@/context/ThemeContext';
 import { useAuth } from '@/context/AuthContext';
+import { useResponsive } from '@/hooks/useResponsive';
 import { isManagementPlatform } from '@/utils/platform';
-import { FontSize, FontWeight, Radius, Shadow, Spacing } from '@/config/theme';
+import { Radius, Shadow, Spacing } from '@/config/theme';
+import { Icon, type IconName, Typography } from '@/components/common';
+import { Sidebar } from './Sidebar';
 
 export type AppTabsParamList = {
   Dashboard: undefined;
@@ -36,12 +39,12 @@ const Tab = createBottomTabNavigator<AppTabsParamList>();
 const TAB_BAR_HEIGHT = 64;
 
 interface TabIconProps {
-  emoji: string;
+  icon: IconName;
   focused: boolean;
   label: string;
 }
 
-function TabIcon({ emoji, focused, label }: TabIconProps) {
+function TabIcon({ icon, focused, label }: TabIconProps) {
   const { colors } = useTheme();
   return (
     <View
@@ -50,17 +53,19 @@ function TabIcon({ emoji, focused, label }: TabIconProps) {
         focused && { backgroundColor: colors.primarySurface },
       ]}
     >
-      <Text style={styles.tabEmoji}>{emoji}</Text>
-      <Text
-        style={[
-          styles.tabLabel,
-          { color: focused ? colors.tabActive : colors.tabInactive },
-          focused && styles.tabLabelFocused,
-        ]}
+      <Icon
+        name={icon}
+        size={22}
+        color={focused ? colors.tabActive : colors.tabInactive}
+        strokeWidth={focused ? 2 : 1.75}
+      />
+      <Typography
+        variant="caption"
         numberOfLines={1}
+        style={{ color: focused ? colors.tabActive : colors.tabInactive, marginTop: 2 }}
       >
         {label}
-      </Text>
+      </Typography>
     </View>
   );
 }
@@ -70,16 +75,23 @@ export function AppTabs() {
   const { colors } = useTheme();
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
+  const { isWide } = useResponsive();
   // Verwaltung ist web-only: auf iOS/Android werden die Bereiche gar nicht
   // erst registriert (siehe utils/platform.ts).
   const isAuthor =
     isManagementPlatform && (user?.role === 'instructor' || user?.role === 'admin');
   const isAdmin = isManagementPlatform && user?.role === 'admin';
 
+  // Ein Routen-Register für beide Modi: schmal → Bottom-Tab-Bar, breit → Sidebar.
+  const renderTabBar = (props: BottomTabBarProps) =>
+    isWide ? <Sidebar {...props} /> : <BottomTabBar {...props} />;
+
   return (
     <Tab.Navigator
+      tabBar={renderTabBar}
       screenOptions={{
         headerShown: false,
+        tabBarPosition: isWide ? 'left' : 'bottom',
         // Höhe + unteres Padding um den Safe-Area-Inset erweitern (Home-Indicator),
         // sonst rutschen die Icons auf dem Smartphone nach oben.
         tabBarStyle: [
@@ -98,7 +110,7 @@ export function AppTabs() {
         component={DashboardScreen}
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon emoji="🏠" focused={focused} label={t('navigation.dashboard')} />
+            <TabIcon icon="dashboard" focused={focused} label={t('navigation.dashboard')} />
           ),
         }}
       />
@@ -107,7 +119,7 @@ export function AppTabs() {
         component={CoursesStack}
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon emoji="📚" focused={focused} label={t('navigation.courses')} />
+            <TabIcon icon="courses" focused={focused} label={t('navigation.courses')} />
           ),
         }}
       />
@@ -116,7 +128,7 @@ export function AppTabs() {
         component={ChatScreen}
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon emoji="🤖" focused={focused} label={t('navigation.chat')} />
+            <TabIcon icon="chat" focused={focused} label={t('navigation.chat')} />
           ),
         }}
       />
@@ -164,7 +176,7 @@ export function AppTabs() {
         options={{
           tabBarButtonTestID: 'tab-settings',
           tabBarIcon: ({ focused }) => (
-            <TabIcon emoji="⚙️" focused={focused} label={t('navigation.settings')} />
+            <TabIcon icon="settings" focused={focused} label={t('navigation.settings')} />
           ),
         }}
       />
@@ -188,11 +200,4 @@ const styles = StyleSheet.create({
     minWidth: 60,
     gap: 2,
   },
-  tabEmoji: { fontSize: 22 },
-  tabLabel: {
-    fontSize: FontSize.xs,
-    fontWeight: FontWeight.medium,
-    marginTop: 2,
-  },
-  tabLabelFocused: { fontWeight: FontWeight.semibold },
 });

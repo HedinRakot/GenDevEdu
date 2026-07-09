@@ -1,9 +1,10 @@
 import React, { useMemo } from 'react';
-import { StyleSheet, Text, View, type TextStyle } from 'react-native';
+import { StyleSheet } from 'react-native';
 import Markdown, { type RenderRules } from 'react-native-markdown-display';
 
 import { useTheme } from '@/context/ThemeContext';
-import { FontSize, FontWeight, Radius, Spacing } from '@/config/theme';
+import { FontFamily, FontSize, FontWeight, Radius, Spacing } from '@/config/theme';
+import { CodeBlock } from './CodeBlock';
 
 interface Props {
   content: string;
@@ -69,7 +70,7 @@ export function MarkdownRenderer({ content, onUserBubble = false }: Props) {
           paddingHorizontal: 6,
           paddingVertical: 2,
           borderRadius: Radius.xs,
-          fontFamily: 'Courier',
+          fontFamily: FontFamily.mono,
           fontSize: FontSize.sm,
         },
 
@@ -79,7 +80,7 @@ export function MarkdownRenderer({ content, onUserBubble = false }: Props) {
           color: colors.codeText,
           padding: Spacing.md,
           borderRadius: Radius.md,
-          fontFamily: 'Courier',
+          fontFamily: FontFamily.mono,
           fontSize: FontSize.sm,
           lineHeight: 20,
           marginVertical: Spacing.xs,
@@ -89,7 +90,7 @@ export function MarkdownRenderer({ content, onUserBubble = false }: Props) {
           color: colors.codeText,
           padding: Spacing.md,
           borderRadius: Radius.md,
-          fontFamily: 'Courier',
+          fontFamily: FontFamily.mono,
           fontSize: FontSize.sm,
           marginVertical: Spacing.xs,
         },
@@ -111,48 +112,16 @@ export function MarkdownRenderer({ content, onUserBubble = false }: Props) {
     [colors, onUserBubble],
   );
 
-  // Custom-Renderer für fenced Code-Blöcke mit Sprach-Label
+  // Custom-Renderer für fenced Code-Blöcke → gemeinsame CodeBlock-Primitive
   const rules = useMemo<RenderRules>(
     () => ({
-      fence: (node, _children, _parent, _style) => {
+      fence: (node) => {
         const language: string | undefined = (node as { sourceInfo?: string }).sourceInfo;
         const codeText: string = (node as { content?: string }).content ?? '';
-
-        const labelStyle: TextStyle = {
-          color: colors.codeText,
-          opacity: 0.6,
-          fontSize: FontSize.xs,
-          fontFamily: 'Courier',
-          marginBottom: Spacing.xs,
-        };
-
-        return (
-          <View
-            key={node.key}
-            style={{
-              backgroundColor: colors.codeBackground,
-              padding: Spacing.md,
-              borderRadius: Radius.md,
-              marginVertical: Spacing.xs,
-            }}
-          >
-            {language ? <Text style={labelStyle}>{language.toUpperCase()}</Text> : null}
-            <Text
-              style={{
-                color: colors.codeText,
-                fontFamily: 'Courier',
-                fontSize: FontSize.sm,
-                lineHeight: 20,
-              }}
-              selectable
-            >
-              {codeText.replace(/\n$/, '')}
-            </Text>
-          </View>
-        );
+        return <CodeBlock key={node.key} code={codeText} language={language} showCopy={!onUserBubble} />;
       },
     }),
-    [colors],
+    [onUserBubble],
   );
 
   return (

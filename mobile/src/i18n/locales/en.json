@@ -116,11 +116,15 @@
   "navigation": {
     "dashboard": "Dashboard",
     "courses": "Courses",
-    "chat": "AI Chat",
+    "chat": "AI Tutor",
     "snippets": "Snippets",
-    "author": "Create",
-    "admin": "Admin",
-    "settings": "Settings"
+    "author": "Authoring",
+    "attendance": "Attendance",
+    "learners": "Learners",
+    "admin": "Administration",
+    "settings": "Settings",
+    "sectionLearn": "Learn",
+    "sectionManage": "Manage"
   },
   "admin": {
     "title": "User management",
@@ -138,7 +142,7 @@
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Welcome!",
-    "greeting": "Hello, {{name}}! 👋",
+    "greeting": "Hello, {{name}}!",
     "subtitle": "Keep it up!",
     "streak": {
       "title": "Learning Streak",
@@ -232,7 +236,7 @@
     "title": "AI Tutor",
     "subtitle": "Your AI learning assistant",
     "askTutor": "Ask tutor",
-    "contextBanner": "🎯 Refers to your current lesson",
+    "contextBanner": "Refers to your current lesson",
     "whyWrong": "Why wrong?",
     "explainWrong": "Why is my answer wrong?",
     "placeholder": "Ask a question about software development...",
@@ -250,9 +254,9 @@
     "tryAgain": "Not quite right.",
     "true": "True",
     "false": "False",
-    "markLessonComplete": "✓ Mark section complete",
+    "markLessonComplete": "Mark section complete",
     "selectAnswer": "Please select at least one answer.",
-    "chapterCompleteTitle": "🎉 Chapter complete!",
+    "chapterCompleteTitle": "Chapter complete!",
     "chapterCompleteBody": "Great job! You answered all questions correctly.",
     "code": {
       "submit": "Run code",
@@ -292,8 +296,8 @@
     "title": "Snippets",
     "subtitle": "Your saved code snippets & answers",
     "searchPlaceholder": "Search snippets...",
-    "empty": "No snippets yet. Tap ★ on chat replies or lessons to save them here.",
-    "saved": "Snippet saved ✓",
+    "empty": "No snippets yet. Save chat replies or lessons to keep them here.",
+    "saved": "Snippet saved",
     "alreadyExists": "Snippet already saved.",
     "delete": "Delete snippet",
     "deleteConfirm": "Delete this snippet?",
@@ -352,7 +356,7 @@
     }
   },
   "notifications": {
-    "streakTitle": "🔥 Keep your streak alive!",
+    "streakTitle": "Keep your streak alive!",
     "streakBody": "You haven't learned today – how about today's daily challenge?"
   }
 }

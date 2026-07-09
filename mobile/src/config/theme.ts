@@ -1,6 +1,9 @@
 /**
- * Zentrales Design-Token-System
+ * Zentrales Design-Token-System – „Akademie"-Palette (warme Aubergine/Kupfer).
  * Light- und Dark-Palette + statische Tokens (Spacing, Radius, Typo, Shadow).
+ *
+ * Werte gespiegelt aus der kanonischen Quelle `design/tokens.json` im Repo-Root.
+ * Änderungen dort zuerst vornehmen. Siehe `design/README.md`.
  */
 
 // ─── Palette-Typ ─────────────────────────────────────────────────────────────
@@ -47,98 +50,101 @@ export type Palette = {
 
   codeBackground: string;
   codeText: string;
+  codeKeyword: string;
 };
 
 // ─── Light-Palette ───────────────────────────────────────────────────────────
 export const lightColors: Palette = {
-  primary: '#6366F1',
-  primaryLight: '#818CF8',
-  primaryDark: '#4F46E5',
-  primarySurface: '#EEF2FF',
+  primary: '#4A2B57', // Aubergine
+  primaryLight: '#6B4478',
+  primaryDark: '#37203F',
+  primarySurface: '#ECE4EA',
 
-  accent: '#F59E0B',
-  accentLight: '#FCD34D',
-  accentSurface: '#FFFBEB',
+  accent: '#B5794F', // Kupfer (WCAG-sicherer auf hell)
+  accentLight: '#C98B62',
+  accentSurface: '#F3E7DC',
 
-  success: '#10B981',
-  successLight: '#6EE7B7',
-  successSurface: '#ECFDF5',
+  success: '#4E7C5D',
+  successLight: '#8FBF9C',
+  successSurface: '#E5EFE7',
 
-  error: '#EF4444',
-  errorLight: '#FCA5A5',
-  errorSurface: '#FEF2F2',
+  error: '#C0453C',
+  errorLight: '#E88A83',
+  errorSurface: '#F7E5E3',
 
-  warning: '#F97316',
-  warningSurface: '#FFF7ED',
+  warning: '#B5794F',
+  warningSurface: '#F6ECE1',
 
-  background: '#F8FAFC',
+  background: '#F4EFF1',
   surface: '#FFFFFF',
-  surfaceElevated: '#F1F5F9',
-  border: '#E2E8F0',
-  borderLight: '#F1F5F9',
+  surfaceElevated: '#ECE4EA',
+  border: '#DDD2DC',
+  borderLight: '#E7DEE6',
 
-  textPrimary: '#0F172A',
-  textSecondary: '#475569',
-  textTertiary: '#94A3B8',
+  textPrimary: '#2A1F30',
+  textSecondary: '#5B4E63',
+  textTertiary: '#83718E',
   textInverted: '#FFFFFF',
 
-  chatUserBubble: '#6366F1',
-  chatAiBubble: '#F1F5F9',
+  chatUserBubble: '#4A2B57',
+  chatAiBubble: '#ECE4EA',
   chatUserText: '#FFFFFF',
-  chatAiText: '#0F172A',
+  chatAiText: '#2A1F30',
 
-  tabActive: '#6366F1',
-  tabInactive: '#94A3B8',
-  tabBackground: '#FFFFFF',
+  tabActive: '#4A2B57',
+  tabInactive: '#83718E',
+  tabBackground: '#ECE4EA',
 
-  codeBackground: '#0F172A',
-  codeText: '#E2E8F0',
+  codeBackground: '#241C2A',
+  codeText: '#F0E8F2',
+  codeKeyword: '#8A5FA8',
 };
 
 // ─── Dark-Palette ────────────────────────────────────────────────────────────
 export const darkColors: Palette = {
-  primary: '#818CF8',
-  primaryLight: '#A5B4FC',
-  primaryDark: '#6366F1',
-  primarySurface: '#1E1B4B',
+  primary: '#C98B62', // Kupfer (CTAs)
+  primaryLight: '#D9A87E',
+  primaryDark: '#A96F49',
+  primarySurface: '#332343',
 
-  accent: '#FBBF24',
-  accentLight: '#FDE68A',
-  accentSurface: '#3B2F0B',
+  accent: '#D9A87E', // Highlight/Labels
+  accentLight: '#E6C29F',
+  accentSurface: '#3A2B44',
 
-  success: '#34D399',
-  successLight: '#6EE7B7',
-  successSurface: '#064E3B',
+  success: '#8FBF9C',
+  successLight: '#A9D3B4',
+  successSurface: '#2E3F33',
 
-  error: '#F87171',
-  errorLight: '#FCA5A5',
-  errorSurface: '#450A0A',
+  error: '#E88A83',
+  errorLight: '#F2ADA8',
+  errorSurface: '#3A2222',
 
-  warning: '#FB923C',
-  warningSurface: '#431407',
+  warning: '#D9A87E',
+  warningSurface: '#3A2B22',
 
-  background: '#0B1220',
-  surface: '#0F172A',
-  surfaceElevated: '#1E293B',
-  border: '#1F2A3D',
-  borderLight: '#1E293B',
+  background: '#171118',
+  surface: '#201826',
+  surfaceElevated: '#251B2E',
+  border: '#2E2336',
+  borderLight: '#2C2133',
 
-  textPrimary: '#F8FAFC',
-  textSecondary: '#CBD5E1',
-  textTertiary: '#64748B',
-  textInverted: '#0F172A',
+  textPrimary: '#F4EFF3',
+  textSecondary: '#BCAFC2',
+  textTertiary: '#82738B',
+  textInverted: '#1C1210',
 
-  chatUserBubble: '#6366F1',
-  chatAiBubble: '#1E293B',
-  chatUserText: '#FFFFFF',
-  chatAiText: '#F1F5F9',
+  chatUserBubble: '#332343',
+  chatAiBubble: '#201826',
+  chatUserText: '#F4EFF3',
+  chatAiText: '#E6DCE8',
 
-  tabActive: '#A5B4FC',
-  tabInactive: '#64748B',
-  tabBackground: '#0F172A',
+  tabActive: '#D9A87E',
+  tabInactive: '#82738B',
+  tabBackground: '#201826',
 
-  codeBackground: '#020617',
-  codeText: '#E2E8F0',
+  codeBackground: '#130E15',
+  codeText: '#E6DCE8',
+  codeKeyword: '#B08BC9',
 };
 
 /**
@@ -195,6 +201,28 @@ export const LineHeight = {
   tight: 1.2,
   normal: 1.5,
   relaxed: 1.75,
+} as const;
+
+/**
+ * Font-Familien – gewichtskodierte Namen, weil RN `fontWeight` mit Custom-Fonts
+ * (v.a. Android) unzuverlässig auf die richtige Schnittdatei mappt. Die Namen
+ * müssen exakt den Exporten der `@expo-google-fonts/*`-Pakete entsprechen und
+ * werden in `App.tsx` via `useFonts` geladen.
+ *
+ * serif = Source Serif 4 (Headlines) · sans = Instrument Sans (UI/Body) · mono = IBM Plex Mono (Code)
+ */
+export const FontFamily = {
+  serif: 'SourceSerif4_400Regular',
+  serifSemibold: 'SourceSerif4_600SemiBold',
+  serifBold: 'SourceSerif4_700Bold',
+
+  sans: 'InstrumentSans_400Regular',
+  sansMedium: 'InstrumentSans_500Medium',
+  sansSemibold: 'InstrumentSans_600SemiBold',
+  sansBold: 'InstrumentSans_700Bold',
+
+  mono: 'IBMPlexMono_400Regular',
+  monoMedium: 'IBMPlexMono_500Medium',
 } as const;
 
 // ─── Schatten (Cross-Platform) ───────────────────────────────────────────────

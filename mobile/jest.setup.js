@@ -146,3 +146,32 @@ jest.mock('expo-web-browser', () => ({
   maybeCompleteAuthSession: jest.fn(),
   openAuthSessionAsync: jest.fn(() => Promise.resolve({ type: 'success' })),
 }));
+
+// expo-clipboard Mock
+jest.mock('expo-clipboard', () => ({
+  __esModule: true,
+  setStringAsync: jest.fn(() => Promise.resolve(true)),
+  getStringAsync: jest.fn(() => Promise.resolve('')),
+}));
+
+// react-native-svg Mock: einfache View-Stubs (kein natives Modul in Jest).
+jest.mock('react-native-svg', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+  const Stub = ({ children, ...props }) => React.createElement(View, props, children);
+  return new Proxy(
+    { __esModule: true, default: Stub },
+    { get: (target, prop) => (prop in target ? target[prop] : Stub) },
+  );
+});
+
+// lucide-react-native Mock: jedes Icon → View-Stub (3494 Icons, daher Proxy).
+jest.mock('lucide-react-native', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+  const Stub = (props) => React.createElement(View, props);
+  return new Proxy(
+    { __esModule: true },
+    { get: (target, prop) => (prop === '__esModule' ? true : Stub) },
+  );
+});

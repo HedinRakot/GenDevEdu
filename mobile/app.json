@@ -45,11 +45,14 @@
         {
           "android": {
             "packagingOptions": {
-              "pickFirst": ["META-INF/versions/9/OSGI-INF/MANIFEST.MF"]
+              "pickFirst": [
+                "META-INF/versions/9/OSGI-INF/MANIFEST.MF"
+              ]
             }
           }
         }
-      ]
+      ],
+      "expo-font"
     ]
   }
 }

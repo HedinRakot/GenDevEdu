@@ -1,16 +1,67 @@
+/*
+ * „Akademie"-Palette (Light). Werte gespiegelt aus der kanonischen Quelle
+ * design/tokens.json (Repo-Root). Änderungen dort zuerst. Siehe design/README.md.
+ * Variablennamen bewusst unverändert, damit der restliche Stylesheet unangetastet bleibt.
+ */
 :root {
-  --bg: #f3f4f6;
+  --bg: #f4eff1;
   --surface: #ffffff;
-  --border: #e5e7eb;
-  --text: #111827;
-  --text-muted: #6b7280;
-  --primary: #4f46e5;
-  --primary-dark: #4338ca;
-  --danger: #dc2626;
-  --warning-bg: #fef3c7;
-  --warning-text: #92400e;
-  --radius: 8px;
-  --shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --elevated: #ece4ea; /* geschichtete Flächen (Tabellenkopf, Dialoge) */
+  --border: #ddd2dc;
+  --text: #2a1f30;
+  --text-muted: #83718e;
+  --primary: #4a2b57; /* Aubergine – Links, aktive Nav, Fokus */
+  --primary-dark: #37203f;
+  --accent: #c98b62; /* Kupfer – Primär-Buttons (mit dunklem Label) */
+  --accent-strong: #b5794f; /* Kupfer dunkler – Hover */
+  --success: #4e7c5d;
+  --danger: #c0453c;
+  --warning-bg: #f6ece1;
+  --warning-text: #8a5a2e;
+  --radius: 11px;
+  --shadow: 0 1px 3px rgba(42, 31, 48, 0.1);
+
+  /* Fonts */
+  --font-ui: 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  /* Spacing-Skala (8-pt, analog Mobile) */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  /* Type-Skala */
+  --text-xs: 0.75rem;
+  --text-sm: 0.85rem;
+  --text-md: 0.95rem;
+  --text-lg: 1.15rem;
+  --text-xl: 1.5rem;
+}
+
+/*
+ * Dark-Mode: überschreibt nur die Token-Werte (Struktur/Selektoren unverändert).
+ * Aktiviert über data-theme="dark" am <html> (siehe useTheme-Hook + Topbar-Toggle).
+ * Gespiegelt aus design/tokens.json (color.dark).
+ */
+:root[data-theme='dark'] {
+  --bg: #171118;
+  --surface: #201826;
+  --elevated: #251b2e;
+  --border: #2c2133;
+  --text: #f4eff3;
+  --text-muted: #bcafc2;
+  --primary: #d9a87e; /* Links/aktive Nav – helles Kupfer auf Dunkel */
+  --primary-dark: #c98b62;
+  --accent: #c98b62;
+  --accent-strong: #b5794f;
+  --success: #8fbf9c;
+  --danger: #e88a83;
+  --warning-bg: #3a2b22;
+  --warning-text: #e6c29f;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 * {
@@ -19,7 +70,7 @@
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-ui);
   background: var(--bg);
   color: var(--text);
   font-size: 15px;
@@ -27,6 +78,8 @@ body {
 }
 
 h1 {
+  font-family: var(--font-serif);
+  font-weight: 600;
   font-size: 1.5rem;
   margin: 0 0 1rem;
 }
@@ -52,15 +105,18 @@ a {
 .topbar-inner {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0.6rem 1.5rem;
+  padding: var(--space-sm) var(--space-lg);
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: var(--space-xl);
 }
 
 .brand {
-  font-weight: 700;
-  font-size: 1.05rem;
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 1.15rem;
+  letter-spacing: 0.01em;
+  color: var(--primary);
 }
 
 .mainnav {
@@ -89,7 +145,7 @@ a {
 .content {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 1.5rem;
+  padding: var(--space-lg);
 }
 
 .page-head {
@@ -131,13 +187,15 @@ a {
 }
 
 .btn-primary {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #2a1f30; /* dunkles Label auf Kupfer – WCAG-sicher */
+  font-weight: 600;
 }
 
 .btn-primary:hover {
-  background: var(--primary-dark);
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
 }
 
 .btn-primary:disabled {
@@ -151,7 +209,7 @@ a {
 }
 
 .btn-danger:hover {
-  background: #fef2f2;
+  background: color-mix(in srgb, var(--danger) 14%, transparent);
 }
 
 .btn-ghost {
@@ -163,6 +221,18 @@ a {
 .btn-small {
   padding: 0.1rem 0.4rem;
   font-size: 0.8rem;
+}
+
+.theme-toggle {
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0.35rem 0.55rem;
+  color: var(--text-muted);
+}
+
+.theme-toggle:hover {
+  color: var(--text);
+  background: var(--elevated);
 }
 
 input,
@@ -201,7 +271,7 @@ select {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 0.6rem 1rem;
+  padding: var(--space-sm) var(--space-md);
   min-width: 110px;
   display: flex;
   flex-direction: column;
@@ -221,7 +291,7 @@ select {
 .board {
   display: grid;
   grid-template-columns: repeat(6, minmax(200px, 1fr));
-  gap: 0.9rem;
+  gap: var(--space-md);
   align-items: start;
   overflow-x: auto;
 }
@@ -321,7 +391,7 @@ select {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 0.6rem;
-  background: var(--bg);
+  background: var(--elevated);
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -356,7 +426,7 @@ select {
 }
 
 .table th {
-  background: var(--bg);
+  background: var(--elevated);
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -554,11 +624,12 @@ label {
 }
 
 .chip {
-  background: var(--surface);
+  background: var(--elevated);
   border: 1px solid var(--border);
   border-radius: 999px;
   padding: 0.15rem 0.6rem;
   font-size: 0.8rem;
+  font-family: var(--font-mono);
 }
 
 /* ── Misc ───────────────────────────────────────────────── */

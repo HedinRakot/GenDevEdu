@@ -1,14 +1,5 @@
 import React, { useState } from 'react';
-import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
@@ -16,7 +7,8 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSignUp } from '@clerk/expo';
 
 import { useTheme } from '@/context/ThemeContext';
-import { FontSize, FontWeight, Radius, Shadow, Spacing } from '@/config/theme';
+import { Radius, Shadow, Spacing } from '@/config/theme';
+import { Button, Card, Icon, Input, Typography } from '@/components/common';
 import type { AuthStackParamList } from '@/navigation/AuthStack';
 
 type SignUpNavProp = NativeStackNavigationProp<AuthStackParamList, 'SignUp'>;
@@ -105,56 +97,53 @@ export function SignUpScreen() {
           style={styles.container}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-          <View style={styles.header}>
-            <Text style={styles.logo}>📧</Text>
-            <Text style={[styles.screenTitle, { color: colors.textPrimary }]}>
-              {t('auth.verifyEmailTitle')}
-            </Text>
-            <Text style={[styles.infoText, { color: colors.textSecondary }]}>
-              {t('auth.verifyEmailInfo', { email })}
-            </Text>
-          </View>
+          <View style={styles.stage}>
+            <View style={styles.header}>
+              <View style={[styles.logoBadge, { backgroundColor: colors.primarySurface }]}>
+                <Icon name="mail" size={34} color={colors.accent} strokeWidth={1.75} />
+              </View>
+              <Typography variant="h2" center style={{ marginTop: Spacing.md }}>
+                {t('auth.verifyEmailTitle')}
+              </Typography>
+              <Typography variant="body" color="secondary" center style={{ marginTop: Spacing.xs }}>
+                {t('auth.verifyEmailInfo', { email })}
+              </Typography>
+            </View>
 
-          <View style={[styles.card, { backgroundColor: colors.surface }]}>
-            {errorMsg && (
-              <Text testID="signup-error" style={[styles.errorText, { color: colors.error }]}>
-                {errorMsg}
-              </Text>
-            )}
-            <TextInput
-              testID="verification-code-input"
-              style={[
-                styles.input,
-                { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border },
-              ]}
-              placeholder={t('auth.verificationCodePlaceholder')}
-              placeholderTextColor={colors.textSecondary}
-              value={code}
-              onChangeText={setCode}
-              keyboardType="number-pad"
-              textContentType="oneTimeCode"
-              autoComplete="one-time-code"
-            />
-
-            <TouchableOpacity
-              accessibilityRole="button"
-              testID="verify-button"
-              style={[
-                styles.primaryButton,
-                { backgroundColor: colors.primary },
-                isSubmitting && { opacity: 0.7 },
-              ]}
-              onPress={handleVerify}
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <ActivityIndicator color={colors.textInverted} />
-              ) : (
-                <Text style={[styles.primaryButtonText, { color: colors.textInverted }]}>
-                  {t('auth.verifyButton')}
-                </Text>
+            <Card style={styles.card}>
+              {errorMsg && (
+                <Typography
+                  testID="signup-error"
+                  variant="bodySm"
+                  style={{ color: colors.error, marginBottom: Spacing.md }}
+                >
+                  {errorMsg}
+                </Typography>
               )}
-            </TouchableOpacity>
+
+              <Input
+                testID="verification-code-input"
+                containerStyle={{ marginBottom: Spacing.md }}
+                placeholder={t('auth.verificationCodePlaceholder')}
+                value={code}
+                onChangeText={setCode}
+                keyboardType="number-pad"
+                textContentType="oneTimeCode"
+                autoComplete="one-time-code"
+                leftIcon="message"
+              />
+
+              <Button
+                testID="verify-button"
+                title={t('auth.verifyButton')}
+                onPress={handleVerify}
+                loading={isSubmitting}
+                disabled={isSubmitting}
+                fullWidth
+                iconRight="arrow-right"
+                style={{ marginTop: Spacing.sm }}
+              />
+            </Card>
           </View>
         </KeyboardAvoidingView>
       </SafeAreaView>
@@ -167,104 +156,98 @@ export function SignUpScreen() {
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <View style={styles.header}>
-          <Text style={styles.logo}>🎓</Text>
-          <Text style={[styles.appName, { color: colors.primary }]}>EduCode</Text>
-          <Text style={[styles.tagline, { color: colors.textSecondary }]}>
-            {t('auth.tagline')}
-          </Text>
-        </View>
+        <View style={styles.stage}>
+          <View style={styles.header}>
+            <View style={[styles.logoBadge, { backgroundColor: colors.primarySurface }]}>
+              <Icon name="logo" size={34} color={colors.accent} strokeWidth={1.75} />
+            </View>
+            <Typography variant="h1" style={{ marginTop: Spacing.md }}>
+              EduCode
+            </Typography>
+            <Typography variant="body" color="secondary" center style={{ marginTop: Spacing.xs }}>
+              {t('auth.tagline')}
+            </Typography>
+          </View>
 
-        <View style={[styles.card, { backgroundColor: colors.surface }]}>
-          <Text style={[styles.welcomeText, { color: colors.textPrimary }]}>
-            {t('auth.signUpTitle')}
-          </Text>
+          <Card style={styles.card}>
+            <Typography variant="h3" style={{ marginBottom: Spacing.lg }}>
+              {t('auth.signUpTitle')}
+            </Typography>
 
-          <TextInput
-            testID="signup-email-input"
-            style={[
-              styles.input,
-              { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border },
-            ]}
-            placeholder={t('auth.emailPlaceholder')}
-            placeholderTextColor={colors.textSecondary}
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
-            textContentType="emailAddress"
-            autoComplete="email"
-          />
+            <Input
+              testID="signup-email-input"
+              containerStyle={{ marginBottom: Spacing.md }}
+              placeholder={t('auth.emailPlaceholder')}
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              keyboardType="email-address"
+              textContentType="emailAddress"
+              autoComplete="email"
+              leftIcon="mail"
+            />
 
-          <TextInput
-            testID="signup-password-input"
-            style={[
-              styles.input,
-              { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border },
-            ]}
-            placeholder={t('auth.passwordPlaceholder')}
-            placeholderTextColor={colors.textSecondary}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            textContentType="newPassword"
-            autoComplete="new-password"
-          />
+            <Input
+              testID="signup-password-input"
+              containerStyle={{ marginBottom: Spacing.md }}
+              placeholder={t('auth.passwordPlaceholder')}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              textContentType="newPassword"
+              autoComplete="new-password"
+              leftIcon="lock"
+            />
 
-          <TextInput
-            testID="signup-confirm-password-input"
-            style={[
-              styles.input,
-              { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border },
-            ]}
-            placeholder={t('auth.confirmPasswordPlaceholder')}
-            placeholderTextColor={colors.textSecondary}
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            secureTextEntry
-            textContentType="newPassword"
-            autoComplete="new-password"
-          />
+            <Input
+              testID="signup-confirm-password-input"
+              containerStyle={{ marginBottom: Spacing.md }}
+              placeholder={t('auth.confirmPasswordPlaceholder')}
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              secureTextEntry
+              textContentType="newPassword"
+              autoComplete="new-password"
+              leftIcon="lock"
+            />
 
-          {errorMsg && (
-            <Text testID="signup-error" style={[styles.errorText, { color: colors.error }]}>
-              {errorMsg}
-            </Text>
-          )}
-
-          {/* clerk-captcha: required for Clerk's bot protection on web (nativeID maps to DOM id via react-native-web) */}
-          <View nativeID="clerk-captcha" />
-
-          <TouchableOpacity
-            accessibilityRole="button"
-            testID="signup-button"
-            style={[
-              styles.primaryButton,
-              { backgroundColor: colors.primary },
-              isSubmitting && { opacity: 0.7 },
-            ]}
-            onPress={handleSignUp}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <ActivityIndicator color={colors.textInverted} />
-            ) : (
-              <Text style={[styles.primaryButtonText, { color: colors.textInverted }]}>
-                {t('auth.signUpButton')}
-              </Text>
+            {errorMsg && (
+              <Typography
+                testID="signup-error"
+                variant="bodySm"
+                style={{ color: colors.error, marginBottom: Spacing.md }}
+              >
+                {errorMsg}
+              </Typography>
             )}
-          </TouchableOpacity>
-        </View>
 
-        <View style={styles.footer}>
-          <Text style={[styles.footerText, { color: colors.textSecondary }]}>
-            {t('auth.loginPrompt')}{' '}
-          </Text>
-          <TouchableOpacity testID="go-to-login-link" onPress={() => navigation.goBack()}>
-            <Text style={[styles.linkText, { color: colors.primary }]}>
-              {t('auth.loginLink')}
-            </Text>
-          </TouchableOpacity>
+            {/* clerk-captcha: required for Clerk's bot protection on web (nativeID maps to DOM id via react-native-web) */}
+            <View nativeID="clerk-captcha" />
+
+            <Button
+              testID="signup-button"
+              title={t('auth.signUpButton')}
+              onPress={handleSignUp}
+              loading={isSubmitting}
+              disabled={isSubmitting}
+              fullWidth
+              iconRight="arrow-right"
+              style={{ marginTop: Spacing.sm }}
+            />
+          </Card>
+
+          <View style={styles.footer}>
+            <Typography variant="body" color="secondary">
+              {t('auth.loginPrompt')}{' '}
+            </Typography>
+            <Button
+              testID="go-to-login-link"
+              title={t('auth.loginLink')}
+              variant="ghost"
+              size="sm"
+              onPress={() => navigation.goBack()}
+            />
+          </View>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -274,41 +257,21 @@ export function SignUpScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   container: { flex: 1, justifyContent: 'center', paddingHorizontal: Spacing.lg },
+  stage: { width: '100%', maxWidth: 440, alignSelf: 'center' },
   header: { alignItems: 'center', marginBottom: Spacing.xl },
-  logo: { fontSize: 64, marginBottom: Spacing.sm },
-  appName: {
-    fontSize: FontSize.xxxl,
-    fontWeight: FontWeight.extrabold,
-    letterSpacing: -1,
-  },
-  tagline: { fontSize: FontSize.md, marginTop: Spacing.xs },
-  screenTitle: { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, marginBottom: Spacing.sm },
-  infoText: { fontSize: FontSize.md, textAlign: 'center' },
-  card: { borderRadius: Radius.xl, padding: Spacing.xl, ...Shadow.md },
-  welcomeText: { fontSize: FontSize.xl, fontWeight: FontWeight.bold, marginBottom: Spacing.lg },
-  errorText: { fontSize: FontSize.sm, marginBottom: Spacing.md, fontWeight: FontWeight.semibold },
-  input: {
-    borderWidth: 1,
-    borderRadius: Radius.md,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    marginBottom: Spacing.md,
-    fontSize: FontSize.md,
-  },
-  primaryButton: {
-    borderRadius: Radius.md,
-    paddingVertical: 16,
+  logoBadge: {
+    width: 72,
+    height: 72,
+    borderRadius: Radius.lg,
     alignItems: 'center',
-    marginTop: Spacing.sm,
+    justifyContent: 'center',
     ...Shadow.sm,
   },
-  primaryButtonText: { fontSize: FontSize.md, fontWeight: FontWeight.bold },
+  card: { padding: Spacing.xl },
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: Spacing.xl,
   },
-  footerText: { fontSize: FontSize.md },
-  linkText: { fontSize: FontSize.md, fontWeight: FontWeight.semibold },
 });

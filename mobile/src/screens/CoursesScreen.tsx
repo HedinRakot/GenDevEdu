@@ -3,7 +3,6 @@ import {
   ActivityIndicator,
   FlatList,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -17,7 +16,8 @@ import { useTheme } from '@/context/ThemeContext';
 import { translate } from '@/utils/textUtils';
 import type { CoursesStackParamList } from '@/navigation/CoursesStack';
 import type { Course } from '@/types/course';
-import { FontSize, FontWeight, Radius, Shadow, Spacing } from '@/config/theme';
+import { Badge, Button, Icon, Typography } from '@/components/common';
+import { FontSize, Radius, Shadow, Spacing } from '@/config/theme';
 
 type NavProp = NativeStackNavigationProp<CoursesStackParamList, 'CoursesList'>;
 
@@ -31,6 +31,7 @@ function CourseCard({ course, onPress }: { course: Course; onPress: () => void }
   const { t } = useTranslation();
   const { colors } = useTheme();
   const title = translate(course.titel);
+  // Sprach-Markenfarben (JS-Gelb / TS-Blau) – bewusst NICHT themebar.
   const accent = course.elementId.includes('js') ? '#F7DF1E' : '#3178C6';
 
   return (
@@ -44,29 +45,31 @@ function CourseCard({ course, onPress }: { course: Course; onPress: () => void }
       <View style={styles.cardBody}>
         <View style={styles.cardHeader}>
           <View style={[styles.iconCircle, { backgroundColor: accent + '22' }]}>
-            <Text style={styles.cardIcon}>
-              {course.elementId.includes('js') ? '📜' : '🔷'}
-            </Text>
+            <Icon name="courses" size={22} color={accent} />
           </View>
           {!!course.level && (
-            <View style={[styles.levelBadge, { backgroundColor: colors.primarySurface }]}>
-              <Text style={[styles.levelBadgeText, { color: colors.primary }]}>
-                {t(LEVEL_LABEL[course.level] ?? course.level)}
-              </Text>
-            </View>
+            <Badge label={t(LEVEL_LABEL[course.level] ?? course.level)} tone="default" />
           )}
         </View>
-        <Text testID="course-card-title" style={[styles.cardTitle, { color: colors.textPrimary }]}>
+        <Typography testID="course-card-title" variant="h3" numberOfLines={2}>
           {title || course.name}
-        </Text>
+        </Typography>
         {course.tags.length > 0 && (
-          <Text style={[styles.cardTags, { color: colors.textTertiary }]} numberOfLines={1}>
+          <Typography
+            variant="caption"
+            color="tertiary"
+            numberOfLines={1}
+            style={styles.cardTags}
+          >
             {course.tags.map((tg) => `#${tg}`).join('  ')}
-          </Text>
+          </Typography>
         )}
-        <Text style={[styles.startButtonText, { color: colors.primary }]}>
-          {t('courses.startCourse')} →
-        </Text>
+        <View style={styles.startRow}>
+          <Typography variant="label" color={colors.primary}>
+            {t('courses.startCourse')}
+          </Typography>
+          <Icon name="arrow-right" size={FontSize.sm + 2} color={colors.primary} strokeWidth={2} />
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -82,14 +85,11 @@ export function CoursesScreen() {
   if (error) {
     return (
       <SafeAreaView style={[styles.centered, { backgroundColor: colors.background }]}>
-        <Text style={styles.errorEmoji}>⚠️</Text>
-        <Text style={[styles.errorText, { color: colors.error }]}>{t('common.error')}</Text>
-        <TouchableOpacity
-          style={[styles.retryButton, { backgroundColor: colors.primary }]}
-          onPress={() => refetch()}
-        >
-          <Text style={[styles.retryText, { color: colors.textInverted }]}>{t('common.retry')}</Text>
-        </TouchableOpacity>
+        <Icon name="x-circle" size={48} color={colors.error} />
+        <Typography variant="body" color={colors.error}>
+          {t('common.error')}
+        </Typography>
+        <Button title={t('common.retry')} onPress={() => refetch()} />
       </SafeAreaView>
     );
   }
@@ -103,12 +103,10 @@ export function CoursesScreen() {
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <View style={styles.listHeader}>
-            <Text style={[styles.screenTitle, { color: colors.textPrimary }]}>
-              {t('courses.title')}
-            </Text>
-            <Text style={[styles.screenSubtitle, { color: colors.textSecondary }]}>
+            <Typography variant="h1">{t('courses.title')}</Typography>
+            <Typography variant="body" color="secondary">
               {t('courses.subtitle')}
-            </Text>
+            </Typography>
           </View>
         }
         renderItem={({ item }) => (
@@ -122,7 +120,9 @@ export function CoursesScreen() {
           isLoading ? (
             <ActivityIndicator color={colors.primary} style={{ marginTop: Spacing.xl }} />
           ) : (
-            <Text style={[styles.empty, { color: colors.textSecondary }]}>{t('courses.noResults')}</Text>
+            <Typography variant="body" color="secondary" center style={styles.empty}>
+              {t('courses.noResults')}
+            </Typography>
           )
         }
       />
@@ -136,8 +136,6 @@ const styles = StyleSheet.create({
   list: { padding: Spacing.lg, paddingBottom: Spacing.xxxl },
 
   listHeader: { marginBottom: Spacing.lg, gap: Spacing.md },
-  screenTitle: { fontSize: FontSize.xxxl, fontWeight: FontWeight.extrabold },
-  screenSubtitle: { fontSize: FontSize.md, marginTop: 4 },
 
   card: { borderRadius: Radius.xl, overflow: 'hidden', flexDirection: 'row', ...Shadow.md },
   stripe: { width: 6 },
@@ -155,16 +153,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  cardIcon: { fontSize: 22 },
-  levelBadge: { paddingHorizontal: Spacing.sm, paddingVertical: 4, borderRadius: Radius.full },
-  levelBadgeText: { fontSize: FontSize.xs, fontWeight: FontWeight.bold },
-  cardTitle: { fontSize: FontSize.lg, fontWeight: FontWeight.bold, marginBottom: 4 },
-  cardTags: { fontSize: FontSize.xs, marginBottom: Spacing.sm },
-  startButtonText: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
+  cardTags: { marginBottom: Spacing.sm },
+  startRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs },
 
-  empty: { fontSize: FontSize.md, textAlign: 'center', marginTop: Spacing.xl },
-  errorEmoji: { fontSize: 48 },
-  errorText: { fontSize: FontSize.md },
-  retryButton: { borderRadius: Radius.md, paddingHorizontal: Spacing.lg, paddingVertical: Spacing.sm },
-  retryText: { fontWeight: FontWeight.bold },
+  empty: { marginTop: Spacing.xl },
 });

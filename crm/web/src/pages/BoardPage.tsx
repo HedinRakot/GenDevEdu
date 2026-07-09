@@ -1,5 +1,11 @@
 import { useDashboard, useParticipants } from '../api/hooks';
-import { PHASE_COLORS, PHASE_LABELS, PIPELINE_PHASES, TERMINAL_PHASES } from '../domain/phases';
+import {
+  PHASE_COLORS,
+  PHASE_LABELS,
+  PIPELINE_PHASES,
+  TERMINAL_COLOR,
+  TERMINAL_PHASES,
+} from '../domain/phases';
 import BoardColumn from '../components/BoardColumn';
 
 export default function BoardPage() {
@@ -43,7 +49,7 @@ export default function BoardPage() {
             participants={all.filter((p) => p.phase === phase)}
           />
         ))}
-        <BoardColumn title="Beendet" color="#9ca3af" participants={finished} />
+        <BoardColumn title="Beendet" color={TERMINAL_COLOR} participants={finished} />
       </div>
     </div>
   );

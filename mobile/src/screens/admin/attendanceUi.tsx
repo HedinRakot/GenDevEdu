@@ -1,8 +1,9 @@
 /** F14: Gemeinsame UI-Bausteine des Anwesenheits-Bereichs. */
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { Typography } from '@/components/common';
 import { useTheme } from '@/context/ThemeContext';
 import type { DayStatus } from '@/types/attendance';
 import { FontSize, FontWeight, Radius, Spacing } from '@/config/theme';
@@ -30,9 +31,9 @@ export function StatusChip({ status }: { status: DayStatus }) {
   const statusColor = useStatusColor()(status);
   return (
     <View style={[styles.chip, { backgroundColor: `${statusColor}22`, borderColor: statusColor }]}>
-      <Text style={[styles.chipText, { color: statusColor }]}>
+      <Typography variant="caption" style={[styles.chipText, { color: statusColor }]}>
         {t(`attendance.status.${status}`)}
-      </Text>
+      </Typography>
     </View>
   );
 }

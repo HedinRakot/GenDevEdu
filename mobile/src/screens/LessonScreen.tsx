@@ -34,7 +34,8 @@ import type { ChapterContent as ChapterContentModel, Question } from '@/types/co
 import { markLessonComplete } from '@/store/storage';
 import { MarkdownRenderer } from '@/components/common/MarkdownRenderer';
 import { QuestionPrompt } from '@/components/common/QuestionPrompt';
-import { FontSize, FontWeight, Radius, Shadow, Spacing } from '@/config/theme';
+import { Button, Icon, Typography } from '@/components/common';
+import { FontFamily, FontSize, FontWeight, Radius, Shadow, Spacing } from '@/config/theme';
 
 type NavProp = NativeStackNavigationProp<CoursesStackParamList, 'Lesson'>;
 type RoutePropType = RouteProp<CoursesStackParamList, 'Lesson'>;
@@ -177,25 +178,27 @@ function ChoiceQuestionCard({ question, onAnsweredCorrectly }: QuestionCardProps
                     )}
                   </View>
                 )}
-                <Text
+                <Typography
+                  color={colors.textPrimary}
                   style={[
                     styles.answerText,
                     isTrueFalse && styles.trueFalseText,
-                    { color: colors.textPrimary },
-                    isSelected && { fontWeight: FontWeight.bold },
+                    isSelected && { fontFamily: FontFamily.sansSemibold },
                   ]}
                 >
                   {translate(answer.titel)}
-                </Text>
+                </Typography>
                 {showCorrectness && isCorrectAnswer && (
-                  <Text style={[styles.correctMark, { color: colors.success }]}>✓</Text>
+                  <Icon name="check" size={18} color={colors.success} strokeWidth={2.5} />
                 )}
                 {showCorrectness && !isCorrectAnswer && isSelected && (
-                  <Text style={[styles.correctMark, { color: colors.error }]}>✕</Text>
+                  <Icon name="close" size={18} color={colors.error} strokeWidth={2.5} />
                 )}
               </TouchableOpacity>
               {showCorrectness && comment.length > 0 && (
-                <Text style={[styles.explanation, { color: colors.textSecondary }]}>{comment}</Text>
+                <Typography variant="bodySm" color={colors.textSecondary} style={styles.explanation}>
+                  {comment}
+                </Typography>
               )}
             </View>
           );
@@ -203,38 +206,40 @@ function ChoiceQuestionCard({ question, onAnsweredCorrectly }: QuestionCardProps
       </View>
 
       {status === 'idle' ? (
-        <TouchableOpacity
+        <Button
           testID="submit-answer"
-          style={[styles.checkButton, { backgroundColor: colors.primary }, isPending && { opacity: 0.7 }]}
-          onPress={validate}
+          title={t('quiz.check')}
+          variant="primary"
+          fullWidth
+          loading={isPending}
           disabled={isPending}
-        >
-          {isPending ? (
-            <ActivityIndicator color="white" />
-          ) : (
-            <Text style={styles.checkButtonText}>{t('quiz.check')}</Text>
-          )}
-        </TouchableOpacity>
+          onPress={validate}
+        />
       ) : (
         <View style={styles.feedback}>
-          <Text
-            testID="answer-feedback"
-            style={[
-              styles.feedbackText,
-              { color: status === 'correct' ? colors.success : colors.error },
-            ]}
-          >
-            {status === 'correct' ? `✅ ${t('quiz.correct')}` : `❌ ${t('quiz.tryAgain')}`}
-          </Text>
+          <View style={styles.feedbackTextRow}>
+            <Icon
+              name={status === 'correct' ? 'check-circle' : 'x-circle'}
+              size={18}
+              color={status === 'correct' ? colors.success : colors.error}
+            />
+            <Typography
+              testID="answer-feedback"
+              variant="label"
+              color={status === 'correct' ? colors.success : colors.error}
+            >
+              {status === 'correct' ? t('quiz.correct') : t('quiz.tryAgain')}
+            </Typography>
+          </View>
           {status === 'incorrect' && (
             <View style={styles.feedbackActions}>
-              <TouchableOpacity onPress={reset}>
-                <Text style={[styles.retryText, { color: colors.primary }]}>
-                  {t('common.retry')}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
+              <Button title={t('common.retry')} variant="ghost" size="sm" onPress={reset} />
+              <Button
                 testID="quiz-why-wrong"
+                title={t('chat.whyWrong')}
+                variant="ghost"
+                size="sm"
+                iconLeft="chat"
                 onPress={() =>
                   navigation.navigate('Chat' as never, {
                     context: {
@@ -250,11 +255,7 @@ function ChoiceQuestionCard({ question, onAnsweredCorrectly }: QuestionCardProps
                     seedNonce: Date.now(),
                   } as never)
                 }
-              >
-                <Text style={[styles.retryText, { color: colors.primary }]}>
-                  🤖 {t('chat.whyWrong')}
-                </Text>
-              </TouchableOpacity>
+              />
             </View>
           )}
         </View>
@@ -328,88 +329,111 @@ function CodeQuestionCard({ question, onAnsweredCorrectly }: QuestionCardProps) 
         placeholderTextColor={colors.textTertiary}
       />
 
-      <TouchableOpacity
-        style={[styles.checkButton, { backgroundColor: colors.primary }, polling && { opacity: 0.7 }]}
-        onPress={onSubmit}
+      <Button
+        title={polling ? t('quiz.code.grading') : t('quiz.code.submit')}
+        variant="primary"
+        fullWidth
+        loading={polling}
         disabled={polling || isPending}
-      >
-        {polling ? (
-          <View style={styles.gradingRow}>
-            <ActivityIndicator color="white" />
-            <Text style={styles.checkButtonText}>{t('quiz.code.grading')}</Text>
-          </View>
-        ) : (
-          <Text style={styles.checkButtonText}>{t('quiz.code.submit')}</Text>
-        )}
-      </TouchableOpacity>
+        onPress={onSubmit}
+      />
 
-      <TouchableOpacity
-        testID="code-ask-tutor"
-        style={styles.codeHelpButton}
-        onPress={() =>
-          navigation.navigate('Chat' as never, {
-            context: {
-              courseId: route.params?.courseId,
-              chapterId: route.params?.chapterId,
-              questionId: question.elementId,
-            },
-          } as never)
-        }
-      >
-        <Text style={[styles.codeHelpText, { color: colors.primary }]}>
-          🤖 {t('quiz.code.askTutor')}
-        </Text>
-      </TouchableOpacity>
+      <View style={styles.codeHelpButton}>
+        <Button
+          testID="code-ask-tutor"
+          title={t('quiz.code.askTutor')}
+          variant="ghost"
+          size="sm"
+          iconLeft="chat"
+          onPress={() =>
+            navigation.navigate('Chat' as never, {
+              context: {
+                courseId: route.params?.courseId,
+                chapterId: route.params?.chapterId,
+                questionId: question.elementId,
+              },
+            } as never)
+          }
+        />
+      </View>
 
       {result?.status === 'Error' && (
         <View style={{ marginTop: Spacing.md }}>
-          <Text style={[styles.feedbackText, { color: colors.error }]}>
-            ❌ {t('quiz.code.error')}
-          </Text>
+          <View style={styles.feedbackTextRow}>
+            <Icon name="x-circle" size={18} color={colors.error} />
+            <Typography variant="label" color={colors.error}>
+              {t('quiz.code.error')}
+            </Typography>
+          </View>
           {result.errorMessage ? (
-            <Text style={[styles.codeSummary, { color: colors.textSecondary }]}>
+            <Typography variant="bodySm" color={colors.textSecondary} style={styles.codeSummary}>
               {result.errorMessage}
-            </Text>
+            </Typography>
           ) : null}
         </View>
       )}
 
       {result?.status === 'Completed' && (
         <View style={styles.codeResult}>
-          <Text
-            style={[styles.feedbackText, { color: passed ? colors.success : colors.error }]}
-          >
-            {passed ? `✅ ${t('quiz.code.allTestsPassed')}` : `❌ ${t('quiz.code.testsFailed')}`}
-          </Text>
-          <Text style={[styles.codeSummary, { color: colors.textSecondary }]}>
+          <View style={styles.feedbackTextRow}>
+            <Icon
+              name={passed ? 'check-circle' : 'x-circle'}
+              size={18}
+              color={passed ? colors.success : colors.error}
+            />
+            <Typography variant="label" color={passed ? colors.success : colors.error}>
+              {passed ? t('quiz.code.allTestsPassed') : t('quiz.code.testsFailed')}
+            </Typography>
+          </View>
+          <Typography variant="bodySm" color={colors.textSecondary} style={styles.codeSummary}>
             {t('quiz.code.passedOf', { passed: result.passedCount, total: result.totalCount })}
             {`  ·  ${result.durationMs} ms`}
-          </Text>
+          </Typography>
 
           {result.compileError ? (
             <>
-              <Text style={[styles.label, { color: colors.error }]}>{t('quiz.code.compileError')}</Text>
-              <Text style={[styles.codeOutput, { color: colors.textPrimary, backgroundColor: colors.background }]}>
+              <Typography variant="label" color={colors.error} style={styles.label}>
+                {t('quiz.code.compileError')}
+              </Typography>
+              <Typography
+                variant="code"
+                color={colors.textPrimary}
+                style={[styles.codeOutput, { backgroundColor: colors.background }]}
+              >
                 {result.compileError}
-              </Text>
+              </Typography>
             </>
           ) : (
             result.testResults.map((tr, i) => (
               <View key={tr.testCaseId} style={styles.testRow}>
-                <Text
-                  style={[styles.testLine, { color: tr.passed ? colors.success : colors.error }]}
-                >
-                  {tr.passed ? '✓' : '✕'} {t('quiz.code.testN', { n: i + 1 })}
-                  {tr.hidden ? ` (${t('quiz.code.hidden')})` : ''}
-                  {tr.passed ? '' : ` — ${tr.outcome}`}
-                </Text>
+                <View style={styles.testLineRow}>
+                  <Icon
+                    name={tr.passed ? 'check' : 'close'}
+                    size={16}
+                    color={tr.passed ? colors.success : colors.error}
+                    strokeWidth={2.5}
+                  />
+                  <Typography
+                    variant="label"
+                    color={tr.passed ? colors.success : colors.error}
+                    style={styles.testLine}
+                  >
+                    {t('quiz.code.testN', { n: i + 1 })}
+                    {tr.hidden ? ` (${t('quiz.code.hidden')})` : ''}
+                    {tr.passed ? '' : ` — ${tr.outcome}`}
+                  </Typography>
+                </View>
                 {!tr.hidden && !tr.passed && (
-                  <Text style={[styles.codeOutput, { color: colors.textSecondary, backgroundColor: colors.background }]}>
+                  <Typography
+                    variant="code"
+                    color={colors.textSecondary}
+                    style={[styles.codeOutput, { backgroundColor: colors.background }]}
+                  >
                     {t('quiz.code.expected')}: {tr.expectedOutput ?? ''}
                     {'\n'}
                     {t('quiz.code.actual')}: {tr.actualOutput ?? ''}
                     {tr.stderr ? `\n${tr.stderr}` : ''}
-                  </Text>
+                  </Typography>
                 )}
               </View>
             ))
@@ -490,7 +514,14 @@ function ContentItem({
     return (
       <View style={styles.contentSection}>
         <View style={styles.lessonHeader}>
-          <Text style={[styles.h1, { color: colors.textPrimary }]}>{title}</Text>
+          <View style={styles.lessonTitleBlock}>
+            <Typography variant="caption" color="accent" style={styles.eyebrow}>
+              {t('snippets.lesson')}
+            </Typography>
+            <Typography variant="h2" color={colors.textPrimary}>
+              {title}
+            </Typography>
+          </View>
           <TouchableOpacity
             onPress={() => {
               saveSnippet({
@@ -504,18 +535,18 @@ function ContentItem({
             }}
             disabled={favorited}
           >
-            <Text style={[styles.fav, { color: favorited ? colors.accent : colors.textTertiary }]}>
-              {favorited ? '★' : '☆'}
-            </Text>
+            <Icon name="snippets" size={24} color={favorited ? colors.accent : colors.textTertiary} />
           </TouchableOpacity>
         </View>
         <MarkdownRenderer content={text} />
-        <TouchableOpacity
-          style={[styles.completeButton, { backgroundColor: colors.primary }]}
+        <Button
+          title={t('quiz.markLessonComplete')}
+          variant="primary"
+          fullWidth
+          iconRight="arrow-right"
           onPress={() => onCompleted(content.elementId)}
-        >
-          <Text style={styles.completeButtonText}>{t('quiz.markLessonComplete')}</Text>
-        </TouchableOpacity>
+          style={styles.completeButton}
+        />
       </View>
     );
   }

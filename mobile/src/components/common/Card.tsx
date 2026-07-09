@@ -12,7 +12,9 @@ export function Card({ padded = true, variant = 'surface', style, children, ...r
   const { colors } = useTheme();
   const base: ViewStyle = {
     backgroundColor: variant === 'elevated' ? colors.surfaceElevated : colors.surface,
-    borderRadius: Radius.xl,
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
     padding: padded ? Spacing.lg : 0,
     ...Shadow.md,
   };

@@ -116,11 +116,15 @@
   "navigation": {
     "dashboard": "Dashboard",
     "courses": "Kurse",
-    "chat": "KI-Chat",
+    "chat": "KI-Tutor",
     "snippets": "Snippets",
-    "author": "Erstellen",
-    "admin": "Admin",
-    "settings": "Einstellungen"
+    "author": "Autoren-Bereich",
+    "attendance": "Anwesenheit",
+    "learners": "Lernende",
+    "admin": "Verwaltung",
+    "settings": "Einstellungen",
+    "sectionLearn": "Lernen",
+    "sectionManage": "Verwaltung"
   },
   "admin": {
     "title": "Nutzerverwaltung",
@@ -138,7 +142,7 @@
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Willkommen!",
-    "greeting": "Hallo, {{name}}! 👋",
+    "greeting": "Hallo, {{name}}!",
     "subtitle": "Mach weiter so!",
     "streak": {
       "title": "Lern-Streak",
@@ -232,7 +236,7 @@
     "title": "KI-Tutor",
     "subtitle": "Dein KI-Lernassistent",
     "askTutor": "Tutor fragen",
-    "contextBanner": "🎯 Bezieht sich auf deine aktuelle Lektion",
+    "contextBanner": "Bezieht sich auf deine aktuelle Lektion",
     "whyWrong": "Warum falsch?",
     "explainWrong": "Warum ist meine Antwort falsch?",
     "placeholder": "Stell eine Frage zur Softwareentwicklung...",
@@ -251,8 +255,8 @@
     "true": "Wahr",
     "false": "Falsch",
     "selectAnswer": "Bitte wähle mindestens eine Antwort.",
-    "markLessonComplete": "✓ Abschnitt abschließen",
-    "chapterCompleteTitle": "🎉 Kapitel abgeschlossen!",
+    "markLessonComplete": "Abschnitt abschließen",
+    "chapterCompleteTitle": "Kapitel abgeschlossen!",
     "chapterCompleteBody": "Großartig! Du hast alle Inhalte dieses Kapitels abgeschlossen.",
     "code": {
       "submit": "Code testen",
@@ -292,8 +296,8 @@
     "title": "Snippets",
     "subtitle": "Deine gespeicherten Code-Schnipsel & Antworten",
     "searchPlaceholder": "Snippet durchsuchen...",
-    "empty": "Noch keine Snippets. Markiere Chat-Antworten oder Lektionen mit ★ um sie hier zu speichern.",
-    "saved": "Snippet gespeichert ✓",
+    "empty": "Noch keine Snippets. Speichere Chat-Antworten oder Lektionen, um sie hier abzulegen.",
+    "saved": "Snippet gespeichert",
     "alreadyExists": "Snippet ist bereits gespeichert.",
     "delete": "Snippet löschen",
     "deleteConfirm": "Dieses Snippet wirklich löschen?",
@@ -352,7 +356,7 @@
     }
   },
   "notifications": {
-    "streakTitle": "🔥 Halte deinen Streak!",
+    "streakTitle": "Halte deinen Streak!",
     "streakBody": "Du hast heute noch nicht gelernt – wie wäre es mit der Daily Challenge?"
   }
 }
