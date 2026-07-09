@@ -335,6 +335,8 @@
       "adminSubtitle": "Rollen und Konten verwalten",
       "attendance": "Anwesenheit",
       "attendanceSubtitle": "Aktivität, Fehlzeiten und Nachweise (AZAV)",
+      "learners": "Teilnehmer",
+      "learnersSubtitle": "Statistiken, Lernzeiten und Antworten aller Teilnehmer",
       "webOnly": "Nur im Web verfügbar",
       "webOnlySubtitle": "Die Verwaltung ist über die Web-Version der App erreichbar"
     },

@@ -18,5 +18,17 @@ public static class AdminEndpoints
         // Rolle eines Nutzers setzen (learner | instructor | admin).
         admin.MapPatch("/users/{id}/role", async (string id, SetRoleRequest req, ClerkAdminService svc) =>
             (await svc.SetRoleAsync(id, req.Role)).ToHttp());
+
+        // ── Teilnehmer-Dashboard (auch für Autoren/Lehrkräfte) ────────────────
+        var staff = app.MapGroup("/api/admin/learners")
+            .RequireAuthorization(Policies.AuthorOrAdmin);
+
+        // Übersicht: aktiv/inaktiv, Lernzeit, Fortschritt, Quiz-Accuracy.
+        staff.MapGet("", async (AdminStatsService svc) =>
+            Results.Ok(await svc.GetLearnersAsync()));
+
+        // Detail: Statistiken, Kurs-/Kapitel-Zeiten, Engagement, Fragen-Historie.
+        staff.MapGet("/{userId}/stats", async (string userId, AdminStatsService svc) =>
+            (await svc.GetLearnerDetailAsync(userId)).ToHttp());
     }
 }

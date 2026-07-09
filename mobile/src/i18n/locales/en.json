@@ -335,6 +335,8 @@
       "adminSubtitle": "Manage roles and accounts",
       "attendance": "Attendance",
       "attendanceSubtitle": "Activity, absences and evidence (AZAV)",
+      "learners": "Participants",
+      "learnersSubtitle": "Statistics, learning time and answers of all participants",
       "webOnly": "Available on the web only",
       "webOnlySubtitle": "Management is accessible via the web version of the app"
     },

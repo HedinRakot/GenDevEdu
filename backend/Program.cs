@@ -29,6 +29,7 @@ builder.Services.AddScoped<EnrollmentService>();
 builder.Services.AddScoped<StatsService>();
 builder.Services.AddScoped<CertificateService>();
 builder.Services.AddScoped<DailyChallengeService>();
+builder.Services.AddScoped<AdminStatsService>();
 builder.Services.AddScoped<Seeder>();
 
 // ---- F7: Code-Aufgaben & Sandbox ----
