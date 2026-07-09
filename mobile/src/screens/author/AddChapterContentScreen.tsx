@@ -19,6 +19,7 @@ import {
   useUpdateChapterContent,
   useChapterContent,
   useDeleteChapterContent,
+  useReorderChapterContents,
 } from '@/hooks/useCourses';
 import { useTheme } from '@/context/ThemeContext';
 import { ChapterContentType, Language } from '@/types/course';
@@ -61,8 +62,23 @@ export function AddChapterContentScreen() {
     chapterId,
     courseId,
   );
+  const { mutate: reorderContents, isPending: isReordering } = useReorderChapterContents(
+    chapterId,
+    courseId,
+  );
 
   const existingContent = contentModel?.chapterContent ?? [];
+
+  /** Tauscht den Inhalt an `index` mit seinem Nachbarn und persistiert die Liste. */
+  const moveContent = (index: number, direction: -1 | 1) => {
+    const ids = existingContent.map((cc) => cc.elementId);
+    const target = index + direction;
+    if (target < 0 || target >= ids.length) return;
+    [ids[index], ids[target]] = [ids[target], ids[index]];
+    reorderContents(ids, {
+      onError: () => Alert.alert('Fehler', 'Reihenfolge konnte nicht gespeichert werden.'),
+    });
+  };
   const editing = isEdit ? existingContent.find((c) => c.elementId === editContentId) : undefined;
 
   const onDeleteContent = (cc: ChapterContent) => {
@@ -86,7 +102,6 @@ export function AddChapterContentScreen() {
   const [contentType, setContentType] = useState<ChapterContentType>(ChapterContentType.Lesson);
   const [lessonTextDe, setLessonTextDe] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
-  const [sortOrder, setSortOrder] = useState('1');
 
   // Im Bearbeiten-Modus die Felder aus dem vorhandenen Inhalt vorbefüllen,
   // sobald er geladen ist — aber nur einmal, damit Nutzereingaben nicht
@@ -101,7 +116,6 @@ export function AddChapterContentScreen() {
     setContentType(editing.contentType);
     setLessonTextDe(textFor(editing.lessonTexte?.items, Language.German) || editing.lessonText || '');
     setVideoUrl(editing.videoUrl ?? '');
-    setSortOrder(String(editing.sortOrder ?? 1));
   }, [isEdit, editing]);
 
   const isPending = isAdding || isUpdating;
@@ -116,7 +130,8 @@ export function AddChapterContentScreen() {
     lessonText: lessonTextDe.trim() || undefined,
     lessonTexteItems: lessonTextDe.trim() ? [{ text: lessonTextDe.trim(), language: 1 }] : undefined,
     videoUrl: videoUrl.trim() || undefined,
-    sortOrder: parseInt(sortOrder, 10) || 1,
+    // Keine SortOrder: beim Anlegen hängt das Backend ans Ende an, beim
+    // Bearbeiten bleibt die Position erhalten (sortiert wird per ▲/▼).
   });
 
   const onSave = () => {
@@ -178,7 +193,7 @@ export function AddChapterContentScreen() {
               <Text style={[styles.hint, { color: colors.textTertiary }]}>
                 Tippen zum Bearbeiten
               </Text>
-              {existingContent.map((cc) => (
+              {existingContent.map((cc, index) => (
                 <View
                   key={cc.elementId}
                   style={[
@@ -186,6 +201,43 @@ export function AddChapterContentScreen() {
                     { backgroundColor: colors.surface, borderColor: colors.border },
                   ]}
                 >
+                  <View style={styles.moveColumn}>
+                    <TouchableOpacity
+                      testID={`content-move-up-${index}`}
+                      onPress={() => moveContent(index, -1)}
+                      disabled={index === 0 || isReordering}
+                      hitSlop={{ top: 6, bottom: 6, left: 8, right: 8 }}
+                    >
+                      <Text
+                        style={[
+                          styles.moveIcon,
+                          { color: index > 0 && !isReordering ? colors.primary : colors.border },
+                        ]}
+                      >
+                        ▲
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      testID={`content-move-down-${index}`}
+                      onPress={() => moveContent(index, 1)}
+                      disabled={index === existingContent.length - 1 || isReordering}
+                      hitSlop={{ top: 6, bottom: 6, left: 8, right: 8 }}
+                    >
+                      <Text
+                        style={[
+                          styles.moveIcon,
+                          {
+                            color:
+                              index < existingContent.length - 1 && !isReordering
+                                ? colors.primary
+                                : colors.border,
+                          },
+                        ]}
+                      >
+                        ▼
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
                   <TouchableOpacity
                     style={styles.existingMain}
                     activeOpacity={0.7}
@@ -332,10 +384,6 @@ export function AddChapterContentScreen() {
               </Text>
             ))}
 
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Reihenfolge</Text>
-          <TextInput style={inputStyle} value={sortOrder} onChangeText={setSortOrder}
-            keyboardType="numeric" placeholderTextColor={colors.textTertiary} />
-
           <TouchableOpacity
             style={[styles.saveButton, { backgroundColor: colors.primary }]}
             onPress={onSave}
@@ -369,6 +417,8 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
   },
   existingMain: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, flex: 1 },
+  moveColumn: { justifyContent: 'center', gap: 2 },
+  moveIcon: { fontSize: FontSize.sm, textAlign: 'center' },
   existingType: { fontSize: FontSize.xs },
   existingTitle: { flex: 1, fontSize: FontSize.md, fontWeight: FontWeight.medium },
   editIcon: { fontSize: FontSize.md },

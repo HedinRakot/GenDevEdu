@@ -24,6 +24,8 @@ import {
   deleteCourse,
   deleteChapter,
   deleteChapterContent,
+  reorderChapters,
+  reorderChapterContents,
   getChapterQuiz,
   setChapterQuiz,
   deleteChapterQuiz,
@@ -286,6 +288,27 @@ export function useUpdateQuestionList() {
     onSuccess: (_data, { questionListId }) => {
       qc.invalidateQueries({ queryKey: courseKeys.questions(questionListId) });
       qc.invalidateQueries({ queryKey: courseKeys.all });
+    },
+  });
+}
+
+// ─── Author: Reihenfolge ──────────────────────────────────────────────────────
+
+export function useReorderChapters(courseId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (orderedIds: string[]) => reorderChapters(courseId, orderedIds),
+    onSuccess: () => qc.invalidateQueries({ queryKey: courseKeys.chapters(courseId) }),
+  });
+}
+
+export function useReorderChapterContents(chapterId: string, courseId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (orderedIds: string[]) => reorderChapterContents(chapterId, orderedIds),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: courseKeys.chapters(courseId) });
+      qc.invalidateQueries({ queryKey: courseKeys.content(chapterId) });
     },
   });
 }

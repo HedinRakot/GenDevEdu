@@ -59,6 +59,16 @@ public static class CourseEndpoints
             async (string id, CreateChapterContentRequest req, ClaimsPrincipal user, CourseService svc) =>
                 (await svc.UpdateChapterContentAsync(id, req, user.UserId(), user.IsAdmin())).ToHttp());
 
+        // ── Reihenfolge (Author/Admin) ────────────────────────────────────────
+
+        author.MapPut("/api/courses/{id}/chapters/order",
+            async (string id, ReorderRequest req, ClaimsPrincipal user, CourseService svc) =>
+                (await svc.ReorderChaptersAsync(id, req, user.UserId(), user.IsAdmin())).ToHttpNoContent());
+
+        author.MapPut("/api/chapters/{id}/contents/order",
+            async (string id, ReorderRequest req, ClaimsPrincipal user, CourseService svc) =>
+                (await svc.ReorderChapterContentAsync(id, req, user.UserId(), user.IsAdmin())).ToHttpNoContent());
+
         // ── Löschen (Author/Admin) ────────────────────────────────────────────
 
         author.MapDelete("/api/courses/{id}",

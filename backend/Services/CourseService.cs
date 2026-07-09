@@ -163,7 +163,11 @@ public class CourseService
             Name = req.Name.Trim(),
             CourseId = courseId,
             Titel = Mappers.BuildTexte(req.TitelItems, req.Name),
-            SortOrder = req.SortOrder,
+            // Ohne explizite Angabe ans Ende anhängen (Reihenfolge wird über
+            // die Reorder-Endpoints gepflegt, nicht mehr per Zahlenfeld).
+            SortOrder = req.SortOrder > 0
+                ? req.SortOrder
+                : (course.Chapters.Count == 0 ? 1 : course.Chapters.Max(ch => ch.SortOrder) + 1),
             Show = req.Show,
         };
         course.Chapters.Add(chapter);
@@ -200,7 +204,10 @@ public class CourseService
             LessonText = req.LessonText ?? string.Empty,
             LessonTexte = Mappers.BuildTexte(req.LessonTexteItems, string.Empty),
             VideoUrl = req.VideoUrl ?? string.Empty,
-            SortOrder = req.SortOrder,
+            // Ohne explizite Angabe ans Ende anhängen (analog AddChapterAsync).
+            SortOrder = req.SortOrder > 0
+                ? req.SortOrder
+                : (chapter.ChapterContent.Count == 0 ? 1 : chapter.ChapterContent.Max(x => x.SortOrder) + 1),
         };
         chapter.ChapterContent.Add(cc);
         course.UpdatedAt = DateTime.UtcNow;
@@ -232,12 +239,88 @@ public class CourseService
         cc.LessonText = req.LessonText ?? string.Empty;
         cc.LessonTexte = Mappers.BuildTexte(req.LessonTexteItems, string.Empty);
         cc.VideoUrl = req.VideoUrl ?? string.Empty;
-        cc.SortOrder = req.SortOrder;
+        // Position bleibt erhalten, wenn der Request keine (positive) SortOrder
+        // mitschickt — die Reihenfolge wird über die Reorder-Endpoints gepflegt.
+        if (req.SortOrder > 0)
+            cc.SortOrder = req.SortOrder;
 
         course.UpdatedAt = DateTime.UtcNow;
         await _db.Courses.ReplaceOneAsync(c => c.Id == course.Id, course);
 
         return ServiceResult<ChapterContentDto>.Ok(Mappers.ToChapterContentDto(cc));
+    }
+
+    // ─── Reorder (Author/Admin) ───────────────────────────────────────────────
+
+    /// <summary>Setzt die Kapitel-Reihenfolge: SortOrder = Position in OrderedIds.</summary>
+    public async Task<ServiceResult<bool>> ReorderChaptersAsync(
+        string courseId, ReorderRequest req, string userId, bool isAdmin)
+    {
+        var course = await _db.Courses.Find(c => c.Id == courseId).FirstOrDefaultAsync();
+        if (course is null)
+            return ServiceResult<bool>.NotFound("Course not found.");
+        if (!isAdmin && course.AuthorId != userId)
+            return ServiceResult<bool>.Forbidden("Not your course.");
+
+        var error = ApplyOrder(course.Chapters, req.OrderedIds,
+            ch => ch.Id, ch => ch.ElementId, (ch, i) => ch.SortOrder = i);
+        if (error is not null)
+            return ServiceResult<bool>.Validation(error);
+
+        course.UpdatedAt = DateTime.UtcNow;
+        await _db.Courses.ReplaceOneAsync(c => c.Id == course.Id, course);
+        return ServiceResult<bool>.Ok(true);
+    }
+
+    /// <summary>Setzt die Inhalts-Reihenfolge eines Kapitels analog zu den Kapiteln.</summary>
+    public async Task<ServiceResult<bool>> ReorderChapterContentAsync(
+        string chapterId, ReorderRequest req, string userId, bool isAdmin)
+    {
+        var course = await _db.Courses
+            .Find(c => c.Chapters.Any(ch => ch.Id == chapterId || ch.ElementId == chapterId))
+            .FirstOrDefaultAsync();
+        if (course is null)
+            return ServiceResult<bool>.NotFound("Chapter not found.");
+        if (!isAdmin && course.AuthorId != userId)
+            return ServiceResult<bool>.Forbidden("Not your course.");
+
+        var chapter = course.Chapters.First(ch => ch.Id == chapterId || ch.ElementId == chapterId);
+        var error = ApplyOrder(chapter.ChapterContent, req.OrderedIds,
+            cc => cc.Id, cc => cc.ElementId, (cc, i) => cc.SortOrder = i);
+        if (error is not null)
+            return ServiceResult<bool>.Validation(error);
+
+        course.UpdatedAt = DateTime.UtcNow;
+        await _db.Courses.ReplaceOneAsync(c => c.Id == course.Id, course);
+        return ServiceResult<bool>.Ok(true);
+    }
+
+    /// <summary>
+    /// Wendet eine vollständige Neuordnung an: Jedes Element muss genau einmal in
+    /// orderedIds vorkommen (per Id oder ElementId). Liefert null bei Erfolg,
+    /// sonst die Validierungsmeldung.
+    /// </summary>
+    private static string? ApplyOrder<T>(
+        List<T> items, List<string>? orderedIds,
+        Func<T, string> id, Func<T, string> elementId, Action<T, int> setSortOrder)
+    {
+        var ids = orderedIds ?? new List<string>();
+        if (ids.Count != items.Count || ids.Distinct().Count() != ids.Count)
+            return "orderedIds must contain every element exactly once.";
+
+        // 1-basiert, konsistent zu Bestandsdaten und zur Append-Logik (max+1).
+        var position = ids.Select((value, index) => (value, index))
+            .ToDictionary(x => x.value, x => x.index + 1);
+        foreach (var item in items)
+        {
+            if (position.TryGetValue(id(item), out var byId))
+                setSortOrder(item, byId);
+            else if (position.TryGetValue(elementId(item), out var byElementId))
+                setSortOrder(item, byElementId);
+            else
+                return "orderedIds must contain every element exactly once.";
+        }
+        return null;
     }
 
     // ─── Delete (Author/Admin) ────────────────────────────────────────────────

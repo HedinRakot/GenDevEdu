@@ -12,7 +12,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-import { useChapterList, usePublishCourse, useDeleteChapter } from '@/hooks/useCourses';
+import {
+  useChapterList,
+  usePublishCourse,
+  useDeleteChapter,
+  useReorderChapters,
+} from '@/hooks/useCourses';
 import { useTheme } from '@/context/ThemeContext';
 import { translate } from '@/utils/textUtils';
 import type { AuthorStackParamList } from '@/navigation/AuthorStack';
@@ -28,18 +33,48 @@ function ChapterRow({
   onPress,
   onQuiz,
   onDelete,
+  onMoveUp,
+  onMoveDown,
   deleting,
+  reordering,
 }: {
   chapter: Chapter;
   index: number;
   onPress: () => void;
   onQuiz: () => void;
   onDelete: () => void;
+  /** undefined = erste Zeile (kein Hoch-Schieben möglich) */
+  onMoveUp?: () => void;
+  /** undefined = letzte Zeile */
+  onMoveDown?: () => void;
   deleting: boolean;
+  reordering: boolean;
 }) {
   const { colors } = useTheme();
   return (
     <View style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
+      <View style={styles.moveColumn}>
+        <TouchableOpacity
+          testID={`chapter-move-up-${index}`}
+          onPress={onMoveUp}
+          disabled={!onMoveUp || reordering}
+          hitSlop={{ top: 6, bottom: 6, left: 8, right: 8 }}
+        >
+          <Text style={[styles.moveIcon, { color: onMoveUp && !reordering ? colors.primary : colors.borderLight }]}>
+            ▲
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          testID={`chapter-move-down-${index}`}
+          onPress={onMoveDown}
+          disabled={!onMoveDown || reordering}
+          hitSlop={{ top: 6, bottom: 6, left: 8, right: 8 }}
+        >
+          <Text style={[styles.moveIcon, { color: onMoveDown && !reordering ? colors.primary : colors.borderLight }]}>
+            ▼
+          </Text>
+        </TouchableOpacity>
+      </View>
       <TouchableOpacity style={styles.rowMain} onPress={onPress} activeOpacity={0.8}>
         <Text style={[styles.sortOrder, { color: colors.textSecondary }]}>
           {String(index + 1).padStart(2, '0')}
@@ -81,6 +116,18 @@ export function CourseEditorScreen() {
   const { data: model, isLoading } = useChapterList(courseId);
   const { mutate: publish, isPending: isPublishing } = usePublishCourse();
   const { mutate: removeChapter, isPending: isDeleting } = useDeleteChapter(courseId);
+  const { mutate: reorder, isPending: isReordering } = useReorderChapters(courseId);
+
+  /** Tauscht das Kapitel an `index` mit seinem Nachbarn und persistiert die Liste. */
+  const moveChapter = (index: number, direction: -1 | 1) => {
+    const ids = (model?.chapters ?? []).map((ch) => ch.elementId);
+    const target = index + direction;
+    if (target < 0 || target >= ids.length) return;
+    [ids[index], ids[target]] = [ids[target], ids[index]];
+    reorder(ids, {
+      onError: () => Alert.alert('Fehler', 'Reihenfolge konnte nicht gespeichert werden.'),
+    });
+  };
 
   const onDeleteChapter = (chapter: Chapter) => {
     const label = translate(chapter.titel) || chapter.name;
@@ -143,6 +190,13 @@ export function CourseEditorScreen() {
               chapter={ch}
               index={index}
               deleting={isDeleting}
+              reordering={isReordering}
+              onMoveUp={index > 0 ? () => moveChapter(index, -1) : undefined}
+              onMoveDown={
+                index < (model?.chapters.length ?? 0) - 1
+                  ? () => moveChapter(index, 1)
+                  : undefined
+              }
               onPress={() =>
                 navigation.navigate('AddChapterContent', {
                   chapterId: ch.elementId,
@@ -199,6 +253,8 @@ const styles = StyleSheet.create({
     ...Shadow.sm,
   },
   rowMain: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, flex: 1 },
+  moveColumn: { justifyContent: 'center', gap: 2 },
+  moveIcon: { fontSize: FontSize.sm, textAlign: 'center' },
   sortOrder: { fontSize: FontSize.sm, fontWeight: FontWeight.bold, minWidth: 28 },
   rowTitle: { fontSize: FontSize.md, fontWeight: FontWeight.medium },
   quizButton: { padding: Spacing.xs },

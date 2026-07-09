@@ -15,7 +15,8 @@ export interface CreateCourseRequest {
 export interface CreateChapterRequest {
   name: string;
   titelItems: TextItemDto[];
-  sortOrder: number;
+  /** Optional: ohne Angabe hängt das Backend ans Ende an (Reorder per ▲/▼). */
+  sortOrder?: number;
   show: boolean;
 }
 
@@ -26,7 +27,8 @@ export interface CreateChapterContentRequest {
   lessonText?: string;
   lessonTexteItems?: TextItemDto[];
   videoUrl?: string;
-  sortOrder: number;
+  /** Optional: ohne Angabe bleibt die Position erhalten bzw. wird angehängt. */
+  sortOrder?: number;
 }
 
 export interface CreateAnswerRequest {

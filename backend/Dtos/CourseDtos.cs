@@ -76,3 +76,9 @@ public record CreateChapterContentRequest(
     List<TextItemDto>? LessonTexteItems = null,
     string? VideoUrl = null,
     int SortOrder = 0);
+
+/// <summary>
+/// Neue Reihenfolge als vollständige, geordnete Liste der Element-IDs
+/// (PUT /api/courses/{id}/chapters/order bzw. /api/chapters/{id}/contents/order).
+/// </summary>
+public record ReorderRequest(List<string>? OrderedIds);

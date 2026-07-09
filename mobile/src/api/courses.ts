@@ -185,6 +185,25 @@ export async function updateQuestionList(
   return data;
 }
 
+// ─── Author: Reihenfolge ──────────────────────────────────────────────────────
+
+/** Neue Kapitel-Reihenfolge: vollständige, geordnete Liste der Kapitel-IDs. */
+export async function reorderChapters(courseId: string, orderedIds: string[]): Promise<void> {
+  await apiClient.put(`/api/courses/${encodeURIComponent(courseId)}/chapters/order`, {
+    orderedIds,
+  });
+}
+
+/** Neue Inhalts-Reihenfolge eines Kapitels (analog zu reorderChapters). */
+export async function reorderChapterContents(
+  chapterId: string,
+  orderedIds: string[],
+): Promise<void> {
+  await apiClient.put(`/api/chapters/${encodeURIComponent(chapterId)}/contents/order`, {
+    orderedIds,
+  });
+}
+
 // ─── Kapitel-Abschlussquiz (F8) ───────────────────────────────────────────────
 
 export async function getChapterQuiz(chapterId: string): Promise<ChapterQuizView> {

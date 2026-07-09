@@ -32,7 +32,6 @@ export function AddChapterScreen() {
   const [name, setName] = useState('');
   const [titelDe, setTitelDe] = useState('');
   const [titelEn, setTitelEn] = useState('');
-  const [sortOrder, setSortOrder] = useState('1');
 
   const onSave = () => {
     if (!name.trim()) {
@@ -46,7 +45,8 @@ export function AddChapterScreen() {
           { text: titelDe.trim() || name.trim(), language: 1 },
           { text: titelEn.trim() || name.trim(), language: 2 },
         ],
-        sortOrder: parseInt(sortOrder, 10) || 1,
+        // Keine SortOrder mehr: Backend hängt ans Ende an; sortiert wird
+        // im Kurs-Editor per ▲/▼ (Reorder-Endpoint).
         show: true,
       },
       {
@@ -82,10 +82,6 @@ export function AddChapterScreen() {
           <Text style={[styles.label, { color: colors.textSecondary }]}>Titel (Englisch)</Text>
           <TextInput style={inputStyle} value={titelEn} onChangeText={setTitelEn}
             placeholder="e.g. Introduction" placeholderTextColor={colors.textTertiary} />
-
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Reihenfolge</Text>
-          <TextInput style={inputStyle} value={sortOrder} onChangeText={setSortOrder}
-            keyboardType="numeric" placeholderTextColor={colors.textTertiary} />
 
           <TouchableOpacity
             style={[styles.saveButton, { backgroundColor: colors.primary }]}
