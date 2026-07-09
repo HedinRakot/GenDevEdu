@@ -4,7 +4,6 @@ import {
   FlatList,
   RefreshControl,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -15,7 +14,8 @@ import { useAdminUsers, useSetUserRole } from '@/hooks/useAdmin';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import type { AdminUser, AppRole } from '@/types/admin';
-import { FontSize, FontWeight, Radius, Shadow, Spacing } from '@/config/theme';
+import { Badge, Button, Card, Icon, Typography } from '@/components/common';
+import { Radius, Spacing } from '@/config/theme';
 
 const ROLE_ORDER: AppRole[] = ['learner', 'instructor', 'admin'];
 
@@ -34,16 +34,12 @@ function UserRow({
   const { colors } = useTheme();
 
   return (
-    <View style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
+    <Card style={styles.row}>
       <View style={styles.rowHeader}>
-        <Text style={[styles.email, { color: colors.textPrimary }]} numberOfLines={1}>
+        <Typography variant="label" numberOfLines={1} style={styles.email}>
           {item.email || item.id}
-        </Text>
-        {isSelf && (
-          <View style={[styles.youBadge, { backgroundColor: colors.primarySurface }]}>
-            <Text style={[styles.youBadgeText, { color: colors.primary }]}>{t('admin.you')}</Text>
-          </View>
-        )}
+        </Typography>
+        {isSelf && <Badge label={t('admin.you')} tone="accent" />}
         {updating && <ActivityIndicator size="small" color={colors.primary} />}
       </View>
 
@@ -66,19 +62,18 @@ function UserRow({
               ]}
               activeOpacity={0.7}
             >
-              <Text
-                style={[
-                  styles.rolePillText,
-                  { color: selected ? colors.textInverted : colors.textSecondary },
-                ]}
+              <Typography
+                variant="label"
+                color={selected ? 'inverted' : 'secondary'}
+                center
               >
                 {t(`admin.roles.${role}`)}
-              </Text>
+              </Typography>
             </TouchableOpacity>
           );
         })}
       </View>
-    </View>
+    </Card>
   );
 }
 
@@ -106,14 +101,24 @@ export function AdminUsersScreen() {
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top', 'bottom']}>
       <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <Text style={[styles.title, { color: colors.textPrimary }]}>🛡️ {t('admin.title')}</Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>{t('admin.subtitle')}</Text>
+        <View style={styles.headerTitle}>
+          <Icon name="users" size={22} color={colors.accent} />
+          <Typography variant="h2">{t('admin.title')}</Typography>
+        </View>
+        <Typography variant="bodySm" color="secondary" style={{ marginTop: Spacing.xs }}>
+          {t('admin.subtitle')}
+        </Typography>
       </View>
 
       {errorMsg && (
-        <Text testID="admin-error" style={[styles.banner, { color: colors.error, backgroundColor: colors.errorSurface }]}>
+        <Typography
+          testID="admin-error"
+          variant="bodySm"
+          color={colors.error}
+          style={[styles.banner, { backgroundColor: colors.errorSurface }]}
+        >
           {errorMsg}
-        </Text>
+        </Typography>
       )}
 
       {isLoading ? (
@@ -122,10 +127,8 @@ export function AdminUsersScreen() {
         </View>
       ) : error ? (
         <View style={styles.centered}>
-          <Text style={[styles.errorText, { color: colors.error }]}>{t('admin.loadError')}</Text>
-          <TouchableOpacity onPress={() => refetch()}>
-            <Text style={[styles.retryText, { color: colors.primary }]}>{t('common.retry')}</Text>
-          </TouchableOpacity>
+          <Typography variant="body" color={colors.error}>{t('admin.loadError')}</Typography>
+          <Button title={t('common.retry')} variant="ghost" onPress={() => refetch()} />
         </View>
       ) : (
         <FlatList
@@ -144,7 +147,9 @@ export function AdminUsersScreen() {
             />
           )}
           ListEmptyComponent={
-            <Text style={[styles.empty, { color: colors.textSecondary }]}>{t('admin.empty')}</Text>
+            <Typography variant="body" color="secondary" center style={styles.empty}>
+              {t('admin.empty')}
+            </Typography>
           }
         />
       )}
@@ -156,26 +161,15 @@ const styles = StyleSheet.create({
   safe: { flex: 1 },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: Spacing.md },
   header: { padding: Spacing.lg, borderBottomWidth: 1 },
-  title: { fontSize: FontSize.xl, fontWeight: FontWeight.bold },
-  subtitle: { fontSize: FontSize.sm, marginTop: 2 },
+  headerTitle: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
   banner: {
-    fontSize: FontSize.sm,
-    fontWeight: FontWeight.semibold,
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.sm,
   },
   list: { padding: Spacing.lg, gap: Spacing.sm },
-  row: {
-    padding: Spacing.md,
-    borderRadius: Radius.lg,
-    borderWidth: 1,
-    gap: Spacing.md,
-    ...Shadow.sm,
-  },
+  row: { gap: Spacing.md },
   rowHeader: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
-  email: { flex: 1, fontSize: FontSize.md, fontWeight: FontWeight.semibold },
-  youBadge: { borderRadius: Radius.full, paddingHorizontal: Spacing.sm, paddingVertical: 2 },
-  youBadgeText: { fontSize: FontSize.xs, fontWeight: FontWeight.bold },
+  email: { flex: 1 },
   roleSelector: { flexDirection: 'row', gap: Spacing.sm },
   rolePill: {
     flex: 1,
@@ -184,8 +178,5 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     alignItems: 'center',
   },
-  rolePillText: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
-  empty: { textAlign: 'center', marginTop: Spacing.xxxl, fontSize: FontSize.md },
-  errorText: { fontSize: FontSize.md },
-  retryText: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
+  empty: { marginTop: Spacing.xxxl },
 });

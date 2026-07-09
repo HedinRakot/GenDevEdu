@@ -4,7 +4,6 @@ import {
   Alert,
   FlatList,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -18,7 +17,8 @@ import { useTheme } from '@/context/ThemeContext';
 import { translate } from '@/utils/textUtils';
 import type { AuthorStackParamList } from '@/navigation/AuthorStack';
 import type { Course } from '@/types/course';
-import { FontSize, FontWeight, Radius, Shadow, Spacing } from '@/config/theme';
+import { Button, Card, Icon, Typography } from '@/components/common';
+import { FontSize, Spacing } from '@/config/theme';
 
 type NavProp = NativeStackNavigationProp<AuthorStackParamList, 'AuthorCourses'>;
 
@@ -35,28 +35,30 @@ function CourseRow({
 }) {
   const { colors } = useTheme();
   return (
-    <TouchableOpacity
-      style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}
-      onPress={onPress}
-      activeOpacity={0.8}
-    >
-      <View style={styles.rowBody}>
-        <Text style={[styles.rowTitle, { color: colors.textPrimary }]}>
-          {translate(course.titel) || course.name}
-        </Text>
-        <Text style={[styles.rowMeta, { color: colors.textTertiary }]}>{course.name}</Text>
-      </View>
-      <TouchableOpacity
-        onPress={onDelete}
-        disabled={deleting}
-        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        style={styles.deleteButton}
-      >
-        <Text style={[styles.deleteIcon, { color: deleting ? colors.textTertiary : colors.error }]}>
-          🗑
-        </Text>
-      </TouchableOpacity>
-      <Text style={[styles.arrow, { color: colors.textTertiary }]}>›</Text>
+    <TouchableOpacity onPress={onPress} activeOpacity={0.85}>
+      <Card style={styles.row}>
+        <View style={styles.rowBody}>
+          <Typography variant="label" numberOfLines={1}>
+            {translate(course.titel) || course.name}
+          </Typography>
+          <Typography variant="caption" color="tertiary" numberOfLines={1}>
+            {course.name}
+          </Typography>
+        </View>
+        <TouchableOpacity
+          onPress={onDelete}
+          disabled={deleting}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          style={styles.deleteButton}
+        >
+          <Icon
+            name="delete"
+            size={FontSize.lg}
+            color={deleting ? colors.textTertiary : colors.error}
+          />
+        </TouchableOpacity>
+        <Icon name="chevron-right" size={22} color={colors.textTertiary} />
+      </Card>
     </TouchableOpacity>
   );
 }
@@ -94,22 +96,26 @@ export function AuthorCoursesScreen() {
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['bottom']}>
       <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <Text style={[styles.title, { color: colors.textPrimary }]}>✏️ Meine Kurse</Text>
+        <View style={styles.titleRow}>
+          <Icon name="edit" size={22} color={colors.accent} />
+          <Typography variant="h2">Meine Kurse</Typography>
+        </View>
         <View style={styles.headerActions}>
-          <TouchableOpacity
+          <Button
             testID="author-daily-challenges"
-            style={[styles.secondaryButton, { borderColor: colors.primary }]}
+            title="Challenges"
+            variant="secondary"
+            size="sm"
+            iconLeft="challenge"
             onPress={() => navigation.navigate('DailyChallenges')}
-          >
-            <Text style={[styles.secondaryButtonText, { color: colors.primary }]}>⚡ Challenges</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
+          />
+          <Button
             testID="author-new-course"
-            style={[styles.addButton, { backgroundColor: colors.primary }]}
+            title="Neu"
+            size="sm"
+            iconLeft="add"
             onPress={() => navigation.navigate('CreateCourse')}
-          >
-            <Text style={styles.addButtonText}>+ Neu</Text>
-          </TouchableOpacity>
+          />
         </View>
       </View>
 
@@ -121,10 +127,10 @@ export function AuthorCoursesScreen() {
 
       {error && (
         <View style={styles.centered}>
-          <Text style={[styles.errorText, { color: colors.error }]}>Fehler beim Laden</Text>
-          <TouchableOpacity onPress={() => refetch()}>
-            <Text style={[styles.retryText, { color: colors.primary }]}>Erneut versuchen</Text>
-          </TouchableOpacity>
+          <Typography variant="body" color={colors.error}>
+            Fehler beim Laden
+          </Typography>
+          <Button title="Erneut versuchen" variant="ghost" onPress={() => refetch()} />
         </View>
       )}
 
@@ -147,9 +153,9 @@ export function AuthorCoursesScreen() {
             />
           )}
           ListEmptyComponent={
-            <Text style={[styles.empty, { color: colors.textSecondary }]}>
+            <Typography variant="body" color="secondary" center style={styles.empty}>
               Noch keine Kurse. Erstelle deinen ersten Kurs!
-            </Text>
+            </Typography>
           }
         />
       )}
@@ -167,34 +173,16 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     borderBottomWidth: 1,
   },
-  title: { fontSize: FontSize.xl, fontWeight: FontWeight.bold },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
-  addButton: { borderRadius: Radius.md, paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm },
-  addButtonText: { color: 'white', fontWeight: FontWeight.bold, fontSize: FontSize.sm },
-  secondaryButton: {
-    borderRadius: Radius.md,
-    borderWidth: 1.5,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-  },
-  secondaryButtonText: { fontWeight: FontWeight.bold, fontSize: FontSize.sm },
   list: { padding: Spacing.lg, gap: Spacing.sm },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: Spacing.md,
-    borderRadius: Radius.lg,
-    borderWidth: 1,
     gap: Spacing.md,
-    ...Shadow.sm,
   },
-  rowBody: { flex: 1 },
-  rowTitle: { fontSize: FontSize.md, fontWeight: FontWeight.bold },
-  rowMeta: { fontSize: FontSize.xs, marginTop: 2 },
+  rowBody: { flex: 1, gap: 2 },
   deleteButton: { padding: Spacing.xs },
-  deleteIcon: { fontSize: FontSize.lg },
-  arrow: { fontSize: 24 },
-  empty: { textAlign: 'center', marginTop: Spacing.xxxl, fontSize: FontSize.md },
-  errorText: { fontSize: FontSize.md },
-  retryText: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
+  empty: { marginTop: Spacing.xxxl },
 });

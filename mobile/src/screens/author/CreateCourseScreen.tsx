@@ -5,8 +5,6 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -17,7 +15,8 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useCreateCourse } from '@/hooks/useCourses';
 import { useTheme } from '@/context/ThemeContext';
 import type { AuthorStackParamList } from '@/navigation/AuthorStack';
-import { FontSize, FontWeight, Radius, Spacing } from '@/config/theme';
+import { Button, Input, Typography } from '@/components/common';
+import { Radius, Spacing } from '@/config/theme';
 
 type NavProp = NativeStackNavigationProp<AuthorStackParamList, 'CreateCourse'>;
 
@@ -76,79 +75,80 @@ export function CreateCourseScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Text style={[styles.cancel, { color: colors.primary }]}>Abbrechen</Text>
-          </TouchableOpacity>
-          <Text style={[styles.title, { color: colors.textPrimary }]}>Neuer Kurs</Text>
-          <TouchableOpacity testID="create-course-submit" onPress={onSave} disabled={isPending}>
-            <Text style={[styles.save, { color: isPending ? colors.textTertiary : colors.primary }]}>
-              {isPending ? 'Wird erstellt…' : 'Erstellen'}
-            </Text>
-          </TouchableOpacity>
+          <Button title="Abbrechen" variant="ghost" size="sm" onPress={() => navigation.goBack()} />
+          <Typography variant="h3">Neuer Kurs</Typography>
+          <Button
+            testID="create-course-submit"
+            title={isPending ? 'Wird erstellt…' : 'Erstellen'}
+            size="sm"
+            loading={isPending}
+            disabled={isPending}
+            iconRight="check"
+            onPress={onSave}
+          />
         </View>
 
         <ScrollView contentContainerStyle={styles.form}>
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Interner Name *</Text>
-          <TextInput
+          <Input
             testID="create-course-name"
-            style={[styles.input, { backgroundColor: colors.surface, color: colors.textPrimary, borderColor: colors.border }]}
+            label="Interner Name *"
             value={name}
             onChangeText={setName}
             placeholder="z.B. csharp-basics"
-            placeholderTextColor={colors.textTertiary}
             autoCapitalize="none"
           />
 
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Titel (Deutsch)</Text>
-          <TextInput
-            style={[styles.input, { backgroundColor: colors.surface, color: colors.textPrimary, borderColor: colors.border }]}
+          <Input
+            label="Titel (Deutsch)"
             value={titelDe}
             onChangeText={setTitelDe}
             placeholder="z.B. C# Grundlagen"
-            placeholderTextColor={colors.textTertiary}
           />
 
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Titel (Englisch)</Text>
-          <TextInput
-            style={[styles.input, { backgroundColor: colors.surface, color: colors.textPrimary, borderColor: colors.border }]}
+          <Input
+            label="Titel (Englisch)"
             value={titelEn}
             onChangeText={setTitelEn}
             placeholder="e.g. C# Basics"
-            placeholderTextColor={colors.textTertiary}
           />
 
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Tags (kommagetrennt)</Text>
-          <TextInput
-            style={[styles.input, { backgroundColor: colors.surface, color: colors.textPrimary, borderColor: colors.border }]}
+          <Input
+            label="Tags (kommagetrennt)"
             value={tagsInput}
             onChangeText={setTagsInput}
             placeholder="z.B. csharp, grundlagen"
-            placeholderTextColor={colors.textTertiary}
             autoCapitalize="none"
           />
 
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Level</Text>
-          <View style={styles.levelRow}>
-            {LEVELS.map((lv) => {
-              const active = level === lv.value;
-              return (
-                <TouchableOpacity
-                  key={lv.value}
-                  onPress={() => setLevel((cur) => (cur === lv.value ? '' : lv.value))}
-                  style={[
-                    styles.levelChip,
-                    {
-                      backgroundColor: active ? colors.primary : colors.surface,
-                      borderColor: active ? colors.primary : colors.border,
-                    },
-                  ]}
-                >
-                  <Text style={{ color: active ? colors.textInverted : colors.textPrimary, fontSize: FontSize.xs }}>
-                    {lv.label}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
+          <View>
+            <Typography variant="label" color="secondary" style={{ marginBottom: Spacing.xs }}>
+              Level
+            </Typography>
+            <View style={styles.levelRow}>
+              {LEVELS.map((lv) => {
+                const active = level === lv.value;
+                return (
+                  <TouchableOpacity
+                    key={lv.value}
+                    onPress={() => setLevel((cur) => (cur === lv.value ? '' : lv.value))}
+                    style={[
+                      styles.levelChip,
+                      {
+                        backgroundColor: active ? colors.primary : colors.surface,
+                        borderColor: active ? colors.primary : colors.border,
+                      },
+                    ]}
+                  >
+                    <Typography
+                      variant="caption"
+                      color={active ? 'inverted' : 'primary'}
+                    >
+                      {lv.label}
+                    </Typography>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -165,17 +165,12 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     borderBottomWidth: 1,
   },
-  cancel: { fontSize: FontSize.md },
-  title: { fontSize: FontSize.lg, fontWeight: FontWeight.bold },
-  save: { fontSize: FontSize.md, fontWeight: FontWeight.semibold },
-  form: { padding: Spacing.lg, gap: Spacing.sm },
-  label: { fontSize: FontSize.sm, fontWeight: FontWeight.medium, marginTop: Spacing.md },
-  input: {
-    borderWidth: 1,
-    borderRadius: Radius.md,
-    padding: Spacing.md,
-    fontSize: FontSize.md,
-  },
+  form: { padding: Spacing.lg, gap: Spacing.md },
   levelRow: { flexDirection: 'row', gap: Spacing.sm, marginTop: Spacing.xs },
-  levelChip: { borderWidth: 1.5, borderRadius: Radius.full, paddingHorizontal: Spacing.md, paddingVertical: 6 },
+  levelChip: {
+    borderWidth: 1.5,
+    borderRadius: Radius.full,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 6,
+  },
 });

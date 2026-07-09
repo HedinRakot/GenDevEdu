@@ -1,15 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
-  FlatList,
-  Modal,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { FlatList, Modal, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { attendanceExportPaths } from '@/api/attendance';
@@ -17,7 +7,8 @@ import { useAdminUsers } from '@/hooks/useAdmin';
 import { useTheme } from '@/context/ThemeContext';
 import { monthRange, todayIso } from '@/utils/attendanceDates';
 import { downloadFile } from '@/utils/downloadFile';
-import { FontSize, FontWeight, Radius, Shadow, Spacing } from '@/config/theme';
+import { Button, Card, Icon, Input, Screen, Typography } from '@/components/common';
+import { Radius, Spacing } from '@/config/theme';
 
 export function AttendanceExportScreen() {
   const { t } = useTranslation();
@@ -81,168 +72,137 @@ export function AttendanceExportScreen() {
       ),
     );
 
-  const Button = ({
-    kind,
-    label,
-    onPress,
-    disabled,
-  }: {
-    kind: string;
-    label: string;
-    onPress: () => void;
-    disabled?: boolean;
-  }) => (
-    <TouchableOpacity
-      onPress={onPress}
-      disabled={disabled || busy !== null}
-      style={[
-        styles.exportButton,
-        { backgroundColor: colors.primary },
-        (disabled || busy !== null) && { opacity: 0.5 },
-      ]}
-      testID={`export-${kind}`}
-    >
-      {busy === kind ? (
-        <ActivityIndicator color={colors.textInverted} size="small" />
-      ) : (
-        <Text style={{ color: colors.textInverted, fontWeight: FontWeight.semibold }}>{label}</Text>
-      )}
-    </TouchableOpacity>
-  );
-
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: colors.background }]}
-      contentContainerStyle={styles.content}
-    >
+    <Screen contentContainerStyle={styles.content}>
       {/* Lerner */}
-      <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
-        <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>
+      <Card>
+        <Typography variant="label" color="secondary">
           {t('attendance.periods.learner')}
-        </Text>
+        </Typography>
         <TouchableOpacity
           onPress={() => setPickerOpen(true)}
-          style={[styles.input, { borderColor: colors.border }]}
+          style={[styles.selectField, { borderColor: colors.border, backgroundColor: colors.surface }]}
         >
-          <Text style={{ color: userId ? colors.textPrimary : colors.textSecondary }}>
+          <Typography variant="body" color={userId ? 'primary' : 'secondary'}>
             {userId ? (emailByUserId.get(userId) ?? userId) : t('attendance.export.allLearners')}
-          </Text>
+          </Typography>
         </TouchableOpacity>
 
         <View style={styles.fieldRow}>
-          <View style={styles.fieldHalf}>
-            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>
-              {t('attendance.from')}
-            </Text>
-            <TextInput
-              value={from}
-              onChangeText={setFrom}
-              placeholder="yyyy-mm-dd"
-              placeholderTextColor={colors.textSecondary}
-              style={[styles.input, { color: colors.textPrimary, borderColor: colors.border }]}
-              autoCapitalize="none"
-            />
-          </View>
-          <View style={styles.fieldHalf}>
-            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>
-              {t('attendance.to')}
-            </Text>
-            <TextInput
-              value={to}
-              onChangeText={setTo}
-              placeholder="yyyy-mm-dd"
-              placeholderTextColor={colors.textSecondary}
-              style={[styles.input, { color: colors.textPrimary, borderColor: colors.border }]}
-              autoCapitalize="none"
-            />
-          </View>
+          <Input
+            label={t('attendance.from')}
+            leftIcon="clock"
+            value={from}
+            onChangeText={setFrom}
+            placeholder="yyyy-mm-dd"
+            autoCapitalize="none"
+            containerStyle={styles.fieldHalf}
+          />
+          <Input
+            label={t('attendance.to')}
+            leftIcon="clock"
+            value={to}
+            onChangeText={setTo}
+            placeholder="yyyy-mm-dd"
+            autoCapitalize="none"
+            containerStyle={styles.fieldHalf}
+          />
         </View>
-      </View>
+      </Card>
 
       {/* CSV */}
-      <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
-        <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>
-          📊 {t('attendance.export.csvTitle')}
-        </Text>
-        <Text style={[styles.cardHint, { color: colors.textSecondary }]}>
+      <Card>
+        <View style={styles.cardTitleRow}>
+          <Icon name="copy" size={20} color={colors.accent} />
+          <Typography variant="h3">{t('attendance.export.csvTitle')}</Typography>
+        </View>
+        <Typography variant="bodySm" color="secondary">
           {t('attendance.export.csvHint')}
-        </Text>
+        </Typography>
         <Button
-          kind="daily"
-          label={t('attendance.export.dailyCsv')}
+          title={t('attendance.export.dailyCsv')}
+          variant="primary"
+          iconRight="arrow-right"
+          fullWidth
+          loading={busy === 'daily'}
+          disabled={busy !== null}
           onPress={exportDailyCsv}
+          testID="export-daily"
         />
         <Button
-          kind="events"
-          label={t('attendance.export.eventsCsv')}
+          title={t('attendance.export.eventsCsv')}
+          variant="primary"
+          iconRight="arrow-right"
+          fullWidth
+          loading={busy === 'events'}
+          disabled={!userId || busy !== null}
           onPress={exportEventsCsv}
-          disabled={!userId}
+          testID="export-events"
         />
         {!userId && (
-          <Text style={[styles.cardHint, { color: colors.textSecondary }]}>
+          <Typography variant="bodySm" color="secondary">
             {t('attendance.export.eventsNeedsLearner')}
-          </Text>
+          </Typography>
         )}
-      </View>
+      </Card>
 
       {/* PDF */}
-      <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
-        <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>
-          📄 {t('attendance.export.pdfTitle')}
-        </Text>
-        <Text style={[styles.cardHint, { color: colors.textSecondary }]}>
-          {t('attendance.export.pdfHint')}
-        </Text>
-        <View style={styles.fieldRow}>
-          <View style={styles.fieldHalf}>
-            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>
-              {t('attendance.export.year')}
-            </Text>
-            <TextInput
-              value={year}
-              onChangeText={setYear}
-              keyboardType="numeric"
-              style={[styles.input, { color: colors.textPrimary, borderColor: colors.border }]}
-            />
-          </View>
-          <View style={styles.fieldHalf}>
-            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>
-              {t('attendance.export.month')}
-            </Text>
-            <TextInput
-              value={month}
-              onChangeText={setMonth}
-              keyboardType="numeric"
-              style={[styles.input, { color: colors.textPrimary, borderColor: colors.border }]}
-            />
-          </View>
+      <Card>
+        <View style={styles.cardTitleRow}>
+          <Icon name="certificate" size={20} color={colors.accent} />
+          <Typography variant="h3">{t('attendance.export.pdfTitle')}</Typography>
         </View>
-        <Button kind="pdf" label={t('attendance.export.pdf')} onPress={exportPdf} disabled={!userId} />
+        <Typography variant="bodySm" color="secondary">
+          {t('attendance.export.pdfHint')}
+        </Typography>
+        <View style={styles.fieldRow}>
+          <Input
+            label={t('attendance.export.year')}
+            value={year}
+            onChangeText={setYear}
+            keyboardType="numeric"
+            containerStyle={styles.fieldHalf}
+          />
+          <Input
+            label={t('attendance.export.month')}
+            value={month}
+            onChangeText={setMonth}
+            keyboardType="numeric"
+            containerStyle={styles.fieldHalf}
+          />
+        </View>
+        <Button
+          title={t('attendance.export.pdf')}
+          variant="primary"
+          iconRight="arrow-right"
+          fullWidth
+          loading={busy === 'pdf'}
+          disabled={!userId || busy !== null}
+          onPress={exportPdf}
+          testID="export-pdf"
+        />
         {!userId && (
-          <Text style={[styles.cardHint, { color: colors.textSecondary }]}>
+          <Typography variant="bodySm" color="secondary">
             {t('attendance.export.pdfNeedsLearner')}
-          </Text>
+          </Typography>
         )}
-      </View>
+      </Card>
 
       {message && (
-        <Text
-          style={[
-            styles.message,
-            { color: message.isError ? colors.error : colors.success },
-          ]}
+        <Typography
+          variant="label"
+          center
+          color={message.isError ? colors.error : colors.success}
         >
           {message.text}
-        </Text>
+        </Typography>
       )}
 
       {/* Lerner-Auswahl */}
       <Modal visible={pickerOpen} transparent animationType="fade">
         <View style={styles.modalBackdrop}>
           <View style={[styles.modalCard, { backgroundColor: colors.surface }]}>
-            <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>
-              {t('attendance.periods.pickLearner')}
-            </Text>
+            <Typography variant="h3">{t('attendance.periods.pickLearner')}</Typography>
             <FlatList
               data={users ?? []}
               keyExtractor={(u) => u.id}
@@ -254,7 +214,7 @@ export function AttendanceExportScreen() {
                   }}
                   style={[styles.pickerRow, { borderBottomColor: colors.borderLight }]}
                 >
-                  <Text style={{ color: colors.textPrimary }}>{item.email || item.id}</Text>
+                  <Typography variant="body">{item.email || item.id}</Typography>
                 </TouchableOpacity>
               )}
               ListHeaderComponent={
@@ -265,52 +225,35 @@ export function AttendanceExportScreen() {
                   }}
                   style={[styles.pickerRow, { borderBottomColor: colors.borderLight }]}
                 >
-                  <Text style={{ color: colors.textSecondary }}>
+                  <Typography variant="body" color="secondary">
                     {t('attendance.export.allLearners')}
-                  </Text>
+                  </Typography>
                 </TouchableOpacity>
               }
             />
             <TouchableOpacity onPress={() => setPickerOpen(false)} style={styles.modalButton}>
-              <Text style={{ color: colors.textSecondary, fontWeight: FontWeight.semibold }}>
+              <Typography variant="label" color="secondary">
                 {t('common.cancel')}
-              </Text>
+              </Typography>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
-    </ScrollView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  content: { padding: Spacing.lg, gap: Spacing.md },
-  card: {
-    padding: Spacing.lg,
-    borderRadius: Radius.lg,
-    borderWidth: 1,
-    gap: Spacing.sm,
-    ...Shadow.sm,
-  },
-  cardTitle: { fontSize: FontSize.md, fontWeight: FontWeight.bold },
-  cardHint: { fontSize: FontSize.sm },
+  content: { gap: Spacing.md },
+  cardTitleRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
   fieldRow: { flexDirection: 'row', gap: Spacing.md },
-  fieldHalf: { flex: 1, gap: Spacing.xs },
-  fieldLabel: { fontSize: FontSize.xs, fontWeight: FontWeight.semibold },
-  input: {
+  fieldHalf: { flex: 1 },
+  selectField: {
     borderWidth: 1,
     borderRadius: Radius.md,
     paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    fontSize: FontSize.md,
+    paddingVertical: Spacing.sm + 2,
   },
-  exportButton: {
-    paddingVertical: Spacing.md,
-    borderRadius: Radius.md,
-    alignItems: 'center',
-  },
-  message: { textAlign: 'center', fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
   modalBackdrop: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.45)',

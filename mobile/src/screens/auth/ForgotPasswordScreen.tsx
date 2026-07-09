@@ -1,14 +1,5 @@
 import React, { useState } from 'react';
-import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
@@ -16,7 +7,8 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSignIn } from '@clerk/expo';
 
 import { useTheme } from '@/context/ThemeContext';
-import { FontSize, FontWeight, Radius, Shadow, Spacing } from '@/config/theme';
+import { Radius, Shadow, Spacing } from '@/config/theme';
+import { Button, Card, Icon, Input, Typography } from '@/components/common';
 import type { AuthStackParamList } from '@/navigation/AuthStack';
 
 type ForgotPasswordNavProp = NativeStackNavigationProp<AuthStackParamList, 'ForgotPassword'>;
@@ -122,139 +114,117 @@ export function ForgotPasswordScreen() {
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <View style={styles.header}>
-          <Text style={styles.logo}>{pendingReset ? '🔑' : '🔒'}</Text>
-          <Text style={[styles.screenTitle, { color: colors.textPrimary }]}>
-            {t('auth.forgotPasswordTitle')}
-          </Text>
-          <Text style={[styles.infoText, { color: colors.textSecondary }]}>
-            {pendingReset
-              ? t('auth.resetCodeSentInfo', { email })
-              : t('auth.forgotPasswordInfo')}
-          </Text>
-        </View>
+        <View style={styles.stage}>
+          <View style={styles.header}>
+            <View style={[styles.logoBadge, { backgroundColor: colors.primarySurface }]}>
+              <Icon name={pendingReset ? 'mail' : 'lock'} size={34} color={colors.accent} />
+            </View>
+            <Typography variant="h1" center style={{ marginTop: Spacing.md }}>
+              {t('auth.forgotPasswordTitle')}
+            </Typography>
+            <Typography variant="body" color="secondary" center style={{ marginTop: Spacing.xs }}>
+              {pendingReset ? t('auth.resetCodeSentInfo', { email }) : t('auth.forgotPasswordInfo')}
+            </Typography>
+          </View>
 
-        <View style={[styles.card, { backgroundColor: colors.surface }]}>
-          {errorMsg && (
-            <Text testID="forgot-password-error" style={[styles.errorText, { color: colors.error }]}>
-              {errorMsg}
-            </Text>
-          )}
-
-          {!pendingReset ? (
-            <>
-              <TextInput
-                testID="forgot-password-email-input"
-                style={[
-                  styles.input,
-                  { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border },
-                ]}
-                placeholder={t('auth.emailPlaceholder')}
-                placeholderTextColor={colors.textSecondary}
-                value={email}
-                onChangeText={setEmail}
-                autoCapitalize="none"
-                keyboardType="email-address"
-                textContentType="emailAddress"
-                autoComplete="email"
-              />
-
-              <TouchableOpacity
-                accessibilityRole="button"
-                testID="send-reset-code-button"
-                style={[
-                  styles.primaryButton,
-                  { backgroundColor: colors.primary },
-                  isSubmitting && { opacity: 0.7 },
-                ]}
-                onPress={handleSendCode}
-                disabled={isSubmitting}
+          <Card style={styles.card}>
+            {errorMsg && (
+              <Typography
+                testID="forgot-password-error"
+                variant="bodySm"
+                style={{ color: colors.error, marginBottom: Spacing.md }}
               >
-                {isSubmitting ? (
-                  <ActivityIndicator color={colors.textInverted} />
-                ) : (
-                  <Text style={[styles.primaryButtonText, { color: colors.textInverted }]}>
-                    {t('auth.sendResetCodeButton')}
-                  </Text>
-                )}
-              </TouchableOpacity>
-            </>
-          ) : (
-            <>
-              <TextInput
-                testID="reset-code-input"
-                style={[
-                  styles.input,
-                  { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border },
-                ]}
-                placeholder={t('auth.verificationCodePlaceholder')}
-                placeholderTextColor={colors.textSecondary}
-                value={code}
-                onChangeText={setCode}
-                keyboardType="number-pad"
-                textContentType="oneTimeCode"
-                autoComplete="one-time-code"
-              />
+                {errorMsg}
+              </Typography>
+            )}
 
-              <TextInput
-                testID="reset-new-password-input"
-                style={[
-                  styles.input,
-                  { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border },
-                ]}
-                placeholder={t('auth.newPasswordPlaceholder')}
-                placeholderTextColor={colors.textSecondary}
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                textContentType="newPassword"
-                autoComplete="new-password"
-              />
+            {!pendingReset ? (
+              <>
+                <Input
+                  testID="forgot-password-email-input"
+                  containerStyle={{ marginBottom: Spacing.md }}
+                  placeholder={t('auth.emailPlaceholder')}
+                  value={email}
+                  onChangeText={setEmail}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                  textContentType="emailAddress"
+                  autoComplete="email"
+                  leftIcon="mail"
+                />
 
-              <TextInput
-                testID="reset-confirm-password-input"
-                style={[
-                  styles.input,
-                  { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border },
-                ]}
-                placeholder={t('auth.confirmPasswordPlaceholder')}
-                placeholderTextColor={colors.textSecondary}
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                secureTextEntry
-                textContentType="newPassword"
-                autoComplete="new-password"
-              />
+                <Button
+                  testID="send-reset-code-button"
+                  title={t('auth.sendResetCodeButton')}
+                  onPress={handleSendCode}
+                  loading={isSubmitting}
+                  disabled={isSubmitting}
+                  fullWidth
+                  iconRight="arrow-right"
+                  style={{ marginTop: Spacing.sm }}
+                />
+              </>
+            ) : (
+              <>
+                <Input
+                  testID="reset-code-input"
+                  containerStyle={{ marginBottom: Spacing.md }}
+                  placeholder={t('auth.verificationCodePlaceholder')}
+                  value={code}
+                  onChangeText={setCode}
+                  keyboardType="number-pad"
+                  textContentType="oneTimeCode"
+                  autoComplete="one-time-code"
+                  leftIcon="lock"
+                />
 
-              <TouchableOpacity
-                accessibilityRole="button"
-                testID="reset-password-button"
-                style={[
-                  styles.primaryButton,
-                  { backgroundColor: colors.primary },
-                  isSubmitting && { opacity: 0.7 },
-                ]}
-                onPress={handleResetPassword}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <ActivityIndicator color={colors.textInverted} />
-                ) : (
-                  <Text style={[styles.primaryButtonText, { color: colors.textInverted }]}>
-                    {t('auth.resetPasswordButton')}
-                  </Text>
-                )}
-              </TouchableOpacity>
-            </>
-          )}
-        </View>
+                <Input
+                  testID="reset-new-password-input"
+                  containerStyle={{ marginBottom: Spacing.md }}
+                  placeholder={t('auth.newPasswordPlaceholder')}
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry
+                  textContentType="newPassword"
+                  autoComplete="new-password"
+                  leftIcon="lock"
+                />
 
-        <View style={styles.footer}>
-          <TouchableOpacity testID="back-to-login-link" onPress={() => navigation.goBack()}>
-            <Text style={[styles.linkText, { color: colors.primary }]}>
-              {t('auth.backToLogin')}
-            </Text>
-          </TouchableOpacity>
+                <Input
+                  testID="reset-confirm-password-input"
+                  containerStyle={{ marginBottom: Spacing.md }}
+                  placeholder={t('auth.confirmPasswordPlaceholder')}
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  secureTextEntry
+                  textContentType="newPassword"
+                  autoComplete="new-password"
+                  leftIcon="lock"
+                />
+
+                <Button
+                  testID="reset-password-button"
+                  title={t('auth.resetPasswordButton')}
+                  onPress={handleResetPassword}
+                  loading={isSubmitting}
+                  disabled={isSubmitting}
+                  fullWidth
+                  iconRight="arrow-right"
+                  style={{ marginTop: Spacing.sm }}
+                />
+              </>
+            )}
+          </Card>
+
+          <View style={styles.footer}>
+            <Button
+              testID="back-to-login-link"
+              title={t('auth.backToLogin')}
+              variant="ghost"
+              onPress={() => navigation.goBack()}
+              iconLeft="arrow-left"
+            />
+          </View>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -264,33 +234,21 @@ export function ForgotPasswordScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   container: { flex: 1, justifyContent: 'center', paddingHorizontal: Spacing.lg },
+  stage: { width: '100%', maxWidth: 440, alignSelf: 'center' },
   header: { alignItems: 'center', marginBottom: Spacing.xl },
-  logo: { fontSize: 64, marginBottom: Spacing.sm },
-  screenTitle: { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, marginBottom: Spacing.sm },
-  infoText: { fontSize: FontSize.md, textAlign: 'center' },
-  card: { borderRadius: Radius.xl, padding: Spacing.xl, ...Shadow.md },
-  errorText: { fontSize: FontSize.sm, marginBottom: Spacing.md, fontWeight: FontWeight.semibold },
-  input: {
-    borderWidth: 1,
-    borderRadius: Radius.md,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    marginBottom: Spacing.md,
-    fontSize: FontSize.md,
-  },
-  primaryButton: {
-    borderRadius: Radius.md,
-    paddingVertical: 16,
+  logoBadge: {
+    width: 72,
+    height: 72,
+    borderRadius: Radius.lg,
     alignItems: 'center',
-    marginTop: Spacing.sm,
+    justifyContent: 'center',
     ...Shadow.sm,
   },
-  primaryButtonText: { fontSize: FontSize.md, fontWeight: FontWeight.bold },
+  card: { padding: Spacing.xl },
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: Spacing.xl,
   },
-  linkText: { fontSize: FontSize.md, fontWeight: FontWeight.semibold },
 });

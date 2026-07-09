@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -7,14 +7,15 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/context/ThemeContext';
 import { translate } from '@/utils/textUtils';
 import { filterGlossary, GLOSSARY, type GlossaryEntry } from '@/data/glossary';
-import { FontSize, FontWeight, Radius, Shadow, Spacing } from '@/config/theme';
+import { Badge, Button, Input, Typography } from '@/components/common';
+import { Radius, Spacing } from '@/config/theme';
 
-const CATEGORY_BADGES: Record<GlossaryEntry['category'], string> = {
-  csharp: '💜 C#',
-  oop: '🧩 OOP',
-  dotnet: '🔵 .NET',
-  tooling: '🛠️ Tooling',
-  general: '🧠 General',
+const CATEGORY_LABELS: Record<GlossaryEntry['category'], string> = {
+  csharp: 'C#',
+  oop: 'OOP',
+  dotnet: '.NET',
+  tooling: 'Tooling',
+  general: 'General',
 };
 
 export function GlossaryScreen() {
@@ -34,39 +35,31 @@ export function GlossaryScreen() {
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top']}>
       <View style={styles.headerRow}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={[styles.back, { color: colors.primary }]}>‹ {t('common.back')}</Text>
-        </TouchableOpacity>
-        <Text style={[styles.title, { color: colors.textPrimary }]}>{t('glossary.title')}</Text>
-        <View style={{ width: 50 }} />
-      </View>
-
-      <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-        {t('glossary.subtitle')}
-      </Text>
-
-      <View
-        style={[
-          styles.searchBox,
-          { backgroundColor: colors.surface, borderColor: colors.border },
-        ]}
-      >
-        <Text style={styles.searchIcon}>🔍</Text>
-        <TextInput
-          style={[styles.searchInput, { color: colors.textPrimary }]}
-          value={query}
-          onChangeText={setQuery}
-          placeholder={t('glossary.searchPlaceholder')}
-          placeholderTextColor={colors.textTertiary}
-          autoCorrect={false}
-          autoCapitalize="none"
+        <Button
+          variant="ghost"
+          size="sm"
+          iconLeft="arrow-left"
+          title={t('common.back')}
+          onPress={() => navigation.goBack()}
         />
-        {query.length > 0 && (
-          <TouchableOpacity onPress={() => setQuery('')}>
-            <Text style={[styles.clear, { color: colors.textTertiary }]}>✕</Text>
-          </TouchableOpacity>
-        )}
       </View>
+
+      <View style={styles.heading}>
+        <Typography variant="h1">{t('glossary.title')}</Typography>
+        <Typography variant="body" color="secondary">
+          {t('glossary.subtitle')}
+        </Typography>
+      </View>
+
+      <Input
+        leftIcon="search"
+        containerStyle={styles.search}
+        value={query}
+        onChangeText={setQuery}
+        placeholder={t('glossary.searchPlaceholder')}
+        autoCorrect={false}
+        autoCapitalize="none"
+      />
 
       <View style={styles.chipRow}>
         {(['all', 'csharp', 'oop', 'dotnet', 'tooling', 'general'] as const).map((cat) => {
@@ -83,14 +76,9 @@ export function GlossaryScreen() {
                 },
               ]}
             >
-              <Text
-                style={[
-                  styles.chipText,
-                  { color: isActive ? colors.textInverted : colors.textSecondary },
-                ]}
-              >
-                {cat === 'all' ? t('glossary.allCategories') : CATEGORY_BADGES[cat]}
-              </Text>
+              <Typography variant="label" color={isActive ? 'inverted' : 'secondary'}>
+                {cat === 'all' ? t('glossary.allCategories') : CATEGORY_LABELS[cat]}
+              </Typography>
             </TouchableOpacity>
           );
         })}
@@ -100,12 +88,13 @@ export function GlossaryScreen() {
         data={filtered}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
+        showsVerticalScrollIndicator={false}
         ItemSeparatorComponent={() => <View style={{ height: Spacing.sm }} />}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={{ color: colors.textTertiary, fontSize: FontSize.md }}>
+            <Typography variant="body" color="tertiary">
               {t('common.noResults')}
-            </Text>
+            </Typography>
           </View>
         }
         renderItem={({ item }) => (
@@ -116,26 +105,24 @@ export function GlossaryScreen() {
             ]}
           >
             <View style={styles.cardHeader}>
-              <Text style={[styles.term, { color: colors.textPrimary }]}>{item.term}</Text>
-              <Text style={[styles.badge, { color: colors.textTertiary }]}>
-                {CATEGORY_BADGES[item.category]}
-              </Text>
+              <Typography variant="h3">{item.term}</Typography>
+              <Badge label={CATEGORY_LABELS[item.category]} tone="default" />
             </View>
-            <Text style={[styles.definition, { color: colors.textSecondary }]}>
+            <Typography variant="bodySm" color="secondary">
               {translate(item.definition)}
-            </Text>
+            </Typography>
             {item.keywords && item.keywords.length > 0 && (
-              <Text style={[styles.keywords, { color: colors.textTertiary }]}>
+              <Typography variant="caption" color="tertiary" style={styles.keywords}>
                 {item.keywords.map((k) => `#${k}`).join(' ')}
-              </Text>
+              </Typography>
             )}
           </View>
         )}
       />
 
-      <Text style={[styles.footer, { color: colors.textTertiary }]}>
+      <Typography variant="caption" color="tertiary" center style={styles.footer}>
         {t('glossary.totalEntries', { count: GLOSSARY.length })}
-      </Text>
+      </Typography>
     </SafeAreaView>
   );
 }
@@ -143,35 +130,23 @@ export function GlossaryScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.sm,
   },
-  back: { fontSize: FontSize.md, fontWeight: FontWeight.medium },
-  title: { fontSize: FontSize.xl, fontWeight: FontWeight.bold },
-  subtitle: { fontSize: FontSize.sm, paddingHorizontal: Spacing.lg, marginTop: 4 },
-
-  searchBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    margin: Spacing.lg,
-    paddingHorizontal: Spacing.md,
-    borderRadius: Radius.md,
-    borderWidth: 1,
-    gap: Spacing.sm,
-    ...Shadow.sm,
+  heading: {
+    paddingHorizontal: Spacing.lg,
+    marginTop: Spacing.xs,
+    gap: Spacing.xs,
   },
-  searchIcon: { fontSize: 16 },
-  searchInput: { flex: 1, paddingVertical: Spacing.sm, fontSize: FontSize.md },
-  clear: { fontSize: 16 },
+
+  search: { marginHorizontal: Spacing.lg, marginTop: Spacing.md },
 
   chipRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     paddingHorizontal: Spacing.lg,
     gap: Spacing.xs,
+    marginTop: Spacing.md,
     marginBottom: Spacing.sm,
   },
   chip: {
@@ -180,7 +155,6 @@ const styles = StyleSheet.create({
     borderRadius: Radius.full,
     borderWidth: 1,
   },
-  chipText: { fontSize: FontSize.xs, fontWeight: FontWeight.semibold },
 
   list: { padding: Spacing.lg, paddingTop: 0, paddingBottom: Spacing.xl },
   empty: { alignItems: 'center', padding: Spacing.xl },
@@ -188,22 +162,17 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     borderRadius: Radius.lg,
     borderWidth: 1,
-    ...Shadow.sm,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: Spacing.xs,
+    gap: Spacing.sm,
   },
-  term: { fontSize: FontSize.lg, fontWeight: FontWeight.bold },
-  badge: { fontSize: FontSize.xs, fontWeight: FontWeight.semibold },
-  definition: { fontSize: FontSize.sm, lineHeight: 20 },
-  keywords: { fontSize: FontSize.xs, marginTop: 6, fontStyle: 'italic' },
+  keywords: { marginTop: 6, fontStyle: 'italic' },
 
   footer: {
-    textAlign: 'center',
-    fontSize: FontSize.xs,
     paddingVertical: Spacing.sm,
   },
 });

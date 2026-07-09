@@ -33,8 +33,10 @@ function q(id: string, correctId: string): Question {
     titel: { items: [{ text: `Frage ${id}`, language: 1 }] },
     questionType: QuestionType.OneChoice,
     answers: [
-      { id: `${id}a`, isCorrect: correctId === 'a', titel: { items: [{ text: 'A', language: 1 }] }, comment: '' },
-      { id: `${id}b`, isCorrect: correctId === 'b', titel: { items: [{ text: 'B', language: 1 }] }, comment: '' },
+      // Antworttexte bewusst != 'A'/'B': QuizOption rendert ein Buchstaben-Badge,
+      // sonst ist getByText('A') zwischen Badge und Antworttext mehrdeutig.
+      { id: `${id}a`, isCorrect: correctId === 'a', titel: { items: [{ text: 'Antwort A', language: 1 }] }, comment: '' },
+      { id: `${id}b`, isCorrect: correctId === 'b', titel: { items: [{ text: 'Antwort B', language: 1 }] }, comment: '' },
     ],
     answerValue: '',
     completed: false,
@@ -89,7 +91,7 @@ describe('ChapterQuizScreen', () => {
     mockedSubmit.mockResolvedValue(result(true));
     const { getByText, findByText } = renderScreen();
 
-    fireEvent.press(await findByText('A'));
+    fireEvent.press(await findByText('Antwort A'));
     fireEvent.press(getByText(/quiz abgeben|submit quiz/i));
 
     await waitFor(() => expect(getByText(/bestanden|passed/i)).toBeTruthy());
@@ -101,7 +103,7 @@ describe('ChapterQuizScreen', () => {
     mockedSubmit.mockResolvedValue(result(false));
     const { getByText, findByText } = renderScreen();
 
-    fireEvent.press(await findByText('B'));
+    fireEvent.press(await findByText('Antwort B'));
     fireEvent.press(getByText(/quiz abgeben|submit quiz/i));
 
     await waitFor(() => expect(getByText(/nicht bestanden|not passed/i)).toBeTruthy());

@@ -4,7 +4,6 @@ import {
   Alert,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -22,7 +21,8 @@ import { useTheme } from '@/context/ThemeContext';
 import { translate } from '@/utils/textUtils';
 import type { AuthorStackParamList } from '@/navigation/AuthorStack';
 import type { Chapter } from '@/types/course';
-import { FontSize, FontWeight, Radius, Shadow, Spacing } from '@/config/theme';
+import { Badge, Button, Card, Icon, Typography } from '@/components/common';
+import { FontSize, Spacing } from '@/config/theme';
 
 type NavProp = NativeStackNavigationProp<AuthorStackParamList, 'CourseEditor'>;
 type RoutePropType = RouteProp<AuthorStackParamList, 'CourseEditor'>;
@@ -52,7 +52,7 @@ function ChapterRow({
 }) {
   const { colors } = useTheme();
   return (
-    <View style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
+    <Card style={styles.row}>
       <View style={styles.moveColumn}>
         <TouchableOpacity
           testID={`chapter-move-up-${index}`}
@@ -60,9 +60,13 @@ function ChapterRow({
           disabled={!onMoveUp || reordering}
           hitSlop={{ top: 6, bottom: 6, left: 8, right: 8 }}
         >
-          <Text style={[styles.moveIcon, { color: onMoveUp && !reordering ? colors.primary : colors.borderLight }]}>
-            ▲
-          </Text>
+          <View style={styles.moveUp}>
+            <Icon
+              name="chevron-down"
+              size={FontSize.md}
+              color={onMoveUp && !reordering ? colors.primary : colors.borderLight}
+            />
+          </View>
         </TouchableOpacity>
         <TouchableOpacity
           testID={`chapter-move-down-${index}`}
@@ -70,27 +74,27 @@ function ChapterRow({
           disabled={!onMoveDown || reordering}
           hitSlop={{ top: 6, bottom: 6, left: 8, right: 8 }}
         >
-          <Text style={[styles.moveIcon, { color: onMoveDown && !reordering ? colors.primary : colors.borderLight }]}>
-            ▼
-          </Text>
+          <Icon
+            name="chevron-down"
+            size={FontSize.md}
+            color={onMoveDown && !reordering ? colors.primary : colors.borderLight}
+          />
         </TouchableOpacity>
       </View>
       <TouchableOpacity style={styles.rowMain} onPress={onPress} activeOpacity={0.8}>
-        <Text style={[styles.sortOrder, { color: colors.textSecondary }]}>
+        <Typography variant="label" color="secondary" style={styles.sortOrder}>
           {String(index + 1).padStart(2, '0')}
-        </Text>
-        <Text style={[styles.rowTitle, { color: colors.textPrimary, flex: 1 }]}>
+        </Typography>
+        <Typography variant="label" numberOfLines={2} style={{ flex: 1 }}>
           {translate(chapter.titel) || chapter.name}
-        </Text>
+        </Typography>
       </TouchableOpacity>
       <TouchableOpacity
         onPress={onQuiz}
         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         style={styles.quizButton}
       >
-        <Text style={[styles.quizChip, { color: chapter.hasQuiz ? colors.success : colors.primary }]}>
-          {chapter.hasQuiz ? '📝 Quiz ✓' : '📝 + Quiz'}
-        </Text>
+        <Badge label={chapter.hasQuiz ? 'Quiz' : '+ Quiz'} tone={chapter.hasQuiz ? 'success' : 'default'} />
       </TouchableOpacity>
       <TouchableOpacity
         onPress={onDelete}
@@ -98,12 +102,10 @@ function ChapterRow({
         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         style={styles.deleteButton}
       >
-        <Text style={[styles.deleteIcon, { color: deleting ? colors.textTertiary : colors.error }]}>
-          🗑
-        </Text>
+        <Icon name="delete" size={FontSize.lg} color={deleting ? colors.textTertiary : colors.error} />
       </TouchableOpacity>
-      <Text style={[styles.arrow, { color: colors.textTertiary }]}>›</Text>
-    </View>
+      <Icon name="chevron-right" size={22} color={colors.textTertiary} />
+    </Card>
   );
 }
 
@@ -155,7 +157,7 @@ export function CourseEditorScreen() {
         text: 'Veröffentlichen',
         onPress: () =>
           publish(courseId, {
-            onSuccess: () => Alert.alert('✓', 'Kurs wurde veröffentlicht.'),
+            onSuccess: () => Alert.alert('Veröffentlicht', 'Kurs wurde veröffentlicht.'),
             onError: () => Alert.alert('Fehler', 'Veröffentlichung fehlgeschlagen.'),
           }),
       },
@@ -165,17 +167,24 @@ export function CourseEditorScreen() {
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['bottom']}>
       <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={[styles.back, { color: colors.primary }]}>‹ Zurück</Text>
-        </TouchableOpacity>
-        <Text style={[styles.title, { color: colors.textPrimary }]} numberOfLines={1}>
+        <Button
+          title="Zurück"
+          variant="ghost"
+          size="sm"
+          iconLeft="chevron-left"
+          onPress={() => navigation.goBack()}
+        />
+        <Typography variant="h3" numberOfLines={1} style={styles.title}>
           {courseName}
-        </Text>
-        <TouchableOpacity onPress={onPublish} disabled={isPublishing}>
-          <Text style={[styles.publish, { color: isPublishing ? colors.textTertiary : colors.success }]}>
-            {isPublishing ? '…' : '▶ Publish'}
-          </Text>
-        </TouchableOpacity>
+        </Typography>
+        <Button
+          title="Publish"
+          size="sm"
+          iconLeft="play"
+          loading={isPublishing}
+          disabled={isPublishing}
+          onPress={onPublish}
+        />
       </View>
 
       {isLoading ? (
@@ -215,14 +224,14 @@ export function CourseEditorScreen() {
             />
           ))}
 
-          <TouchableOpacity
-            style={[styles.addButton, { borderColor: colors.primary }]}
+          <Button
+            title="Kapitel hinzufügen"
+            variant="secondary"
+            iconLeft="add"
+            fullWidth
+            style={{ marginTop: Spacing.md }}
             onPress={() => navigation.navigate('AddChapter', { courseId })}
-          >
-            <Text style={[styles.addButtonText, { color: colors.primary }]}>
-              + Kapitel hinzufügen
-            </Text>
-          </TouchableOpacity>
+          />
         </ScrollView>
       )}
     </SafeAreaView>
@@ -239,36 +248,18 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     borderBottomWidth: 1,
   },
-  back: { fontSize: FontSize.md },
-  title: { fontSize: FontSize.lg, fontWeight: FontWeight.bold, flex: 1, textAlign: 'center' },
-  publish: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
+  title: { flex: 1, textAlign: 'center', marginHorizontal: Spacing.sm },
   list: { padding: Spacing.lg, gap: Spacing.sm },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: Spacing.md,
-    borderRadius: Radius.lg,
-    borderWidth: 1,
     gap: Spacing.sm,
-    ...Shadow.sm,
   },
   rowMain: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, flex: 1 },
   moveColumn: { justifyContent: 'center', gap: 2 },
-  moveIcon: { fontSize: FontSize.sm, textAlign: 'center' },
-  sortOrder: { fontSize: FontSize.sm, fontWeight: FontWeight.bold, minWidth: 28 },
-  rowTitle: { fontSize: FontSize.md, fontWeight: FontWeight.medium },
+  moveUp: { transform: [{ rotate: '180deg' }] },
+  sortOrder: { minWidth: 28 },
   quizButton: { padding: Spacing.xs },
-  quizChip: { fontSize: FontSize.xs, fontWeight: FontWeight.semibold },
   deleteButton: { padding: Spacing.xs },
-  deleteIcon: { fontSize: FontSize.lg },
-  arrow: { fontSize: 24 },
-  addButton: {
-    marginTop: Spacing.md,
-    borderWidth: 1.5,
-    borderRadius: Radius.lg,
-    borderStyle: 'dashed',
-    padding: Spacing.md,
-    alignItems: 'center',
-  },
-  addButtonText: { fontSize: FontSize.md, fontWeight: FontWeight.semibold },
 });

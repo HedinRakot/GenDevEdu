@@ -5,8 +5,6 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -26,22 +24,24 @@ import { ChapterContentType, Language } from '@/types/course';
 import type { ChapterContent, TextItem } from '@/types/course';
 import { translate } from '@/utils/textUtils';
 import type { AuthorStackParamList } from '@/navigation/AuthorStack';
-import { FontSize, FontWeight, Radius, Spacing } from '@/config/theme';
+import { Radius, Spacing } from '@/config/theme';
+import { Button, Card, Icon, Input, Typography, type IconName } from '@/components/common';
 
-const CONTENT_TYPE_LABEL: Record<ChapterContentType, string> = {
-  [ChapterContentType.Lesson]: '📖 Lektion',
-  [ChapterContentType.Video]: '🎬 Video',
-  [ChapterContentType.Questions]: '❓ Quiz',
+/** Icon + Label je Inhaltstyp (löst die früheren Emoji-Labels ab). */
+const CONTENT_TYPE_META: Record<ChapterContentType, { icon: IconName; label: string }> = {
+  [ChapterContentType.Lesson]: { icon: 'courses', label: 'Lektion' },
+  [ChapterContentType.Video]: { icon: 'play', label: 'Video' },
+  [ChapterContentType.Questions]: { icon: 'message', label: 'Quiz' },
 };
 
 type NavProp = NativeStackNavigationProp<AuthorStackParamList, 'AddChapterContent'>;
 type RoutePropType = RouteProp<AuthorStackParamList, 'AddChapterContent'>;
 
 const CONTENT_TYPES = [
-  { label: '📖 Lektion', value: ChapterContentType.Lesson },
-  { label: '🎬 Video', value: ChapterContentType.Video },
-  { label: '❓ Quiz', value: ChapterContentType.Questions },
-];
+  { icon: CONTENT_TYPE_META[ChapterContentType.Lesson].icon, label: 'Lektion', value: ChapterContentType.Lesson },
+  { icon: CONTENT_TYPE_META[ChapterContentType.Video].icon, label: 'Video', value: ChapterContentType.Video },
+  { icon: CONTENT_TYPE_META[ChapterContentType.Questions].icon, label: 'Quiz', value: ChapterContentType.Questions },
+] as const;
 
 /** Text einer bestimmten Sprache aus einem lokalisierten items-Array. */
 function textFor(items: TextItem[] | undefined, lang: Language): string {
@@ -131,7 +131,7 @@ export function AddChapterContentScreen() {
     lessonTexteItems: lessonTextDe.trim() ? [{ text: lessonTextDe.trim(), language: 1 }] : undefined,
     videoUrl: videoUrl.trim() || undefined,
     // Keine SortOrder: beim Anlegen hängt das Backend ans Ende an, beim
-    // Bearbeiten bleibt die Position erhalten (sortiert wird per ▲/▼).
+    // Bearbeiten bleibt die Position erhalten (sortiert wird per Pfeil).
   });
 
   const onSave = () => {
@@ -164,18 +164,11 @@ export function AddChapterContentScreen() {
     });
   };
 
-  const inputStyle = [
-    styles.input,
-    { backgroundColor: colors.surface, color: colors.textPrimary, borderColor: colors.border },
-  ];
-
-  const saveLabel = isPending
-    ? 'Wird gespeichert…'
-    : isEdit
-      ? 'Änderungen speichern'
-      : contentType === ChapterContentType.Questions
-        ? 'Weiter → Fragen hinzufügen'
-        : 'Inhalt erstellen';
+  const saveLabel = isEdit
+    ? 'Änderungen speichern'
+    : contentType === ChapterContentType.Questions
+      ? 'Weiter: Fragen hinzufügen'
+      : 'Inhalt erstellen';
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['bottom']}>
@@ -187,185 +180,186 @@ export function AddChapterContentScreen() {
           {/* Vorhandene Inhalte nur im Anlege-Modus zeigen — antippen = bearbeiten. */}
           {!isEdit && existingContent.length > 0 && (
             <View style={styles.existingSection}>
-              <Text style={[styles.label, { color: colors.textSecondary }]}>
+              <Typography variant="label" color="secondary">
                 Vorhandene Inhalte
-              </Text>
-              <Text style={[styles.hint, { color: colors.textTertiary }]}>
+              </Typography>
+              <Typography variant="caption" color="tertiary">
                 Tippen zum Bearbeiten
-              </Text>
-              {existingContent.map((cc, index) => (
-                <View
-                  key={cc.elementId}
-                  style={[
-                    styles.existingRow,
-                    { backgroundColor: colors.surface, borderColor: colors.border },
-                  ]}
-                >
-                  <View style={styles.moveColumn}>
-                    <TouchableOpacity
-                      testID={`content-move-up-${index}`}
-                      onPress={() => moveContent(index, -1)}
-                      disabled={index === 0 || isReordering}
-                      hitSlop={{ top: 6, bottom: 6, left: 8, right: 8 }}
-                    >
-                      <Text
-                        style={[
-                          styles.moveIcon,
-                          { color: index > 0 && !isReordering ? colors.primary : colors.border },
-                        ]}
+              </Typography>
+              {existingContent.map((cc, index) => {
+                const meta = CONTENT_TYPE_META[cc.contentType];
+                const canUp = index > 0 && !isReordering;
+                const canDown = index < existingContent.length - 1 && !isReordering;
+                return (
+                  <Card key={cc.elementId} padded={false} style={styles.existingRow}>
+                    <View style={styles.moveColumn}>
+                      <TouchableOpacity
+                        testID={`content-move-up-${index}`}
+                        onPress={() => moveContent(index, -1)}
+                        disabled={index === 0 || isReordering}
+                        hitSlop={{ top: 6, bottom: 6, left: 8, right: 8 }}
                       >
-                        ▲
-                      </Text>
+                        <View style={styles.chevronUp}>
+                          <Icon
+                            name="chevron-down"
+                            size={16}
+                            color={canUp ? colors.primary : colors.border}
+                          />
+                        </View>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        testID={`content-move-down-${index}`}
+                        onPress={() => moveContent(index, 1)}
+                        disabled={index === existingContent.length - 1 || isReordering}
+                        hitSlop={{ top: 6, bottom: 6, left: 8, right: 8 }}
+                      >
+                        <Icon
+                          name="chevron-down"
+                          size={16}
+                          color={canDown ? colors.primary : colors.border}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                    <TouchableOpacity
+                      style={styles.existingMain}
+                      activeOpacity={0.7}
+                      onPress={() =>
+                        navigation.push('AddChapterContent', {
+                          chapterId,
+                          courseId,
+                          chapterName,
+                          editContentId: cc.elementId,
+                        })
+                      }
+                    >
+                      <Icon name={meta.icon} size={18} color={colors.textTertiary} />
+                      <Typography variant="label" numberOfLines={1} style={{ flex: 1 }}>
+                        {translate(cc.titel) || cc.name}
+                      </Typography>
+                      <Icon name="edit" size={16} color={colors.primary} />
                     </TouchableOpacity>
                     <TouchableOpacity
-                      testID={`content-move-down-${index}`}
-                      onPress={() => moveContent(index, 1)}
-                      disabled={index === existingContent.length - 1 || isReordering}
-                      hitSlop={{ top: 6, bottom: 6, left: 8, right: 8 }}
+                      onPress={() => onDeleteContent(cc)}
+                      disabled={isDeleting}
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                     >
-                      <Text
-                        style={[
-                          styles.moveIcon,
-                          {
-                            color:
-                              index < existingContent.length - 1 && !isReordering
-                                ? colors.primary
-                                : colors.border,
-                          },
-                        ]}
-                      >
-                        ▼
-                      </Text>
+                      <Icon
+                        name="delete"
+                        size={18}
+                        color={isDeleting ? colors.textTertiary : colors.error}
+                      />
                     </TouchableOpacity>
-                  </View>
-                  <TouchableOpacity
-                    style={styles.existingMain}
-                    activeOpacity={0.7}
-                    onPress={() =>
-                      navigation.push('AddChapterContent', {
-                        chapterId,
-                        courseId,
-                        chapterName,
-                        editContentId: cc.elementId,
-                      })
-                    }
-                  >
-                    <Text style={[styles.existingType, { color: colors.textTertiary }]}>
-                      {CONTENT_TYPE_LABEL[cc.contentType]}
-                    </Text>
-                    <Text
-                      style={[styles.existingTitle, { color: colors.textPrimary }]}
-                      numberOfLines={1}
-                    >
-                      {translate(cc.titel) || cc.name}
-                    </Text>
-                    <Text style={[styles.editIcon, { color: colors.primary }]}>✏️</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => onDeleteContent(cc)}
-                    disabled={isDeleting}
-                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                  >
-                    <Text
-                      style={[
-                        styles.deleteIcon,
-                        { color: isDeleting ? colors.textTertiary : colors.error },
-                      ]}
-                    >
-                      🗑
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              ))}
+                  </Card>
+                );
+              })}
             </View>
           )}
 
-          <Text style={[styles.heading, { color: colors.textPrimary }]}>
-            {isEdit ? 'Inhalt bearbeiten' : 'Neuer Inhalt'}
-          </Text>
-          <Text style={[styles.subheading, { color: colors.textSecondary }]}>{chapterName}</Text>
+          <Typography variant="h2">{isEdit ? 'Inhalt bearbeiten' : 'Neuer Inhalt'}</Typography>
+          <Typography variant="bodySm" color="secondary" style={{ marginBottom: Spacing.sm }}>
+            {chapterName}
+          </Typography>
 
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Interner Name *</Text>
-          <TextInput style={inputStyle} value={name} onChangeText={setName}
-            placeholder="z.B. variables-lesson" placeholderTextColor={colors.textTertiary}
-            autoCapitalize="none" />
+          <Input
+            label="Interner Name *"
+            value={name}
+            onChangeText={setName}
+            placeholder="z.B. variables-lesson"
+            autoCapitalize="none"
+          />
 
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Titel (Deutsch)</Text>
-          <TextInput style={inputStyle} value={titelDe} onChangeText={setTitelDe}
-            placeholder="z.B. Variablen & Typen" placeholderTextColor={colors.textTertiary} />
+          <Input
+            label="Titel (Deutsch)"
+            value={titelDe}
+            onChangeText={setTitelDe}
+            placeholder="z.B. Variablen & Typen"
+          />
 
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Titel (Englisch)</Text>
-          <TextInput style={inputStyle} value={titelEn} onChangeText={setTitelEn}
-            placeholder="e.g. Variables & Types" placeholderTextColor={colors.textTertiary} />
+          <Input
+            label="Titel (Englisch)"
+            value={titelEn}
+            onChangeText={setTitelEn}
+            placeholder="e.g. Variables & Types"
+          />
 
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Typ</Text>
+          <Typography variant="label" color="secondary" style={{ marginTop: Spacing.sm }}>
+            Typ
+          </Typography>
           {isEdit ? (
-            <View style={[styles.lockedType, { backgroundColor: colors.surfaceElevated, borderColor: colors.border }]}>
-              <Text style={{ color: colors.textPrimary, fontWeight: FontWeight.medium }}>
-                {CONTENT_TYPE_LABEL[contentType]}
-              </Text>
-              <Text style={[styles.hint, { color: colors.textTertiary, marginTop: 0 }]}>
+            <View
+              style={[
+                styles.lockedType,
+                { backgroundColor: colors.surfaceElevated, borderColor: colors.border },
+              ]}
+            >
+              <View style={styles.lockedTypeRow}>
+                <Icon name={CONTENT_TYPE_META[contentType].icon} size={18} color={colors.textPrimary} />
+                <Typography variant="label">{CONTENT_TYPE_META[contentType].label}</Typography>
+              </View>
+              <Typography variant="caption" color="tertiary">
                 Typ nicht änderbar
-              </Text>
+              </Typography>
             </View>
           ) : (
             <View style={styles.typeRow}>
-              {CONTENT_TYPES.map((ct) => (
-                <TouchableOpacity
-                  key={ct.value}
-                  style={[
-                    styles.typeButton,
-                    {
-                      backgroundColor: contentType === ct.value ? colors.primary : colors.surface,
-                      borderColor: contentType === ct.value ? colors.primary : colors.border,
-                    },
-                  ]}
-                  onPress={() => setContentType(ct.value)}
-                >
-                  <Text
-                    style={{
-                      color: contentType === ct.value ? 'white' : colors.textPrimary,
-                      fontWeight: FontWeight.medium,
-                    }}
+              {CONTENT_TYPES.map((ct) => {
+                const selected = contentType === ct.value;
+                return (
+                  <TouchableOpacity
+                    key={ct.value}
+                    style={[
+                      styles.typeButton,
+                      {
+                        backgroundColor: selected ? colors.primary : colors.surface,
+                        borderColor: selected ? colors.primary : colors.border,
+                      },
+                    ]}
+                    onPress={() => setContentType(ct.value)}
                   >
-                    {ct.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+                    <Icon
+                      name={ct.icon}
+                      size={16}
+                      color={selected ? colors.textInverted : colors.textPrimary}
+                    />
+                    <Typography variant="label" color={selected ? 'inverted' : 'primary'}>
+                      {ct.label}
+                    </Typography>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           )}
 
           {contentType === ChapterContentType.Lesson && (
-            <>
-              <Text style={[styles.label, { color: colors.textSecondary }]}>
-                Lektionstext (Markdown, Deutsch)
-              </Text>
-              <TextInput
-                style={[inputStyle, styles.multiline]}
-                value={lessonTextDe}
-                onChangeText={setLessonTextDe}
-                placeholder="**Markdown** wird unterstützt…"
-                placeholderTextColor={colors.textTertiary}
-                multiline
-                numberOfLines={6}
-                textAlignVertical="top"
-              />
-            </>
+            <Input
+              label="Lektionstext (Markdown, Deutsch)"
+              value={lessonTextDe}
+              onChangeText={setLessonTextDe}
+              placeholder="**Markdown** wird unterstützt…"
+              multiline
+              numberOfLines={6}
+              textAlignVertical="top"
+              style={styles.multiline}
+            />
           )}
 
           {contentType === ChapterContentType.Video && (
-            <>
-              <Text style={[styles.label, { color: colors.textSecondary }]}>Video-URL</Text>
-              <TextInput style={inputStyle} value={videoUrl} onChangeText={setVideoUrl}
-                placeholder="https://…" placeholderTextColor={colors.textTertiary}
-                autoCapitalize="none" keyboardType="url" />
-            </>
+            <Input
+              label="Video-URL"
+              value={videoUrl}
+              onChangeText={setVideoUrl}
+              placeholder="https://…"
+              autoCapitalize="none"
+              keyboardType="url"
+            />
           )}
 
           {contentType === ChapterContentType.Questions &&
             (isEdit ? (
-              <TouchableOpacity
-                style={[styles.questionsButton, { borderColor: colors.primary }]}
+              <Button
+                title={editing?.questionListId ? 'Fragen bearbeiten' : 'Fragen hinzufügen'}
+                variant="secondary"
+                iconLeft="message"
                 onPress={() =>
                   navigation.navigate('AddQuestionList', {
                     chapterContentId: editContentId!,
@@ -373,28 +367,30 @@ export function AddChapterContentScreen() {
                     questionListId: editing?.questionListId || undefined,
                   })
                 }
-              >
-                <Text style={[styles.questionsButtonText, { color: colors.primary }]}>
-                  {editing?.questionListId ? '❓ Fragen bearbeiten' : '❓ Fragen hinzufügen'}
-                </Text>
-              </TouchableOpacity>
+                style={{ marginTop: Spacing.sm }}
+              />
             ) : (
-              <Text style={[styles.hint, { color: colors.textTertiary }]}>
-                ℹ️ Fragen werden im nächsten Schritt hinzugefügt.
-              </Text>
+              <Typography variant="caption" color="tertiary" style={{ marginTop: Spacing.sm }}>
+                Fragen werden im nächsten Schritt hinzugefügt.
+              </Typography>
             ))}
 
-          <TouchableOpacity
-            style={[styles.saveButton, { backgroundColor: colors.primary }]}
+          <Button
+            title={saveLabel}
             onPress={onSave}
+            loading={isPending}
             disabled={isPending}
-          >
-            <Text style={styles.saveButtonText}>{saveLabel}</Text>
-          </TouchableOpacity>
+            fullWidth
+            iconRight="arrow-right"
+            style={{ marginTop: Spacing.xl }}
+          />
 
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.cancelButton}>
-            <Text style={[styles.cancelText, { color: colors.textSecondary }]}>Abbrechen</Text>
-          </TouchableOpacity>
+          <Button
+            title="Abbrechen"
+            variant="ghost"
+            onPress={() => navigation.goBack()}
+            style={{ alignSelf: 'center', marginTop: Spacing.xs }}
+          />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -404,30 +400,22 @@ export function AddChapterContentScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   form: { padding: Spacing.lg, gap: Spacing.sm },
-  heading: { fontSize: FontSize.xxl, fontWeight: FontWeight.bold },
-  subheading: { fontSize: FontSize.sm, marginBottom: Spacing.md },
   existingSection: { marginBottom: Spacing.lg, gap: Spacing.xs },
   existingRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
-    borderWidth: 1,
-    borderRadius: Radius.md,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
   },
   existingMain: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, flex: 1 },
   moveColumn: { justifyContent: 'center', gap: 2 },
-  moveIcon: { fontSize: FontSize.sm, textAlign: 'center' },
-  existingType: { fontSize: FontSize.xs },
-  existingTitle: { flex: 1, fontSize: FontSize.md, fontWeight: FontWeight.medium },
-  editIcon: { fontSize: FontSize.md },
-  deleteIcon: { fontSize: FontSize.lg },
-  label: { fontSize: FontSize.sm, fontWeight: FontWeight.medium, marginTop: Spacing.md },
-  input: { borderWidth: 1, borderRadius: Radius.md, padding: Spacing.md, fontSize: FontSize.md },
-  multiline: { minHeight: 120 },
+  chevronUp: { transform: [{ rotate: '180deg' }] },
   typeRow: { flexDirection: 'row', gap: Spacing.sm, flexWrap: 'wrap' },
   typeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
     borderWidth: 1.5,
     borderRadius: Radius.md,
     paddingHorizontal: Spacing.md,
@@ -438,19 +426,8 @@ const styles = StyleSheet.create({
     borderRadius: Radius.md,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
+    gap: Spacing.xs,
   },
-  hint: { fontSize: FontSize.sm, fontStyle: 'italic', marginTop: Spacing.sm },
-  questionsButton: {
-    marginTop: Spacing.sm,
-    borderWidth: 1.5,
-    borderRadius: Radius.md,
-    borderStyle: 'dashed',
-    padding: Spacing.md,
-    alignItems: 'center',
-  },
-  questionsButtonText: { fontSize: FontSize.md, fontWeight: FontWeight.semibold },
-  saveButton: { marginTop: Spacing.xl, borderRadius: Radius.md, padding: Spacing.md, alignItems: 'center' },
-  saveButtonText: { color: 'white', fontWeight: FontWeight.bold, fontSize: FontSize.md },
-  cancelButton: { marginTop: Spacing.sm, alignItems: 'center', padding: Spacing.sm },
-  cancelText: { fontSize: FontSize.md },
+  lockedTypeRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
+  multiline: { minHeight: 120 },
 });

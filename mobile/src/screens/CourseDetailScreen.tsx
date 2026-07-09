@@ -3,7 +3,6 @@ import {
   ActivityIndicator,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -15,10 +14,10 @@ import { useTranslation } from 'react-i18next';
 import { useChapterList, useEnrollment } from '@/hooks/useCourses';
 import { useTheme } from '@/context/ThemeContext';
 import { translate } from '@/utils/textUtils';
-import { ProgressBar } from '@/components/common/ProgressBar';
+import { Card, Icon, ProgressBar, Typography } from '@/components/common';
 import type { CoursesStackParamList } from '@/navigation/CoursesStack';
 import type { Chapter } from '@/types/course';
-import { FontSize, FontWeight, Radius, Shadow, Spacing } from '@/config/theme';
+import { Radius, Spacing } from '@/config/theme';
 
 type NavProp = NativeStackNavigationProp<CoursesStackParamList, 'CourseDetail'>;
 type RoutePropType = RouteProp<CoursesStackParamList, 'CourseDetail'>;
@@ -37,53 +36,48 @@ function ChapterRow({
   const isCompleted = chapter.completed;
 
   return (
-    <TouchableOpacity
-      testID="chapter-row"
-      style={[
-        styles.chapterRow,
-        {
-          backgroundColor: isCompleted ? colors.successSurface : colors.surface,
-          borderColor: isCompleted ? colors.success : colors.borderLight,
-        },
-      ]}
-      onPress={onPress}
-      activeOpacity={0.8}
-    >
-      <View
+    <TouchableOpacity testID="chapter-row" onPress={onPress} activeOpacity={0.85}>
+      <Card
+        padded={false}
         style={[
-          styles.chapterStatus,
-          {
-            backgroundColor: isCompleted ? colors.success : colors.surfaceElevated,
-            borderColor: isCompleted ? colors.success : colors.border,
+          styles.chapterCard,
+          isCompleted && {
+            backgroundColor: colors.successSurface,
+            borderColor: colors.success,
           },
         ]}
       >
-        <Text
+        <View
           style={[
-            styles.chapterStatusIcon,
-            { color: isCompleted ? colors.textInverted : colors.textSecondary },
-          ]}
-        >
-          {isCompleted ? '✓' : String(index + 1)}
-        </Text>
-      </View>
-      <View style={styles.chapterInfo}>
-        <Text
-          style={[
-            styles.chapterTitle,
+            styles.chapterStatus,
             {
-              color: isCompleted ? colors.textTertiary : colors.textPrimary,
-              textDecorationLine: isCompleted ? 'line-through' : 'none',
+              backgroundColor: isCompleted ? colors.success : colors.surfaceElevated,
+              borderColor: isCompleted ? colors.success : colors.border,
             },
           ]}
         >
-          {title || chapter.name}
-        </Text>
-        <Text style={[styles.chapterMeta, { color: colors.textTertiary }]}>
-          {chapter.rank} Punkte
-        </Text>
-      </View>
-      <Text style={[styles.chapterArrow, { color: colors.textTertiary }]}>›</Text>
+          {isCompleted ? (
+            <Icon name="check" size={18} color={colors.textInverted} strokeWidth={2.5} />
+          ) : (
+            <Typography variant="label" color="secondary">
+              {String(index + 1)}
+            </Typography>
+          )}
+        </View>
+        <View style={styles.chapterInfo}>
+          <Typography
+            variant="label"
+            color={isCompleted ? 'tertiary' : 'primary'}
+            style={isCompleted ? styles.completedTitle : undefined}
+          >
+            {title || chapter.name}
+          </Typography>
+          <Typography variant="caption" color="tertiary" style={styles.chapterMeta}>
+            {chapter.rank} Punkte
+          </Typography>
+        </View>
+        <Icon name="chevron-right" size={20} color={colors.textTertiary} />
+      </Card>
     </TouchableOpacity>
   );
 }
@@ -114,7 +108,10 @@ export function CourseDetailScreen() {
   if (error || !model) {
     return (
       <SafeAreaView style={[styles.centered, { backgroundColor: colors.background }]}>
-        <Text style={[styles.errorText, { color: colors.error }]}>{t('common.error')}</Text>
+        <Icon name="x-circle" size={48} color={colors.error} />
+        <Typography variant="body" color={colors.error}>
+          {t('common.error')}
+        </Typography>
       </SafeAreaView>
     );
   }
@@ -126,86 +123,84 @@ export function CourseDetailScreen() {
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['bottom']}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={[styles.hero, { backgroundColor: colors.primary }]}>
-          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-            <Text style={[styles.backIcon, { color: colors.textInverted }]}>
-              ‹ {t('common.back')}
-            </Text>
-          </TouchableOpacity>
-          <Text style={styles.heroIcon}>📚</Text>
-          <Text style={[styles.heroTitle, { color: colors.textInverted }]}>
-            {model.courseName}
-          </Text>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+        <TouchableOpacity
+          style={styles.breadcrumb}
+          onPress={() => navigation.goBack()}
+          activeOpacity={0.7}
+        >
+          <Typography variant="label" color="secondary">
+            {t('courses.title')}
+          </Typography>
+          <Icon name="chevron-right" size={14} color={colors.textTertiary} />
+        </TouchableOpacity>
 
-          <View style={styles.heroProgress}>
-            <View style={styles.heroProgressHeader}>
-              <Text style={[styles.heroProgressLabel, { color: colors.textInverted }]}>
-                {t('dashboard.progress.title')}
-              </Text>
-              <Text style={[styles.heroProgressPct, { color: colors.textInverted }]}>
-                {progress}%
-              </Text>
-            </View>
-            <ProgressBar
-              progress={progress}
-              height={8}
-              color={colors.textInverted}
-              backgroundColor="rgba(255,255,255,0.3)"
-            />
+        <Typography variant="h1" style={styles.title}>
+          {model.courseName}
+        </Typography>
+
+        <Card style={styles.progressCard}>
+          <View style={styles.progressHeader}>
+            <Typography variant="label">{t('dashboard.progress.title')}</Typography>
+            <Typography variant="label" color="accent">
+              {progress}%
+            </Typography>
           </View>
-        </View>
+          <ProgressBar progress={progress} height={8} />
+        </Card>
 
-        <View style={styles.content}>
-          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
-            📖 {t('courses.chapters')}
-          </Text>
-          <View style={styles.chapterList}>
-            {chapters.map((chapter, index) => (
-              <View key={chapter.elementId} style={styles.chapterGroup}>
-                <ChapterRow
-                  chapter={chapter}
-                  index={index}
+        <Typography variant="h3" style={styles.sectionTitle}>
+          {t('courses.chapters')}
+        </Typography>
+
+        <View style={styles.chapterList}>
+          {chapters.map((chapter, index) => (
+            <View key={chapter.elementId} style={styles.chapterGroup}>
+              <ChapterRow
+                chapter={chapter}
+                index={index}
+                onPress={() =>
+                  navigation.navigate('Lesson', {
+                    courseId,
+                    chapterId: chapter.elementId,
+                    lessonId: '',
+                  })
+                }
+              />
+              {chapter.hasQuiz && (
+                <TouchableOpacity
+                  style={[
+                    styles.quizEntry,
+                    {
+                      backgroundColor: chapter.quizPassed ? colors.successSurface : colors.surface,
+                      borderColor: chapter.quizPassed ? colors.success : colors.primary,
+                    },
+                  ]}
                   onPress={() =>
-                    navigation.navigate('Lesson', {
+                    navigation.navigate('ChapterQuiz', {
                       courseId,
                       chapterId: chapter.elementId,
-                      lessonId: '',
+                      chapterName: translate(chapter.titel) || chapter.name,
                     })
                   }
-                />
-                {chapter.hasQuiz && (
-                  <TouchableOpacity
-                    style={[
-                      styles.quizEntry,
-                      {
-                        backgroundColor: chapter.quizPassed ? colors.successSurface : colors.surface,
-                        borderColor: chapter.quizPassed ? colors.success : colors.primary,
-                      },
-                    ]}
-                    onPress={() =>
-                      navigation.navigate('ChapterQuiz', {
-                        courseId,
-                        chapterId: chapter.elementId,
-                        chapterName: translate(chapter.titel) || chapter.name,
-                      })
-                    }
+                  activeOpacity={0.8}
+                >
+                  <Icon
+                    name={chapter.quizPassed ? 'check-circle' : 'message'}
+                    size={16}
+                    color={chapter.quizPassed ? colors.success : colors.primary}
+                    strokeWidth={2}
+                  />
+                  <Typography
+                    variant="label"
+                    color={chapter.quizPassed ? colors.success : colors.primary}
                   >
-                    <Text
-                      style={[
-                        styles.quizEntryText,
-                        { color: chapter.quizPassed ? colors.success : colors.primary },
-                      ]}
-                    >
-                      {chapter.quizPassed
-                        ? `📝 ${t('chapterQuiz.passed')}`
-                        : `📝 ${t('chapterQuiz.start')}`}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-            ))}
-          </View>
+                    {chapter.quizPassed ? t('chapterQuiz.passed') : t('chapterQuiz.start')}
+                  </Typography>
+                </TouchableOpacity>
+              )}
+            </View>
+          ))}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -214,42 +209,26 @@ export function CourseDetailScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  errorText: { fontSize: FontSize.md },
-
-  hero: { padding: Spacing.lg, paddingTop: Spacing.md },
-  backButton: { marginBottom: Spacing.sm },
-  backIcon: { fontSize: FontSize.md, fontWeight: FontWeight.medium, opacity: 0.9 },
-  heroIcon: { fontSize: 48, marginBottom: Spacing.sm },
-  heroTitle: { fontSize: FontSize.xxl, fontWeight: FontWeight.extrabold, marginBottom: Spacing.xs },
-  heroProgress: { gap: 6, marginTop: Spacing.md },
-  heroProgressHeader: { flexDirection: 'row', justifyContent: 'space-between' },
-  heroProgressLabel: { fontSize: FontSize.sm, opacity: 0.85 },
-  heroProgressPct: { fontSize: FontSize.sm, fontWeight: FontWeight.bold },
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: Spacing.md },
 
   content: { padding: Spacing.lg, paddingBottom: Spacing.xxxl },
-  sectionTitle: { fontSize: FontSize.lg, fontWeight: FontWeight.bold, marginBottom: Spacing.md },
+
+  breadcrumb: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs, marginBottom: Spacing.sm },
+  title: { marginBottom: Spacing.lg },
+
+  progressCard: { gap: Spacing.sm, marginBottom: Spacing.xl },
+  progressHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+
+  sectionTitle: { marginBottom: Spacing.md },
 
   chapterList: { gap: Spacing.sm },
   chapterGroup: { gap: Spacing.xs },
-  quizEntry: {
-    marginLeft: Spacing.xl,
-    borderWidth: 1.5,
-    borderRadius: Radius.md,
-    borderStyle: 'dashed',
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.md,
-    alignItems: 'center',
-  },
-  quizEntryText: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
-  chapterRow: {
+
+  chapterCard: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: Spacing.md,
-    borderRadius: Radius.lg,
-    borderWidth: 1,
     gap: Spacing.md,
-    ...Shadow.sm,
   },
   chapterStatus: {
     width: 36,
@@ -259,9 +238,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  chapterStatusIcon: { fontSize: FontSize.sm, fontWeight: FontWeight.bold },
   chapterInfo: { flex: 1 },
-  chapterTitle: { fontSize: FontSize.md, fontWeight: FontWeight.bold },
-  chapterMeta: { fontSize: FontSize.xs, marginTop: 2 },
-  chapterArrow: { fontSize: 24 },
+  completedTitle: { textDecorationLine: 'line-through' },
+  chapterMeta: { marginTop: 2 },
+
+  quizEntry: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.xs,
+    marginLeft: Spacing.xl,
+    borderWidth: 1.5,
+    borderRadius: Radius.md,
+    borderStyle: 'dashed',
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+  },
 });

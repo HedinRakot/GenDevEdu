@@ -1,6 +1,6 @@
 import { act, renderHook, waitFor } from '@testing-library/react-native';
 
-import '@/i18n';
+import i18n from '@/i18n';
 
 jest.mock('@/api/chat', () => ({ sendChatStreaming: jest.fn() }));
 
@@ -51,7 +51,7 @@ describe('useChat', () => {
     await waitFor(() => expect(result.current.isSending).toBe(false));
 
     const ai = result.current.messages.find((m) => m.role === 'model');
-    expect(ai?.content).toContain('⚠️');
+    expect(ai?.content).toBe(i18n.t('chat.errorSending'));
   });
 
   it('ignores empty input', async () => {

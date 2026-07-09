@@ -6,9 +6,6 @@ import {
   ScrollView,
   StyleSheet,
   Switch,
-  Text,
-  TextInput,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -20,15 +17,16 @@ import { useTheme } from '@/context/ThemeContext';
 import { Language } from '@/types/course';
 import type { TextItem } from '@/types/course';
 import type { AuthorStackParamList } from '@/navigation/AuthorStack';
-import { FontSize, FontWeight, Radius, Spacing } from '@/config/theme';
+import { Button, Input, Typography } from '@/components/common';
+import { FontFamily, FontSize, Spacing } from '@/config/theme';
 
 type NavProp = NativeStackNavigationProp<AuthorStackParamList, 'DailyChallengeEditor'>;
 type RoutePropType = RouteProp<AuthorStackParamList, 'DailyChallengeEditor'>;
 
 const DIFFICULTIES = [
-  { label: '🟢 Leicht', value: 'easy' },
-  { label: '🟡 Mittel', value: 'medium' },
-  { label: '🔴 Schwer', value: 'hard' },
+  { label: 'Leicht', value: 'easy' },
+  { label: 'Mittel', value: 'medium' },
+  { label: 'Schwer', value: 'hard' },
 ];
 
 function textFor(items: TextItem[] | undefined, lang: Language): string {
@@ -110,10 +108,7 @@ export function DailyChallengeEditorScreen() {
     );
   };
 
-  const inputStyle = [
-    styles.input,
-    { backgroundColor: colors.surface, color: colors.textPrimary, borderColor: colors.border },
-  ];
+  const fieldGap = { marginTop: Spacing.md };
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['bottom']}>
@@ -122,100 +117,125 @@ export function DailyChallengeEditorScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ScrollView contentContainerStyle={styles.form}>
-          <Text style={[styles.heading, { color: colors.textPrimary }]}>
+          <Typography variant="h2" style={{ marginBottom: Spacing.md }}>
             {isEdit ? 'Challenge bearbeiten' : 'Neue Challenge'}
-          </Text>
+          </Typography>
 
           {!isEdit && (
-            <>
-              <Text style={[styles.label, { color: colors.textSecondary }]}>
-                Slug (optional, z.B. cs-arrays)
-              </Text>
-              <TextInput style={inputStyle} value={slug} onChangeText={setSlug}
-                placeholder="wird sonst generiert" placeholderTextColor={colors.textTertiary}
-                autoCapitalize="none" />
-            </>
+            <Input
+              label="Slug (optional, z.B. cs-arrays)"
+              value={slug}
+              onChangeText={setSlug}
+              placeholder="wird sonst generiert"
+              autoCapitalize="none"
+            />
           )}
 
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Titel (Deutsch) *</Text>
-          <TextInput style={inputStyle} value={titleDe} onChangeText={setTitleDe}
-            placeholder="z.B. Arrays durchlaufen" placeholderTextColor={colors.textTertiary} />
+          <Input
+            containerStyle={!isEdit ? fieldGap : undefined}
+            label="Titel (Deutsch) *"
+            value={titleDe}
+            onChangeText={setTitleDe}
+            placeholder="z.B. Arrays durchlaufen"
+          />
+          <Input
+            containerStyle={fieldGap}
+            label="Titel (Englisch)"
+            value={titleEn}
+            onChangeText={setTitleEn}
+            placeholder="e.g. Iterate arrays"
+          />
 
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Titel (Englisch)</Text>
-          <TextInput style={inputStyle} value={titleEn} onChangeText={setTitleEn}
-            placeholder="e.g. Iterate arrays" placeholderTextColor={colors.textTertiary} />
+          <Input
+            containerStyle={fieldGap}
+            label="Beschreibung (Deutsch) *"
+            value={descDe}
+            onChangeText={setDescDe}
+            placeholder="Aufgabenstellung…"
+            multiline
+            textAlignVertical="top"
+            style={styles.multiline}
+          />
+          <Input
+            containerStyle={fieldGap}
+            label="Beschreibung (Englisch)"
+            value={descEn}
+            onChangeText={setDescEn}
+            placeholder="Task description…"
+            multiline
+            textAlignVertical="top"
+            style={styles.multiline}
+          />
 
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Beschreibung (Deutsch) *</Text>
-          <TextInput style={[inputStyle, styles.multiline]} value={descDe} onChangeText={setDescDe}
-            placeholder="Aufgabenstellung…" placeholderTextColor={colors.textTertiary}
-            multiline textAlignVertical="top" />
+          <Input
+            containerStyle={fieldGap}
+            label="Beispiel-Code (optional)"
+            value={snippet}
+            onChangeText={setSnippet}
+            placeholder="Console.WriteLine(…);"
+            multiline
+            textAlignVertical="top"
+            autoCapitalize="none"
+            autoCorrect={false}
+            spellCheck={false}
+            style={[styles.multiline, styles.code]}
+          />
 
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Beschreibung (Englisch)</Text>
-          <TextInput style={[inputStyle, styles.multiline]} value={descEn} onChangeText={setDescEn}
-            placeholder="Task description…" placeholderTextColor={colors.textTertiary}
-            multiline textAlignVertical="top" />
-
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Beispiel-Code (optional)</Text>
-          <TextInput style={[inputStyle, styles.multiline, styles.code]} value={snippet}
-            onChangeText={setSnippet} placeholder="Console.WriteLine(…);"
-            placeholderTextColor={colors.textTertiary} multiline textAlignVertical="top"
-            autoCapitalize="none" autoCorrect={false} spellCheck={false} />
-
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Schwierigkeit</Text>
+          <Typography variant="label" color="secondary" style={fieldGap}>
+            Schwierigkeit
+          </Typography>
           <View style={styles.chipRow}>
             {DIFFICULTIES.map((d) => (
-              <TouchableOpacity
+              <Button
                 key={d.value}
-                style={[
-                  styles.chip,
-                  {
-                    backgroundColor: difficulty === d.value ? colors.primary : colors.surface,
-                    borderColor: difficulty === d.value ? colors.primary : colors.border,
-                  },
-                ]}
+                title={d.label}
+                size="sm"
+                variant={difficulty === d.value ? 'primary' : 'secondary'}
                 onPress={() => setDifficulty(d.value)}
-              >
-                <Text
-                  style={{
-                    color: difficulty === d.value ? 'white' : colors.textPrimary,
-                    fontWeight: FontWeight.medium,
-                  }}
-                >
-                  {d.label}
-                </Text>
-              </TouchableOpacity>
+              />
             ))}
           </View>
 
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Kategorie</Text>
-          <TextInput style={inputStyle} value={category} onChangeText={setCategory}
-            placeholder="z.B. loops, linq, classes" placeholderTextColor={colors.textTertiary}
-            autoCapitalize="none" />
+          <Input
+            containerStyle={fieldGap}
+            label="Kategorie"
+            value={category}
+            onChangeText={setCategory}
+            placeholder="z.B. loops, linq, classes"
+            autoCapitalize="none"
+          />
 
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Geschätzte Minuten</Text>
-          <TextInput style={inputStyle} value={minutes} onChangeText={setMinutes}
-            keyboardType="numeric" placeholderTextColor={colors.textTertiary} />
+          <Input
+            containerStyle={fieldGap}
+            label="Geschätzte Minuten"
+            value={minutes}
+            onChangeText={setMinutes}
+            keyboardType="numeric"
+          />
 
           <View style={styles.switchRow}>
-            <Text style={[styles.label, { color: colors.textSecondary, marginTop: 0 }]}>
+            <Typography variant="label" color="secondary" style={styles.switchLabel}>
               Aktiv (nimmt an der Tagesauswahl teil)
-            </Text>
+            </Typography>
             <Switch value={active} onValueChange={setActive} />
           </View>
 
-          <TouchableOpacity
-            style={[styles.saveButton, { backgroundColor: colors.primary }]}
+          <Button
+            title={isPending ? 'Wird gespeichert…' : isEdit ? 'Änderungen speichern' : 'Challenge erstellen'}
             onPress={onSave}
+            loading={isPending}
             disabled={isPending}
-          >
-            <Text style={styles.saveButtonText}>
-              {isPending ? 'Wird gespeichert…' : isEdit ? 'Änderungen speichern' : 'Challenge erstellen'}
-            </Text>
-          </TouchableOpacity>
+            fullWidth
+            iconRight="check"
+            style={{ marginTop: Spacing.xl }}
+          />
 
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.cancelButton}>
-            <Text style={[styles.cancelText, { color: colors.textSecondary }]}>Abbrechen</Text>
-          </TouchableOpacity>
+          <Button
+            title="Abbrechen"
+            variant="ghost"
+            onPress={() => navigation.goBack()}
+            style={{ alignSelf: 'center', marginTop: Spacing.sm }}
+          />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -224,27 +244,16 @@ export function DailyChallengeEditorScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
-  form: { padding: Spacing.lg, gap: Spacing.sm },
-  heading: { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, marginBottom: Spacing.md },
-  label: { fontSize: FontSize.sm, fontWeight: FontWeight.medium, marginTop: Spacing.md },
-  input: { borderWidth: 1, borderRadius: Radius.md, padding: Spacing.md, fontSize: FontSize.md },
+  form: { padding: Spacing.lg },
   multiline: { minHeight: 90 },
-  code: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', fontSize: FontSize.sm },
-  chipRow: { flexDirection: 'row', gap: Spacing.sm, flexWrap: 'wrap' },
-  chip: {
-    borderWidth: 1.5,
-    borderRadius: Radius.md,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-  },
+  code: { fontFamily: FontFamily.mono, fontSize: FontSize.sm },
+  chipRow: { flexDirection: 'row', gap: Spacing.sm, flexWrap: 'wrap', marginTop: Spacing.sm },
   switchRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: Spacing.md,
+    gap: Spacing.md,
+    marginTop: Spacing.lg,
   },
-  saveButton: { marginTop: Spacing.xl, borderRadius: Radius.md, padding: Spacing.md, alignItems: 'center' },
-  saveButtonText: { color: 'white', fontWeight: FontWeight.bold, fontSize: FontSize.md },
-  cancelButton: { marginTop: Spacing.sm, alignItems: 'center', padding: Spacing.sm },
-  cancelText: { fontSize: FontSize.md },
+  switchLabel: { flexShrink: 1 },
 });

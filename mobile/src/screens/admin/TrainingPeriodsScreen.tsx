@@ -4,8 +4,6 @@ import {
   FlatList,
   Modal,
   StyleSheet,
-  Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -16,7 +14,8 @@ import { useCreatePeriod, useDeletePeriod, usePeriods, useUpdatePeriod } from '@
 import { useAdminUsers } from '@/hooks/useAdmin';
 import { useTheme } from '@/context/ThemeContext';
 import type { TrainingPeriod } from '@/types/attendance';
-import { FontSize, FontWeight, Radius, Shadow, Spacing } from '@/config/theme';
+import { Button, Icon, Input, Typography } from '@/components/common';
+import { Radius, Shadow, Spacing } from '@/config/theme';
 
 interface FormState {
   id?: string;
@@ -100,15 +99,14 @@ export function TrainingPeriodsScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.toolbar}>
-        <TouchableOpacity
+        <Button
+          title={t('attendance.periods.new')}
+          variant="primary"
+          size="sm"
+          iconLeft="add"
           onPress={openNew}
-          style={[styles.newButton, { backgroundColor: colors.primary }]}
           testID="period-new"
-        >
-          <Text style={{ color: colors.textInverted, fontWeight: FontWeight.semibold }}>
-            + {t('attendance.periods.new')}
-          </Text>
-        </TouchableOpacity>
+        />
       </View>
 
       {isLoading ? (
@@ -123,28 +121,29 @@ export function TrainingPeriodsScreen() {
           renderItem={({ item }) => (
             <View style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
               <View style={styles.rowMain}>
-                <Text style={[styles.rowTitle, { color: colors.textPrimary }]} numberOfLines={1}>
+                <Typography variant="label" numberOfLines={1}>
                   {emailByUserId.get(item.userId) ?? item.userId}
-                </Text>
-                <Text style={[styles.rowSubtitle, { color: colors.textSecondary }]}>
+                </Typography>
+                <Typography variant="bodySm" color="secondary">
                   {item.startDate} – {item.endDate} · {item.requiredMinutesPerDay} min/{t('attendance.periods.day')}
                   {item.label ? ` · ${item.label}` : ''}
-                </Text>
+                </Typography>
               </View>
-              <TouchableOpacity onPress={() => openEdit(item)} style={styles.rowAction}>
-                <Text style={{ color: colors.primary, fontWeight: FontWeight.semibold }}>
-                  {t('common.edit')}
-                </Text>
-              </TouchableOpacity>
+              <Button
+                title={t('common.edit')}
+                variant="ghost"
+                size="sm"
+                onPress={() => openEdit(item)}
+              />
               <TouchableOpacity onPress={() => deletePeriod.mutate(item.id)} style={styles.rowAction}>
-                <Text style={{ color: colors.error, fontWeight: FontWeight.semibold }}>✕</Text>
+                <Icon name="delete" size={18} color={colors.error} />
               </TouchableOpacity>
             </View>
           )}
           ListEmptyComponent={
-            <Text style={[styles.empty, { color: colors.textSecondary }]}>
+            <Typography variant="body" color="secondary" center style={styles.empty}>
               {t('attendance.periods.empty')}
-            </Text>
+            </Typography>
           }
         />
       )}
@@ -153,96 +152,79 @@ export function TrainingPeriodsScreen() {
       <Modal visible={form !== null} transparent animationType="fade">
         <View style={styles.modalBackdrop}>
           <View style={[styles.modalCard, { backgroundColor: colors.surface }]}>
-            <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>
+            <Typography variant="h3">
               {form?.id ? t('attendance.periods.edit') : t('attendance.periods.new')}
-            </Text>
+            </Typography>
 
-            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>
-              {t('attendance.periods.learner')}
-            </Text>
-            <TouchableOpacity
-              onPress={() => setUserPickerOpen(true)}
-              style={[styles.input, { borderColor: colors.border }]}
-            >
-              <Text style={{ color: form?.userId ? colors.textPrimary : colors.textSecondary }}>
-                {form?.userId
-                  ? (emailByUserId.get(form.userId) ?? form.userId)
-                  : t('attendance.periods.pickLearner')}
-              </Text>
-            </TouchableOpacity>
-
-            <View style={styles.fieldRow}>
-              <View style={styles.fieldHalf}>
-                <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>
-                  {t('attendance.from')}
-                </Text>
-                <TextInput
-                  value={form?.startDate}
-                  onChangeText={field('startDate')}
-                  placeholder="yyyy-mm-dd"
-                  placeholderTextColor={colors.textSecondary}
-                  style={[styles.input, { color: colors.textPrimary, borderColor: colors.border }]}
-                  autoCapitalize="none"
-                />
-              </View>
-              <View style={styles.fieldHalf}>
-                <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>
-                  {t('attendance.to')}
-                </Text>
-                <TextInput
-                  value={form?.endDate}
-                  onChangeText={field('endDate')}
-                  placeholder="yyyy-mm-dd"
-                  placeholderTextColor={colors.textSecondary}
-                  style={[styles.input, { color: colors.textPrimary, borderColor: colors.border }]}
-                  autoCapitalize="none"
-                />
-              </View>
+            <View style={{ gap: Spacing.xs }}>
+              <Typography variant="label" color="secondary">
+                {t('attendance.periods.learner')}
+              </Typography>
+              <TouchableOpacity
+                onPress={() => setUserPickerOpen(true)}
+                style={[styles.selectField, { borderColor: colors.border, backgroundColor: colors.surface }]}
+              >
+                <Typography variant="body" color={form?.userId ? 'primary' : 'secondary'}>
+                  {form?.userId
+                    ? (emailByUserId.get(form.userId) ?? form.userId)
+                    : t('attendance.periods.pickLearner')}
+                </Typography>
+              </TouchableOpacity>
             </View>
 
             <View style={styles.fieldRow}>
-              <View style={styles.fieldHalf}>
-                <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>
-                  {t('attendance.periods.minutesPerDay')}
-                </Text>
-                <TextInput
-                  value={form?.requiredMinutesPerDay}
-                  onChangeText={field('requiredMinutesPerDay')}
-                  keyboardType="numeric"
-                  style={[styles.input, { color: colors.textPrimary, borderColor: colors.border }]}
-                />
-              </View>
-              <View style={styles.fieldHalf}>
-                <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>
-                  {t('attendance.periods.label')}
-                </Text>
-                <TextInput
-                  value={form?.label}
-                  onChangeText={field('label')}
-                  placeholder={t('attendance.periods.labelPlaceholder')}
-                  placeholderTextColor={colors.textSecondary}
-                  style={[styles.input, { color: colors.textPrimary, borderColor: colors.border }]}
-                />
-              </View>
+              <Input
+                label={t('attendance.from')}
+                leftIcon="clock"
+                value={form?.startDate}
+                onChangeText={field('startDate')}
+                placeholder="yyyy-mm-dd"
+                autoCapitalize="none"
+                containerStyle={styles.fieldHalf}
+              />
+              <Input
+                label={t('attendance.to')}
+                leftIcon="clock"
+                value={form?.endDate}
+                onChangeText={field('endDate')}
+                placeholder="yyyy-mm-dd"
+                autoCapitalize="none"
+                containerStyle={styles.fieldHalf}
+              />
             </View>
 
-            {errorMsg && <Text style={{ color: colors.error, fontSize: FontSize.sm }}>{errorMsg}</Text>}
+            <View style={styles.fieldRow}>
+              <Input
+                label={t('attendance.periods.minutesPerDay')}
+                value={form?.requiredMinutesPerDay}
+                onChangeText={field('requiredMinutesPerDay')}
+                keyboardType="numeric"
+                containerStyle={styles.fieldHalf}
+              />
+              <Input
+                label={t('attendance.periods.label')}
+                value={form?.label}
+                onChangeText={field('label')}
+                placeholder={t('attendance.periods.labelPlaceholder')}
+                containerStyle={styles.fieldHalf}
+              />
+            </View>
+
+            {errorMsg && (
+              <Typography variant="bodySm" color={colors.error}>
+                {errorMsg}
+              </Typography>
+            )}
 
             <View style={styles.modalActions}>
-              <TouchableOpacity onPress={() => setForm(null)} style={styles.modalButton}>
-                <Text style={{ color: colors.textSecondary, fontWeight: FontWeight.semibold }}>
-                  {t('common.cancel')}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={submit}
+              <Button title={t('common.cancel')} variant="ghost" onPress={() => setForm(null)} />
+              <Button
+                title={t('common.save')}
+                variant="primary"
+                loading={createPeriod.isPending || updatePeriod.isPending}
                 disabled={createPeriod.isPending || updatePeriod.isPending || !form?.userId}
-                style={[styles.modalButton, styles.modalPrimary, { backgroundColor: colors.primary }]}
-              >
-                <Text style={{ color: colors.textInverted, fontWeight: FontWeight.semibold }}>
-                  {t('common.save')}
-                </Text>
-              </TouchableOpacity>
+                onPress={submit}
+              />
             </View>
           </View>
         </View>
@@ -252,9 +234,7 @@ export function TrainingPeriodsScreen() {
       <Modal visible={userPickerOpen} transparent animationType="fade">
         <View style={styles.modalBackdrop}>
           <View style={[styles.modalCard, styles.pickerCard, { backgroundColor: colors.surface }]}>
-            <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>
-              {t('attendance.periods.pickLearner')}
-            </Text>
+            <Typography variant="h3">{t('attendance.periods.pickLearner')}</Typography>
             <FlatList
               data={users ?? []}
               keyExtractor={(u) => u.id}
@@ -266,14 +246,14 @@ export function TrainingPeriodsScreen() {
                   }}
                   style={[styles.pickerRow, { borderBottomColor: colors.borderLight }]}
                 >
-                  <Text style={{ color: colors.textPrimary }}>{item.email || item.id}</Text>
+                  <Typography variant="body">{item.email || item.id}</Typography>
                 </TouchableOpacity>
               )}
             />
             <TouchableOpacity onPress={() => setUserPickerOpen(false)} style={styles.modalButton}>
-              <Text style={{ color: colors.textSecondary, fontWeight: FontWeight.semibold }}>
+              <Typography variant="label" color="secondary">
                 {t('common.cancel')}
-              </Text>
+              </Typography>
             </TouchableOpacity>
           </View>
         </View>
@@ -286,11 +266,6 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   toolbar: { padding: Spacing.lg, paddingBottom: 0, alignItems: 'flex-end' },
-  newButton: {
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.sm,
-    borderRadius: Radius.md,
-  },
   list: { padding: Spacing.lg, gap: Spacing.sm },
   row: {
     flexDirection: 'row',
@@ -302,10 +277,14 @@ const styles = StyleSheet.create({
     ...Shadow.sm,
   },
   rowMain: { flex: 1, gap: 2 },
-  rowTitle: { fontSize: FontSize.md, fontWeight: FontWeight.semibold },
-  rowSubtitle: { fontSize: FontSize.sm },
   rowAction: { padding: Spacing.xs },
-  empty: { textAlign: 'center', marginTop: Spacing.xxxl, fontSize: FontSize.md },
+  empty: { marginTop: Spacing.xxxl },
+  selectField: {
+    borderWidth: 1,
+    borderRadius: Radius.md,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm + 2,
+  },
   modalBackdrop: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.45)',
@@ -314,19 +293,9 @@ const styles = StyleSheet.create({
   },
   modalCard: { borderRadius: Radius.lg, padding: Spacing.lg, gap: Spacing.md },
   pickerCard: { maxHeight: '70%' },
-  modalTitle: { fontSize: FontSize.lg, fontWeight: FontWeight.bold },
   fieldRow: { flexDirection: 'row', gap: Spacing.md },
-  fieldHalf: { flex: 1, gap: Spacing.xs },
-  fieldLabel: { fontSize: FontSize.xs, fontWeight: FontWeight.semibold },
-  input: {
-    borderWidth: 1,
-    borderRadius: Radius.md,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    fontSize: FontSize.md,
-  },
+  fieldHalf: { flex: 1 },
   pickerRow: { paddingVertical: Spacing.md, borderBottomWidth: 1 },
   modalActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: Spacing.md },
-  modalButton: { paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg },
-  modalPrimary: { borderRadius: Radius.md },
+  modalButton: { paddingVertical: Spacing.sm, alignItems: 'flex-end' },
 });

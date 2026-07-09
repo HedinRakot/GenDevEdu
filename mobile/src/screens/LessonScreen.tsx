@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -556,9 +555,8 @@ function ContentItem({
       <View style={styles.contentSection}>
         <Text style={[styles.h1, { color: colors.textPrimary }]}>{title}</Text>
         <View style={styles.videoPlaceholder}>
-          <Text style={styles.videoPlaceholderText}>
-            📺 Video: {content.videoUrl || 'URL'}
-          </Text>
+          <Icon name="play" size={18} color="white" />
+          <Text style={styles.videoPlaceholderText}>Video: {content.videoUrl || 'URL'}</Text>
         </View>
         <TouchableOpacity
           style={[styles.completeButton, { backgroundColor: colors.primary }]}
@@ -669,8 +667,9 @@ export function LessonScreen() {
           }
           style={styles.tutorButton}
         >
+          <Icon name="chat" size={16} color={colors.primary} />
           <Text style={[styles.tutorButtonText, { color: colors.primary }]}>
-            🤖 {t('chat.askTutor')}
+            {t('chat.askTutor')}
           </Text>
         </TouchableOpacity>
       </View>
@@ -703,7 +702,13 @@ const styles = StyleSheet.create({
   },
   backButton: {},
   backText: { fontSize: FontSize.md, fontWeight: FontWeight.medium },
-  tutorButton: { paddingVertical: 4, paddingHorizontal: Spacing.sm },
+  tutorButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    paddingVertical: 4,
+    paddingHorizontal: Spacing.sm,
+  },
   tutorButtonText: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
   codeHelpButton: { alignSelf: 'center', paddingVertical: Spacing.sm },
   codeHelpText: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
@@ -720,6 +725,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: Spacing.md,
   },
+  lessonTitleBlock: { flex: 1, gap: Spacing.xs },
+  eyebrow: { letterSpacing: 0.8, textTransform: 'uppercase' },
   fav: { fontSize: 24 },
   h1: { fontSize: FontSize.xl, fontWeight: FontWeight.extrabold, flex: 1 },
 
@@ -727,8 +734,10 @@ const styles = StyleSheet.create({
     height: 200,
     backgroundColor: '#000',
     borderRadius: Radius.lg,
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    gap: Spacing.xs,
     ...Shadow.md,
   },
   videoPlaceholderText: { color: 'white', fontSize: FontSize.md, fontWeight: FontWeight.bold },
@@ -793,7 +802,7 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     marginBottom: Spacing.md,
     minHeight: 140,
-    fontFamily: Platform.select({ ios: 'Menlo', android: 'monospace', default: 'monospace' }),
+    fontFamily: FontFamily.mono,
     fontSize: FontSize.sm,
     textAlignVertical: 'top',
   },
@@ -802,8 +811,9 @@ const styles = StyleSheet.create({
   codeSummary: { fontSize: FontSize.sm },
   testRow: { marginTop: Spacing.xs },
   testLine: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
+  testLineRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs },
   codeOutput: {
-    fontFamily: Platform.select({ ios: 'Menlo', android: 'monospace', default: 'monospace' }),
+    fontFamily: FontFamily.mono,
     fontSize: FontSize.xs,
     padding: Spacing.sm,
     borderRadius: Radius.sm,
@@ -818,5 +828,6 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
   },
   feedbackText: { fontSize: FontSize.md, fontWeight: FontWeight.bold },
+  feedbackTextRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs },
   retryText: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
 });

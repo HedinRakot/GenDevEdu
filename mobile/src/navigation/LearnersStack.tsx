@@ -29,7 +29,7 @@ export function LearnersStack() {
       <Stack.Screen
         name="LearnersOverview"
         component={LearnersOverviewScreen}
-        options={{ title: '👥 Teilnehmer' }}
+        options={{ title: 'Teilnehmer' }}
       />
       <Stack.Screen
         name="LearnerStats"

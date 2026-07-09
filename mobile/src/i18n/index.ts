@@ -14,12 +14,11 @@ export const resources = {
 
 export type SupportedLanguage = keyof typeof resources;
 
-export const SUPPORTED_LANGUAGES: { code: SupportedLanguage; nativeName: string; flag: string }[] =
-  [
-    { code: 'de', nativeName: 'Deutsch', flag: '🇩🇪' },
-    { code: 'en', nativeName: 'English', flag: '🇬🇧' },
-    { code: 'ru', nativeName: 'Русский', flag: '🇷🇺' },
-  ];
+export const SUPPORTED_LANGUAGES: { code: SupportedLanguage; nativeName: string }[] = [
+  { code: 'de', nativeName: 'Deutsch' },
+  { code: 'en', nativeName: 'English' },
+  { code: 'ru', nativeName: 'Русский' },
+];
 
 // ─── Initialisierung ──────────────────────────────────────────────────────────
 // Initialisierung erfolgt synchron mit Default-Sprache.

@@ -4,8 +4,6 @@ import {
   FlatList,
   Modal,
   StyleSheet,
-  Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -18,7 +16,8 @@ import { useTheme } from '@/context/ThemeContext';
 import type { DailyAttendance, ExcuseReason } from '@/types/attendance';
 import { minIso, monthRange, todayIso } from '@/utils/attendanceDates';
 import { formatTime, StatusChip } from './attendanceUi';
-import { FontSize, FontWeight, Radius, Shadow, Spacing } from '@/config/theme';
+import { Button, Icon, Input, Typography } from '@/components/common';
+import { Radius, Shadow, Spacing } from '@/config/theme';
 
 const REASONS: ExcuseReason[] = ['krank', 'urlaub', 'feiertag', 'sonstig'];
 
@@ -44,38 +43,43 @@ function DayRow({
   return (
     <View style={[styles.dayRow, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
       <View style={styles.dayHeader}>
-        <Text style={[styles.dayDate, { color: colors.textPrimary }]}>{dateLabel}</Text>
+        <Typography variant="label">{dateLabel}</Typography>
         <StatusChip status={day.status} />
       </View>
       <View style={styles.dayDetails}>
-        <Text style={[styles.dayDetailText, { color: colors.textSecondary }]}>
+        <Typography variant="bodySm" color="secondary">
           {t('attendance.minutesOf', { minutes: day.minutes, required: day.requiredMinutes })}
-        </Text>
-        <Text style={[styles.dayDetailText, { color: colors.textSecondary }]}>
+        </Typography>
+        <Typography variant="code" color="secondary">
           {formatTime(day.firstActivityUtc)} – {formatTime(day.lastActivityUtc)}
-        </Text>
+        </Typography>
       </View>
       {day.excuseNote ? (
-        <Text style={[styles.dayDetailText, { color: colors.textSecondary }]} numberOfLines={2}>
-          💬 {day.excuseNote}
-        </Text>
+        <View style={styles.noteRow}>
+          <Icon name="message" size={14} color={colors.textSecondary} />
+          <Typography variant="bodySm" color="secondary" numberOfLines={2} style={{ flex: 1 }}>
+            {day.excuseNote}
+          </Typography>
+        </View>
       ) : null}
       {day.status !== 'keinSolltag' && (
         <View style={styles.dayActions}>
           {day.excuseReason ? (
             onRemoveExcuse && (
-              <TouchableOpacity onPress={onRemoveExcuse}>
-                <Text style={[styles.actionText, { color: colors.error }]}>
-                  {t('attendance.removeExcuse')}
-                </Text>
-              </TouchableOpacity>
+              <Button
+                title={t('attendance.removeExcuse')}
+                variant="destructive"
+                size="sm"
+                onPress={onRemoveExcuse}
+              />
             )
           ) : (
-            <TouchableOpacity onPress={onExcuse}>
-              <Text style={[styles.actionText, { color: colors.primary }]}>
-                {t('attendance.excuseAction')}
-              </Text>
-            </TouchableOpacity>
+            <Button
+              title={t('attendance.excuseAction')}
+              variant="ghost"
+              size="sm"
+              onPress={onExcuse}
+            />
           )}
         </View>
       )}
@@ -157,13 +161,18 @@ export function AttendanceLearnerDetailScreen() {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.monthBar, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity onPress={() => shiftMonth(-1)} style={styles.monthArrow}>
-          <Text style={[styles.monthArrowText, { color: colors.primary }]}>‹</Text>
+          <Icon name="chevron-left" size={24} color={colors.primary} strokeWidth={2} />
         </TouchableOpacity>
-        <Text style={[styles.monthText, { color: colors.textPrimary }]}>{monthLabel}</Text>
+        <Typography variant="label" style={styles.monthText}>
+          {monthLabel}
+        </Typography>
         <TouchableOpacity onPress={() => shiftMonth(1)} style={styles.monthArrow} disabled={isCurrentMonth}>
-          <Text style={[styles.monthArrowText, { color: isCurrentMonth ? colors.border : colors.primary }]}>
-            ›
-          </Text>
+          <Icon
+            name="chevron-right"
+            size={24}
+            color={isCurrentMonth ? colors.border : colors.primary}
+            strokeWidth={2}
+          />
         </TouchableOpacity>
       </View>
 
@@ -173,7 +182,9 @@ export function AttendanceLearnerDetailScreen() {
         </View>
       ) : error ? (
         <View style={styles.centered}>
-          <Text style={{ color: colors.error }}>{t('attendance.loadError')}</Text>
+          <Typography variant="body" color={colors.error}>
+            {t('attendance.loadError')}
+          </Typography>
         </View>
       ) : (
         <FlatList
@@ -193,9 +204,9 @@ export function AttendanceLearnerDetailScreen() {
             />
           )}
           ListEmptyComponent={
-            <Text style={[styles.empty, { color: colors.textSecondary }]}>
+            <Typography variant="body" color="secondary" center style={styles.empty}>
               {t('attendance.emptyDetail')}
-            </Text>
+            </Typography>
           }
         />
       )}
@@ -204,30 +215,26 @@ export function AttendanceLearnerDetailScreen() {
       <Modal visible={excuseDay !== null} transparent animationType="fade">
         <View style={styles.modalBackdrop}>
           <View style={[styles.modalCard, { backgroundColor: colors.surface }]}>
-            <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>
-              {t('attendance.excuseTitle')}
-            </Text>
+            <Typography variant="h3">{t('attendance.excuseTitle')}</Typography>
 
             <View style={styles.rangeRow}>
               <View style={styles.rangeField}>
-                <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>
+                <Typography variant="label" color="secondary">
                   {t('attendance.from')}
-                </Text>
-                <Text style={[styles.fieldStatic, { color: colors.textPrimary }]}>{excuseDay}</Text>
+                </Typography>
+                <Typography variant="body" style={styles.fieldStatic}>
+                  {excuseDay}
+                </Typography>
               </View>
-              <View style={styles.rangeField}>
-                <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>
-                  {t('attendance.to')}
-                </Text>
-                <TextInput
-                  value={excuseTo}
-                  onChangeText={setExcuseTo}
-                  placeholder="yyyy-mm-dd"
-                  placeholderTextColor={colors.textSecondary}
-                  style={[styles.input, { color: colors.textPrimary, borderColor: colors.border }]}
-                  autoCapitalize="none"
-                />
-              </View>
+              <Input
+                label={t('attendance.to')}
+                leftIcon="clock"
+                value={excuseTo}
+                onChangeText={setExcuseTo}
+                placeholder="yyyy-mm-dd"
+                autoCapitalize="none"
+                containerStyle={styles.rangeField}
+              />
             </View>
 
             <View style={styles.reasonRow}>
@@ -243,48 +250,43 @@ export function AttendanceLearnerDetailScreen() {
                     },
                   ]}
                 >
-                  <Text
-                    style={[
-                      styles.reasonText,
-                      { color: reason === r ? colors.textInverted : colors.textSecondary },
-                    ]}
+                  <Typography
+                    variant="label"
+                    color={reason === r ? 'inverted' : 'secondary'}
                   >
                     {t(`attendance.reasons.${r}`)}
-                  </Text>
+                  </Typography>
                 </TouchableOpacity>
               ))}
             </View>
 
-            <TextInput
+            <Input
               value={note}
               onChangeText={setNote}
               placeholder={t('attendance.excuseNotePlaceholder')}
-              placeholderTextColor={colors.textSecondary}
-              style={[styles.input, styles.noteInput, { color: colors.textPrimary, borderColor: colors.border }]}
               multiline
+              style={styles.noteInput}
             />
 
             {createExcuse.isError && (
-              <Text style={{ color: colors.error, fontSize: FontSize.sm }}>
+              <Typography variant="bodySm" color={colors.error}>
                 {t('attendance.saveError')}
-              </Text>
+              </Typography>
             )}
 
             <View style={styles.modalActions}>
-              <TouchableOpacity onPress={() => setExcuseDay(null)} style={styles.modalButton}>
-                <Text style={{ color: colors.textSecondary, fontWeight: FontWeight.semibold }}>
-                  {t('common.cancel')}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={submitExcuse}
+              <Button
+                title={t('common.cancel')}
+                variant="ghost"
+                onPress={() => setExcuseDay(null)}
+              />
+              <Button
+                title={t('common.save')}
+                variant="primary"
+                loading={createExcuse.isPending}
                 disabled={createExcuse.isPending}
-                style={[styles.modalButton, styles.modalPrimary, { backgroundColor: colors.primary }]}
-              >
-                <Text style={{ color: colors.textInverted, fontWeight: FontWeight.semibold }}>
-                  {t('common.save')}
-                </Text>
-              </TouchableOpacity>
+                onPress={submitExcuse}
+              />
             </View>
           </View>
         </View>
@@ -305,8 +307,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   monthArrow: { paddingHorizontal: Spacing.lg },
-  monthArrowText: { fontSize: FontSize.xxl, fontWeight: FontWeight.bold },
-  monthText: { fontSize: FontSize.md, fontWeight: FontWeight.semibold, minWidth: 140, textAlign: 'center' },
+  monthText: { minWidth: 140, textAlign: 'center' },
   list: { padding: Spacing.lg, gap: Spacing.sm },
   dayRow: {
     padding: Spacing.md,
@@ -316,12 +317,10 @@ const styles = StyleSheet.create({
     ...Shadow.sm,
   },
   dayHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  dayDate: { fontSize: FontSize.md, fontWeight: FontWeight.semibold },
   dayDetails: { flexDirection: 'row', justifyContent: 'space-between' },
-  dayDetailText: { fontSize: FontSize.sm },
+  noteRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs },
   dayActions: { flexDirection: 'row', justifyContent: 'flex-end' },
-  actionText: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
-  empty: { textAlign: 'center', marginTop: Spacing.xxxl, fontSize: FontSize.md },
+  empty: { marginTop: Spacing.xxxl },
   modalBackdrop: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.45)',
@@ -329,18 +328,9 @@ const styles = StyleSheet.create({
     padding: Spacing.xl,
   },
   modalCard: { borderRadius: Radius.lg, padding: Spacing.lg, gap: Spacing.md },
-  modalTitle: { fontSize: FontSize.lg, fontWeight: FontWeight.bold },
   rangeRow: { flexDirection: 'row', gap: Spacing.md },
   rangeField: { flex: 1, gap: Spacing.xs },
-  fieldLabel: { fontSize: FontSize.xs, fontWeight: FontWeight.semibold },
-  fieldStatic: { fontSize: FontSize.md, paddingVertical: Spacing.sm },
-  input: {
-    borderWidth: 1,
-    borderRadius: Radius.md,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    fontSize: FontSize.md,
-  },
+  fieldStatic: { paddingVertical: Spacing.sm },
   noteInput: { minHeight: 64, textAlignVertical: 'top' },
   reasonRow: { flexDirection: 'row', gap: Spacing.sm, flexWrap: 'wrap' },
   reasonPill: {
@@ -349,8 +339,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs,
   },
-  reasonText: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
   modalActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: Spacing.md },
-  modalButton: { paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg },
-  modalPrimary: { borderRadius: Radius.md },
 });

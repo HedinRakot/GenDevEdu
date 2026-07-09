@@ -1,26 +1,19 @@
 import React, { useMemo, useState } from 'react';
-import {
-  Alert,
-  FlatList,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Alert, FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { useSnippets } from '@/hooks/useSnippets';
 import { useTheme } from '@/context/ThemeContext';
 import { MarkdownRenderer } from '@/components/common/MarkdownRenderer';
-import { FontSize, FontWeight, Radius, Shadow, Spacing } from '@/config/theme';
+import { Badge, Card, Icon, Input, Typography, type IconName } from '@/components/common';
+import { Spacing } from '@/config/theme';
 import type { Snippet } from '@/types/snippet';
 
-const SOURCE_ICON: Record<Snippet['source'], string> = {
-  chat: '🤖',
-  lesson: '📚',
-  manual: '✍️',
+const SOURCE_ICON: Record<Snippet['source'], IconName> = {
+  chat: 'chat',
+  lesson: 'courses',
+  manual: 'edit',
 };
 
 export function SnippetsScreen() {
@@ -50,76 +43,67 @@ export function SnippetsScreen() {
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
       <View style={styles.header}>
-        <Text style={[styles.title, { color: colors.textPrimary }]}>{t('snippets.title')}</Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+        <Typography variant="h1">{t('snippets.title')}</Typography>
+        <Typography variant="body" color="secondary">
           {t('snippets.subtitle')}
-        </Text>
+        </Typography>
       </View>
 
-      <View
-        style={[
-          styles.searchBox,
-          { backgroundColor: colors.surface, borderColor: colors.border },
-        ]}
-      >
-        <Text style={styles.searchIcon}>🔍</Text>
-        <TextInput
-          style={[styles.searchInput, { color: colors.textPrimary }]}
-          value={query}
-          onChangeText={setQuery}
-          placeholder={t('snippets.searchPlaceholder')}
-          placeholderTextColor={colors.textTertiary}
-          autoCorrect={false}
-        />
-      </View>
+      <Input
+        leftIcon="search"
+        containerStyle={styles.search}
+        value={query}
+        onChangeText={setQuery}
+        placeholder={t('snippets.searchPlaceholder')}
+        autoCorrect={false}
+      />
 
       <FlatList
         data={filtered}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
+        showsVerticalScrollIndicator={false}
         ItemSeparatorComponent={() => <View style={{ height: Spacing.md }} />}
         ListEmptyComponent={
           isLoading ? null : (
             <View style={styles.empty}>
-              <Text style={styles.emptyEmoji}>📌</Text>
-              <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+              <Icon name="snippets" size={48} color={colors.textTertiary} />
+              <Typography variant="body" color="secondary" center>
                 {t('snippets.empty')}
-              </Text>
+              </Typography>
             </View>
           )
         }
         renderItem={({ item }) => (
-          <View
-            style={[
-              styles.card,
-              { backgroundColor: colors.surface, borderColor: colors.borderLight },
-            ]}
-          >
+          <Card>
             <View style={styles.cardHeader}>
-              <Text style={[styles.cardSource, { color: colors.textTertiary }]}>
-                {SOURCE_ICON[item.source]} {t(`snippets.source.${item.source}`)}
-              </Text>
-              <TouchableOpacity onPress={() => confirmDelete(item)}>
-                <Text style={[styles.cardDelete, { color: colors.error }]}>🗑️</Text>
+              <View style={styles.sourceRow}>
+                <Icon name={SOURCE_ICON[item.source]} size={14} color={colors.textTertiary} />
+                <Typography variant="caption" color="tertiary" style={styles.cardSource}>
+                  {t(`snippets.source.${item.source}`)}
+                </Typography>
+              </View>
+              <TouchableOpacity
+                testID="snippet-delete"
+                accessibilityRole="button"
+                accessibilityLabel={t('common.delete')}
+                onPress={() => confirmDelete(item)}
+              >
+                <Icon name="delete" size={16} color={colors.error} />
               </TouchableOpacity>
             </View>
-            <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>{item.title}</Text>
+            <Typography variant="h3">{item.title}</Typography>
             <View style={styles.cardBody}>
               <MarkdownRenderer content={item.content} />
             </View>
             {item.tags && item.tags.length > 0 && (
               <View style={styles.tagRow}>
                 {item.tags.map((tag) => (
-                  <View
-                    key={tag}
-                    style={[styles.tag, { backgroundColor: colors.primarySurface }]}
-                  >
-                    <Text style={[styles.tagText, { color: colors.primary }]}>#{tag}</Text>
-                  </View>
+                  <Badge key={tag} label={`#${tag}`} tone="default" />
                 ))}
               </View>
             )}
-          </View>
+          </Card>
         )}
       />
     </SafeAreaView>
@@ -129,49 +113,20 @@ export function SnippetsScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   header: { padding: Spacing.lg, paddingBottom: 0 },
-  title: { fontSize: FontSize.xxxl, fontWeight: FontWeight.extrabold },
-  subtitle: { fontSize: FontSize.md, marginTop: 4 },
-  searchBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    margin: Spacing.lg,
-    marginBottom: Spacing.md,
-    paddingHorizontal: Spacing.md,
-    borderRadius: Radius.md,
-    borderWidth: 1,
-    gap: Spacing.sm,
-    ...Shadow.sm,
-  },
-  searchIcon: { fontSize: 16 },
-  searchInput: { flex: 1, paddingVertical: Spacing.sm, fontSize: FontSize.md },
+
+  search: { marginHorizontal: Spacing.lg, marginTop: Spacing.md, marginBottom: Spacing.md },
 
   list: { paddingHorizontal: Spacing.lg, paddingBottom: Spacing.xxxl },
-  empty: { alignItems: 'center', paddingVertical: Spacing.xxl },
-  emptyEmoji: { fontSize: 56, marginBottom: Spacing.sm },
-  emptyText: { fontSize: FontSize.md, textAlign: 'center' },
+  empty: { alignItems: 'center', paddingVertical: Spacing.xxl, gap: Spacing.sm },
 
-  card: {
-    padding: Spacing.md,
-    borderRadius: Radius.lg,
-    borderWidth: 1,
-    ...Shadow.sm,
-  },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 4,
   },
-  cardSource: {
-    fontSize: FontSize.xs,
-    textTransform: 'uppercase',
-    fontWeight: FontWeight.semibold,
-    letterSpacing: 0.5,
-  },
-  cardDelete: { fontSize: 16 },
-  cardTitle: { fontSize: FontSize.md, fontWeight: FontWeight.bold, marginBottom: 4 },
+  sourceRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs },
+  cardSource: { textTransform: 'uppercase', letterSpacing: 0.5 },
   cardBody: { marginTop: Spacing.xs },
   tagRow: { flexDirection: 'row', gap: Spacing.xs, marginTop: Spacing.sm, flexWrap: 'wrap' },
-  tag: { paddingHorizontal: Spacing.sm, paddingVertical: 2, borderRadius: Radius.full },
-  tagText: { fontSize: FontSize.xs, fontWeight: FontWeight.semibold },
 });

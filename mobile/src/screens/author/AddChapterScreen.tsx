@@ -1,14 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-} from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -16,7 +7,8 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAddChapter } from '@/hooks/useCourses';
 import { useTheme } from '@/context/ThemeContext';
 import type { AuthorStackParamList } from '@/navigation/AuthorStack';
-import { FontSize, FontWeight, Radius, Spacing } from '@/config/theme';
+import { Spacing } from '@/config/theme';
+import { Button, Input, Typography } from '@/components/common';
 
 type NavProp = NativeStackNavigationProp<AuthorStackParamList, 'AddChapter'>;
 type RoutePropType = RouteProp<AuthorStackParamList, 'AddChapter'>;
@@ -46,7 +38,7 @@ export function AddChapterScreen() {
           { text: titelEn.trim() || name.trim(), language: 2 },
         ],
         // Keine SortOrder mehr: Backend hängt ans Ende an; sortiert wird
-        // im Kurs-Editor per ▲/▼ (Reorder-Endpoint).
+        // im Kurs-Editor per Pfeil (Reorder-Endpoint).
         show: true,
       },
       {
@@ -56,11 +48,6 @@ export function AddChapterScreen() {
     );
   };
 
-  const inputStyle = [
-    styles.input,
-    { backgroundColor: colors.surface, color: colors.textPrimary, borderColor: colors.border },
-  ];
-
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['bottom']}>
       <KeyboardAvoidingView
@@ -68,34 +55,48 @@ export function AddChapterScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ScrollView contentContainerStyle={styles.form}>
-          <Text style={[styles.heading, { color: colors.textPrimary }]}>Neues Kapitel</Text>
+          <Typography variant="h2" style={{ marginBottom: Spacing.sm }}>
+            Neues Kapitel
+          </Typography>
 
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Interner Name *</Text>
-          <TextInput style={inputStyle} value={name} onChangeText={setName}
-            placeholder="z.B. introduction" placeholderTextColor={colors.textTertiary}
-            autoCapitalize="none" />
+          <Input
+            label="Interner Name *"
+            value={name}
+            onChangeText={setName}
+            placeholder="z.B. introduction"
+            autoCapitalize="none"
+          />
 
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Titel (Deutsch)</Text>
-          <TextInput style={inputStyle} value={titelDe} onChangeText={setTitelDe}
-            placeholder="z.B. Einführung" placeholderTextColor={colors.textTertiary} />
+          <Input
+            label="Titel (Deutsch)"
+            value={titelDe}
+            onChangeText={setTitelDe}
+            placeholder="z.B. Einführung"
+          />
 
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Titel (Englisch)</Text>
-          <TextInput style={inputStyle} value={titelEn} onChangeText={setTitelEn}
-            placeholder="e.g. Introduction" placeholderTextColor={colors.textTertiary} />
+          <Input
+            label="Titel (Englisch)"
+            value={titelEn}
+            onChangeText={setTitelEn}
+            placeholder="e.g. Introduction"
+          />
 
-          <TouchableOpacity
-            style={[styles.saveButton, { backgroundColor: colors.primary }]}
+          <Button
+            title="Kapitel erstellen"
             onPress={onSave}
+            loading={isPending}
             disabled={isPending}
-          >
-            <Text style={styles.saveButtonText}>
-              {isPending ? 'Wird gespeichert…' : 'Kapitel erstellen'}
-            </Text>
-          </TouchableOpacity>
+            fullWidth
+            iconRight="arrow-right"
+            style={{ marginTop: Spacing.lg }}
+          />
 
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.cancelButton}>
-            <Text style={[styles.cancelText, { color: colors.textSecondary }]}>Abbrechen</Text>
-          </TouchableOpacity>
+          <Button
+            title="Abbrechen"
+            variant="ghost"
+            onPress={() => navigation.goBack()}
+            style={{ alignSelf: 'center', marginTop: Spacing.xs }}
+          />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -104,12 +105,5 @@ export function AddChapterScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
-  form: { padding: Spacing.lg, gap: Spacing.sm },
-  heading: { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, marginBottom: Spacing.md },
-  label: { fontSize: FontSize.sm, fontWeight: FontWeight.medium, marginTop: Spacing.md },
-  input: { borderWidth: 1, borderRadius: Radius.md, padding: Spacing.md, fontSize: FontSize.md },
-  saveButton: { marginTop: Spacing.xl, borderRadius: Radius.md, padding: Spacing.md, alignItems: 'center' },
-  saveButtonText: { color: 'white', fontWeight: FontWeight.bold, fontSize: FontSize.md },
-  cancelButton: { marginTop: Spacing.sm, alignItems: 'center', padding: Spacing.sm },
-  cancelText: { fontSize: FontSize.md },
+  form: { padding: Spacing.lg, gap: Spacing.md },
 });

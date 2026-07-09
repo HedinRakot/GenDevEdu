@@ -70,7 +70,7 @@ export function useChat() {
           err instanceof Error && err.message === 'UNAUTHORIZED'
             ? i18n.t('chat.errorSending')
             : i18n.t('chat.errorSending');
-        await updateChatMessage(aiMessageId, `⚠️ ${msg}`);
+        await updateChatMessage(aiMessageId, msg);
       } finally {
         setMessages(await getChatHistory());
         setIsSending(false);

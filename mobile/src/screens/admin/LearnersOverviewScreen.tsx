@@ -3,7 +3,6 @@ import {
   ActivityIndicator,
   FlatList,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -15,7 +14,8 @@ import { useLearners } from '@/hooks/useAdminStats';
 import { useTheme } from '@/context/ThemeContext';
 import type { AdminLearnerSummary } from '@/types/adminStats';
 import type { LearnersStackParamList } from '@/navigation/LearnersStack';
-import { FontSize, FontWeight, Radius, Shadow, Spacing } from '@/config/theme';
+import { Button, Card, Icon, Typography } from '@/components/common';
+import { Radius, Spacing } from '@/config/theme';
 
 type NavProp = NativeStackNavigationProp<LearnersStackParamList, 'LearnersOverview'>;
 type Filter = 'all' | 'active' | 'inactive';
@@ -23,38 +23,32 @@ type Filter = 'all' | 'active' | 'inactive';
 function LearnerRow({ learner, onPress }: { learner: AdminLearnerSummary; onPress: () => void }) {
   const { colors } = useTheme();
   return (
-    <TouchableOpacity
-      style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}
-      onPress={onPress}
-      activeOpacity={0.8}
-    >
-      <View
-        style={[
-          styles.activityDot,
-          { backgroundColor: learner.active ? colors.success : colors.borderLight },
-        ]}
-      />
-      <View style={styles.rowBody}>
-        <Text style={[styles.rowTitle, { color: colors.textPrimary }]} numberOfLines={1}>
-          {learner.displayName}
-        </Text>
-        <Text style={[styles.rowMeta, { color: colors.textTertiary }]} numberOfLines={1}>
-          {learner.email}
-        </Text>
-      </View>
-      <View style={styles.rowStats}>
-        <Text style={[styles.statValue, { color: colors.textPrimary }]}>
-          {learner.overallProgressPercent}%
-        </Text>
-        <Text style={[styles.statLabel, { color: colors.textTertiary }]}>Fortschritt</Text>
-      </View>
-      <View style={styles.rowStats}>
-        <Text style={[styles.statValue, { color: colors.textPrimary }]}>
-          {Math.round(learner.totalLearningMinutes / 60)}h
-        </Text>
-        <Text style={[styles.statLabel, { color: colors.textTertiary }]}>Lernzeit</Text>
-      </View>
-      <Text style={[styles.arrow, { color: colors.textTertiary }]}>›</Text>
+    <TouchableOpacity onPress={onPress} activeOpacity={0.85}>
+      <Card style={styles.row}>
+        <View
+          style={[
+            styles.activityDot,
+            { backgroundColor: learner.active ? colors.success : colors.borderLight },
+          ]}
+        />
+        <View style={styles.rowBody}>
+          <Typography variant="label" numberOfLines={1}>
+            {learner.displayName}
+          </Typography>
+          <Typography variant="caption" color="tertiary" numberOfLines={1}>
+            {learner.email}
+          </Typography>
+        </View>
+        <View style={styles.rowStats}>
+          <Typography variant="h3">{learner.overallProgressPercent}%</Typography>
+          <Typography variant="caption" color="tertiary">Fortschritt</Typography>
+        </View>
+        <View style={styles.rowStats}>
+          <Typography variant="h3">{Math.round(learner.totalLearningMinutes / 60)}h</Typography>
+          <Typography variant="caption" color="tertiary">Lernzeit</Typography>
+        </View>
+        <Icon name="chevron-right" size={20} color={colors.textTertiary} />
+      </Card>
     </TouchableOpacity>
   );
 }
@@ -72,36 +66,34 @@ export function LearnersOverviewScreen() {
 
   const FILTERS: { label: string; value: Filter }[] = [
     { label: `Alle (${learners?.length ?? 0})`, value: 'all' },
-    { label: `🟢 Aktiv (${learners?.filter((l) => l.active).length ?? 0})`, value: 'active' },
-    { label: `⚪ Inaktiv (${learners?.filter((l) => !l.active).length ?? 0})`, value: 'inactive' },
+    { label: `Aktiv (${learners?.filter((l) => l.active).length ?? 0})`, value: 'active' },
+    { label: `Inaktiv (${learners?.filter((l) => !l.active).length ?? 0})`, value: 'inactive' },
   ];
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['bottom']}>
       <View style={styles.filterRow}>
-        {FILTERS.map((f) => (
-          <TouchableOpacity
-            key={f.value}
-            style={[
-              styles.filterChip,
-              {
-                backgroundColor: filter === f.value ? colors.primary : colors.surface,
-                borderColor: filter === f.value ? colors.primary : colors.border,
-              },
-            ]}
-            onPress={() => setFilter(f.value)}
-          >
-            <Text
-              style={{
-                color: filter === f.value ? 'white' : colors.textPrimary,
-                fontWeight: FontWeight.medium,
-                fontSize: FontSize.sm,
-              }}
+        {FILTERS.map((f) => {
+          const selected = filter === f.value;
+          return (
+            <TouchableOpacity
+              key={f.value}
+              style={[
+                styles.filterChip,
+                {
+                  backgroundColor: selected ? colors.primary : colors.surface,
+                  borderColor: selected ? colors.primary : colors.border,
+                },
+              ]}
+              onPress={() => setFilter(f.value)}
+              activeOpacity={0.7}
             >
-              {f.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
+              <Typography variant="label" color={selected ? 'inverted' : 'primary'}>
+                {f.label}
+              </Typography>
+            </TouchableOpacity>
+          );
+        })}
       </View>
 
       {isLoading && (
@@ -112,12 +104,8 @@ export function LearnersOverviewScreen() {
 
       {!!error && (
         <View style={styles.centered}>
-          <Text style={{ color: colors.error }}>Fehler beim Laden</Text>
-          <TouchableOpacity onPress={() => refetch()}>
-            <Text style={{ color: colors.primary, fontWeight: FontWeight.semibold }}>
-              Erneut versuchen
-            </Text>
-          </TouchableOpacity>
+          <Typography variant="body" color={colors.error}>Fehler beim Laden</Typography>
+          <Button title="Erneut versuchen" variant="ghost" onPress={() => refetch()} />
         </View>
       )}
 
@@ -138,9 +126,9 @@ export function LearnersOverviewScreen() {
             />
           )}
           ListEmptyComponent={
-            <Text style={[styles.empty, { color: colors.textSecondary }]}>
+            <Typography variant="body" color="secondary" center style={styles.empty}>
               Keine Teilnehmer gefunden.
-            </Text>
+            </Typography>
           }
         />
       )}
@@ -165,22 +153,9 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.xs,
   },
   list: { padding: Spacing.lg, gap: Spacing.sm },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: Spacing.md,
-    borderRadius: Radius.lg,
-    borderWidth: 1,
-    gap: Spacing.md,
-    ...Shadow.sm,
-  },
+  row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
   activityDot: { width: 10, height: 10, borderRadius: 5 },
   rowBody: { flex: 1 },
-  rowTitle: { fontSize: FontSize.md, fontWeight: FontWeight.medium },
-  rowMeta: { fontSize: FontSize.xs, marginTop: 2 },
   rowStats: { alignItems: 'center', minWidth: 64 },
-  statValue: { fontSize: FontSize.md, fontWeight: FontWeight.bold },
-  statLabel: { fontSize: FontSize.xs },
-  arrow: { fontSize: 24 },
-  empty: { textAlign: 'center', marginTop: Spacing.xxxl, fontSize: FontSize.md },
+  empty: { marginTop: Spacing.xxxl },
 });

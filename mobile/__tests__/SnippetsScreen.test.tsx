@@ -52,9 +52,9 @@ describe('SnippetsScreen', () => {
   it('confirms deletion and calls remove', () => {
     const alertSpy = jest.spyOn(Alert, 'alert');
     mockState = { snippets: [snippet('s1', 'Alpha Snippet')], isLoading: false };
-    const { getByText } = renderScreen();
+    const { getByTestId } = renderScreen();
 
-    fireEvent.press(getByText('🗑️'));
+    fireEvent.press(getByTestId('snippet-delete'));
 
     expect(alertSpy).toHaveBeenCalled();
     // Den "Löschen"-Button des Bestätigungsdialogs auslösen.

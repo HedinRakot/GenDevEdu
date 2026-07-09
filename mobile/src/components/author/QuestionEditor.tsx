@@ -8,6 +8,7 @@ import type { Question } from '@/types/course';
 import type { CreateAnswerRequest, CreateQuestionRequest } from '@/types/author';
 import { translate } from '@/utils/textUtils';
 import { FontSize, FontWeight, Radius, Spacing } from '@/config/theme';
+import { Icon } from '@/components/common';
 
 // ─── Draft-Modelle (lokaler Editor-Zustand) ──────────────────────────────────
 
@@ -213,8 +214,9 @@ export function QuestionEditor({
     <View style={[styles.questionBox, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
       <View style={styles.questionHeader}>
         <Text style={[styles.questionNum, { color: colors.textSecondary }]}>Frage {index + 1}</Text>
-        <TouchableOpacity onPress={onRemove}>
-          <Text style={{ color: colors.error, fontSize: FontSize.sm }}>✕ Entfernen</Text>
+        <TouchableOpacity onPress={onRemove} style={styles.removeRow}>
+          <Icon name="close" size={14} color={colors.error} />
+          <Text style={{ color: colors.error, fontSize: FontSize.sm }}>Entfernen</Text>
         </TouchableOpacity>
       </View>
 
@@ -287,13 +289,13 @@ export function QuestionEditor({
               <View style={styles.questionHeader}>
                 <TouchableOpacity style={styles.answerRow} onPress={() => updateTestCase(ti, { hidden: !tc.hidden })}>
                   <View style={[styles.correctToggle, { borderColor: tc.hidden ? colors.primary : colors.border }]}>
-                    {tc.hidden && <Text style={{ color: colors.primary, fontSize: 12 }}>✓</Text>}
+                    {tc.hidden && <Icon name="check" size={12} color={colors.primary} strokeWidth={2.5} />}
                   </View>
                   <Text style={{ color: colors.textSecondary, fontSize: FontSize.sm }}>Versteckt</Text>
                 </TouchableOpacity>
                 {(q.code?.testCases.length ?? 0) > 1 && (
                   <TouchableOpacity onPress={() => updateCode({ testCases: q.code!.testCases.filter((_, i) => i !== ti) })}>
-                    <Text style={{ color: colors.error, fontSize: FontSize.sm }}>✕</Text>
+                    <Icon name="close" size={14} color={colors.error} />
                   </TouchableOpacity>
                 )}
               </View>
@@ -336,7 +338,7 @@ export function QuestionEditor({
           {q.answers.map((a, ai) => (
             <TouchableOpacity key={ai} style={styles.answerRow} onPress={() => updateAnswer(ai, { isCorrect: true })}>
               <View style={[styles.correctToggle, { borderColor: a.isCorrect ? colors.success : colors.border }]}>
-                {a.isCorrect && <Text style={{ color: colors.success, fontSize: 12 }}>✓</Text>}
+                {a.isCorrect && <Icon name="check" size={12} color={colors.success} strokeWidth={2.5} />}
               </View>
               <Text style={[styles.trueFalseLabel, { color: colors.textPrimary }]}>
                 {t(ai === 0 ? 'quiz.true' : 'quiz.false')}
@@ -353,7 +355,7 @@ export function QuestionEditor({
                 style={[styles.correctToggle, { borderColor: a.isCorrect ? colors.success : colors.border }]}
                 onPress={() => updateAnswer(ai, { isCorrect: !a.isCorrect })}
               >
-                {a.isCorrect && <Text style={{ color: colors.success, fontSize: 12 }}>✓</Text>}
+                {a.isCorrect && <Icon name="check" size={12} color={colors.success} strokeWidth={2.5} />}
               </TouchableOpacity>
               <TextInput
                 style={[inputStyle, { flex: 1 }]}
@@ -363,8 +365,11 @@ export function QuestionEditor({
                 placeholderTextColor={colors.textTertiary}
               />
               {q.answers.length > 2 && (
-                <TouchableOpacity onPress={() => onChange({ ...q, answers: q.answers.filter((_, i) => i !== ai) })}>
-                  <Text style={{ color: colors.error, paddingHorizontal: Spacing.sm }}>✕</Text>
+                <TouchableOpacity
+                  onPress={() => onChange({ ...q, answers: q.answers.filter((_, i) => i !== ai) })}
+                  style={{ paddingHorizontal: Spacing.sm }}
+                >
+                  <Icon name="close" size={14} color={colors.error} />
                 </TouchableOpacity>
               )}
             </View>
@@ -384,6 +389,7 @@ export function QuestionEditor({
 const styles = StyleSheet.create({
   questionBox: { borderWidth: 1, borderRadius: Radius.lg, padding: Spacing.md, gap: Spacing.sm },
   questionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  removeRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs / 2 },
   questionNum: { fontSize: FontSize.sm, fontWeight: FontWeight.bold },
   label: { fontSize: FontSize.xs, fontWeight: FontWeight.medium },
   input: { borderWidth: 1, borderRadius: Radius.md, padding: Spacing.sm, fontSize: FontSize.sm },

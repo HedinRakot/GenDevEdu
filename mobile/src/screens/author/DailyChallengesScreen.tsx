@@ -4,7 +4,6 @@ import {
   Alert,
   FlatList,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -17,11 +16,16 @@ import { useTheme } from '@/context/ThemeContext';
 import { translate } from '@/utils/textUtils';
 import type { ApiDailyChallenge } from '@/types/challenges';
 import type { AuthorStackParamList } from '@/navigation/AuthorStack';
-import { FontSize, FontWeight, Radius, Shadow, Spacing } from '@/config/theme';
+import { Badge, Button, Card, Icon, Typography } from '@/components/common';
+import { Spacing } from '@/config/theme';
 
 type NavProp = NativeStackNavigationProp<AuthorStackParamList, 'DailyChallenges'>;
 
-const DIFFICULTY_EMOJI: Record<string, string> = { easy: '🟢', medium: '🟡', hard: '🔴' };
+const DIFFICULTY_TONE: Record<string, 'success' | 'default' | 'error'> = {
+  easy: 'success',
+  medium: 'default',
+  hard: 'error',
+};
 
 function ChallengeRow({
   challenge,
@@ -36,37 +40,29 @@ function ChallengeRow({
 }) {
   const { colors } = useTheme();
   return (
-    <TouchableOpacity
-      style={[
-        styles.row,
-        {
-          backgroundColor: colors.surface,
-          borderColor: colors.borderLight,
-          opacity: challenge.active ? 1 : 0.5,
-        },
-      ]}
-      onPress={onPress}
-      activeOpacity={0.8}
-    >
-      <View style={styles.rowBody}>
-        <Text style={[styles.rowTitle, { color: colors.textPrimary }]} numberOfLines={1}>
-          {DIFFICULTY_EMOJI[challenge.difficulty] ?? ''} {translate(challenge.title) || challenge.id}
-        </Text>
-        <Text style={[styles.rowMeta, { color: colors.textTertiary }]} numberOfLines={1}>
-          {challenge.category} · ~{challenge.estimatedMinutes} min
-          {challenge.active ? '' : ' · inaktiv'}
-        </Text>
-      </View>
-      <TouchableOpacity
-        onPress={onDelete}
-        disabled={deleting}
-        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-      >
-        <Text style={[styles.deleteIcon, { color: deleting ? colors.textTertiary : colors.error }]}>
-          🗑
-        </Text>
-      </TouchableOpacity>
-      <Text style={[styles.arrow, { color: colors.textTertiary }]}>›</Text>
+    <TouchableOpacity onPress={onPress} activeOpacity={0.85} style={{ opacity: challenge.active ? 1 : 0.5 }}>
+      <Card style={styles.row}>
+        <View style={styles.rowBody}>
+          <View style={styles.titleRow}>
+            <Badge label={challenge.difficulty} tone={DIFFICULTY_TONE[challenge.difficulty] ?? 'muted'} />
+            <Typography variant="label" numberOfLines={1} style={styles.rowTitle}>
+              {translate(challenge.title) || challenge.id}
+            </Typography>
+          </View>
+          <Typography variant="caption" color="tertiary" numberOfLines={1}>
+            {challenge.category} · ~{challenge.estimatedMinutes} min
+            {challenge.active ? '' : ' · inaktiv'}
+          </Typography>
+        </View>
+        <TouchableOpacity
+          onPress={onDelete}
+          disabled={deleting}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
+          <Icon name="delete" size={20} color={deleting ? colors.textTertiary : colors.error} />
+        </TouchableOpacity>
+        <Icon name="chevron-right" size={20} color={colors.textTertiary} />
+      </Card>
     </TouchableOpacity>
   );
 }
@@ -98,14 +94,17 @@ export function DailyChallengesScreen() {
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['bottom']}>
       <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <Text style={[styles.title, { color: colors.textPrimary }]}>⚡ Daily Challenges</Text>
-        <TouchableOpacity
+        <View style={styles.headerTitle}>
+          <Icon name="challenge" size={22} color={colors.accent} />
+          <Typography variant="h2">Daily Challenges</Typography>
+        </View>
+        <Button
           testID="challenge-new"
-          style={[styles.addButton, { backgroundColor: colors.primary }]}
+          title="Neu"
+          size="sm"
+          iconLeft="add"
           onPress={() => navigation.navigate('DailyChallengeEditor', {})}
-        >
-          <Text style={styles.addButtonText}>+ Neu</Text>
-        </TouchableOpacity>
+        />
       </View>
 
       {isLoading && (
@@ -116,12 +115,8 @@ export function DailyChallengesScreen() {
 
       {!!error && (
         <View style={styles.centered}>
-          <Text style={{ color: colors.error }}>Fehler beim Laden</Text>
-          <TouchableOpacity onPress={() => refetch()}>
-            <Text style={{ color: colors.primary, fontWeight: FontWeight.semibold }}>
-              Erneut versuchen
-            </Text>
-          </TouchableOpacity>
+          <Typography variant="body" color={colors.error}>Fehler beim Laden</Typography>
+          <Button title="Erneut versuchen" variant="ghost" onPress={() => refetch()} />
         </View>
       )}
 
@@ -139,9 +134,9 @@ export function DailyChallengesScreen() {
             />
           )}
           ListEmptyComponent={
-            <Text style={[styles.empty, { color: colors.textSecondary }]}>
+            <Typography variant="body" color="secondary" center style={styles.empty}>
               Noch keine Challenges vorhanden.
-            </Text>
+            </Typography>
           }
         />
       )}
@@ -159,23 +154,11 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     borderBottomWidth: 1,
   },
-  title: { fontSize: FontSize.xl, fontWeight: FontWeight.bold },
-  addButton: { borderRadius: Radius.md, paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm },
-  addButtonText: { color: 'white', fontWeight: FontWeight.bold, fontSize: FontSize.sm },
+  headerTitle: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
   list: { padding: Spacing.lg, gap: Spacing.sm },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: Spacing.md,
-    borderRadius: Radius.lg,
-    borderWidth: 1,
-    gap: Spacing.md,
-    ...Shadow.sm,
-  },
-  rowBody: { flex: 1 },
-  rowTitle: { fontSize: FontSize.md, fontWeight: FontWeight.medium },
-  rowMeta: { fontSize: FontSize.xs, marginTop: 2 },
-  deleteIcon: { fontSize: FontSize.lg },
-  arrow: { fontSize: 24 },
-  empty: { textAlign: 'center', marginTop: Spacing.xxxl, fontSize: FontSize.md },
+  row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
+  rowBody: { flex: 1, gap: Spacing.xs },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
+  rowTitle: { flexShrink: 1 },
+  empty: { marginTop: Spacing.xxxl },
 });

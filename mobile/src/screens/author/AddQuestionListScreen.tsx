@@ -6,9 +6,6 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
@@ -25,7 +22,8 @@ import {
   questionToDraft,
   type DraftQuestion,
 } from '@/components/author/QuestionEditor';
-import { FontSize, FontWeight, Radius, Spacing } from '@/config/theme';
+import { Spacing } from '@/config/theme';
+import { Button, Typography } from '@/components/common';
 
 type NavProp = NativeStackNavigationProp<AuthorStackParamList, 'AddQuestionList'>;
 type RoutePropType = RouteProp<AuthorStackParamList, 'AddQuestionList'>;
@@ -70,7 +68,7 @@ export function AddQuestionListScreen() {
         { questionListId: questionListId!, questions: mapped },
         {
           onSuccess: () => {
-            Alert.alert('✓', 'Fragen wurden aktualisiert.');
+            Alert.alert('Gespeichert', 'Fragen wurden aktualisiert.');
             navigation.goBack();
           },
           onError: () => Alert.alert('Fehler', 'Fragen konnten nicht gespeichert werden.'),
@@ -83,7 +81,7 @@ export function AddQuestionListScreen() {
       { chapterContentId, questions: mapped },
       {
         onSuccess: () => {
-          Alert.alert('✓', 'Fragenliste wurde gespeichert.');
+          Alert.alert('Gespeichert', 'Fragenliste wurde gespeichert.');
           navigation.navigate('AuthorCourses');
         },
         onError: () => Alert.alert('Fehler', 'Fragenliste konnte nicht gespeichert werden.'),
@@ -103,9 +101,9 @@ export function AddQuestionListScreen() {
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['bottom']}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.form}>
-          <Text style={[styles.heading, { color: colors.textPrimary }]}>
+          <Typography variant="h2" style={{ marginBottom: Spacing.xs }}>
             {isEdit ? 'Fragen bearbeiten' : 'Fragen erstellen'}
-          </Text>
+          </Typography>
 
           {questions.map((q, i) => (
             <QuestionEditor
@@ -117,26 +115,23 @@ export function AddQuestionListScreen() {
             />
           ))}
 
-          <TouchableOpacity
-            style={[styles.addQButton, { borderColor: colors.primary }]}
+          <Button
+            title="Frage hinzufügen"
+            variant="secondary"
+            iconLeft="add"
+            fullWidth
             onPress={() => setQuestions((prev) => [...prev, emptyQuestion()])}
-          >
-            <Text style={[styles.addQText, { color: colors.primary }]}>+ Frage hinzufügen</Text>
-          </TouchableOpacity>
+          />
 
-          <TouchableOpacity
-            style={[styles.saveButton, { backgroundColor: colors.primary }]}
+          <Button
+            title={isEdit ? 'Änderungen speichern' : 'Fragenliste speichern'}
             onPress={onSave}
+            loading={isPending}
             disabled={isPending}
-          >
-            <Text style={styles.saveButtonText}>
-              {isPending
-                ? 'Wird gespeichert…'
-                : isEdit
-                  ? 'Änderungen speichern'
-                  : 'Fragenliste speichern'}
-            </Text>
-          </TouchableOpacity>
+            fullWidth
+            iconRight="arrow-right"
+            style={{ marginTop: Spacing.md }}
+          />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -147,15 +142,4 @@ const styles = StyleSheet.create({
   safe: { flex: 1 },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   form: { padding: Spacing.lg, gap: Spacing.md },
-  heading: { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, marginBottom: Spacing.sm },
-  addQButton: {
-    borderWidth: 1.5,
-    borderRadius: Radius.lg,
-    borderStyle: 'dashed',
-    padding: Spacing.md,
-    alignItems: 'center',
-  },
-  addQText: { fontSize: FontSize.md, fontWeight: FontWeight.semibold },
-  saveButton: { borderRadius: Radius.md, padding: Spacing.md, alignItems: 'center', marginTop: Spacing.md },
-  saveButtonText: { color: 'white', fontWeight: FontWeight.bold, fontSize: FontSize.md },
 });

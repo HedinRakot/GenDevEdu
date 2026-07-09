@@ -1,13 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Alert,
-  ScrollView,
-  StyleSheet,
-  Switch,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Alert, ScrollView, StyleSheet, Switch, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -22,28 +14,24 @@ import {
   isStreakReminderEnabled,
   scheduleDailyStreakReminder,
 } from '@/services/notifications';
-import { FontSize, FontWeight, Radius, Shadow, Spacing } from '@/config/theme';
+import { Radius, Shadow, Spacing } from '@/config/theme';
+import { Badge, Card, Icon, Typography, type IconName } from '@/components/common';
 
-function SettingsSection({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  const { colors } = useTheme();
+function SettingsSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <View style={styles.section}>
-      <Text style={[styles.sectionLabel, { color: colors.textTertiary }]}>
+      <Typography variant="caption" color="tertiary" style={styles.sectionLabel}>
         {title.toUpperCase()}
-      </Text>
-      <View style={[styles.sectionCard, { backgroundColor: colors.surface }]}>{children}</View>
+      </Typography>
+      <Card padded={false} style={styles.sectionCard}>
+        {children}
+      </Card>
     </View>
   );
 }
 
 interface SettingsRowProps {
-  icon: string;
+  icon: IconName;
   label: string;
   subtitle?: string;
   onPress?: () => void;
@@ -62,9 +50,13 @@ function SettingsRow({
   variant = 'default',
 }: SettingsRowProps) {
   const { colors } = useTheme();
+  const tint = variant === 'danger' ? colors.error : colors.textSecondary;
   return (
     <TouchableOpacity
-      style={[styles.row, !isLast && { borderBottomWidth: 1, borderBottomColor: colors.borderLight }]}
+      style={[
+        styles.row,
+        !isLast && { borderBottomWidth: 1, borderBottomColor: colors.borderLight },
+      ]}
       onPress={onPress}
       disabled={!onPress && !trailing}
       activeOpacity={onPress ? 0.7 : 1}
@@ -72,28 +64,23 @@ function SettingsRow({
       <View
         style={[
           styles.rowIcon,
-          {
-            backgroundColor:
-              variant === 'danger' ? colors.errorSurface : colors.surfaceElevated,
-          },
+          { backgroundColor: variant === 'danger' ? colors.errorSurface : colors.surfaceElevated },
         ]}
       >
-        <Text style={styles.rowIconText}>{icon}</Text>
+        <Icon name={icon} size={18} color={tint} />
       </View>
       <View style={styles.rowContent}>
-        <Text
-          style={[
-            styles.rowLabel,
-            { color: variant === 'danger' ? colors.error : colors.textPrimary },
-          ]}
-        >
+        <Typography variant="body" color={variant === 'danger' ? colors.error : 'primary'}>
           {label}
-        </Text>
+        </Typography>
         {subtitle && (
-          <Text style={[styles.rowSubtitle, { color: colors.textTertiary }]}>{subtitle}</Text>
+          <Typography variant="caption" color="tertiary" style={{ marginTop: 2 }}>
+            {subtitle}
+          </Typography>
         )}
       </View>
-      {trailing ?? (onPress && <Text style={[styles.rowArrow, { color: colors.textTertiary }]}>›</Text>)}
+      {trailing ??
+        (onPress && <Icon name="chevron-right" size={18} color={colors.textTertiary} />)}
     </TouchableOpacity>
   );
 }
@@ -148,38 +135,31 @@ export function SettingsScreen() {
     }
   };
 
+  const roleLabel =
+    user?.role === 'instructor' ? 'Author' : user?.role === 'admin' ? 'Admin' : 'Student';
+
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <Text style={[styles.screenTitle, { color: colors.textPrimary }]}>
+        <Typography variant="h1" style={{ marginBottom: Spacing.lg }}>
           {t('settings.title')}
-        </Text>
+        </Typography>
 
         {user && (
-          <View style={[styles.profileCard, { backgroundColor: colors.surface }]}>
+          <Card style={styles.profileCard}>
             <View style={[styles.profileAvatar, { backgroundColor: colors.primary }]}>
-              <Text style={styles.profileAvatarText}>
+              <Typography variant="h2" color="inverted">
                 {(user.name || user.email || '?').charAt(0).toUpperCase()}
-              </Text>
+              </Typography>
             </View>
-            <View>
-              <Text style={[styles.profileName, { color: colors.textPrimary }]}>
-                {user.name || user.email}
-              </Text>
-              <Text style={[styles.profileEmail, { color: colors.textSecondary }]}>
+            <View style={styles.profileMeta}>
+              <Typography variant="h3">{user.name || user.email}</Typography>
+              <Typography variant="bodySm" color="secondary" style={{ marginBottom: Spacing.xs }}>
                 {user.email}
-              </Text>
-              <View style={[styles.roleBadge, { backgroundColor: colors.primarySurface }]}>
-                <Text style={[styles.roleBadgeText, { color: colors.primary }]}>
-                  {user.role === 'instructor'
-                    ? '✏️ Author'
-                    : user.role === 'admin'
-                      ? '🛡️ Admin'
-                      : '🎓 Student'}
-                </Text>
-              </View>
+              </Typography>
+              <Badge label={roleLabel} tone="default" />
             </View>
-          </View>
+          </Card>
         )}
 
         {/* Sprache */}
@@ -187,8 +167,9 @@ export function SettingsScreen() {
           {SUPPORTED_LANGUAGES.map((lang, index) => (
             <SettingsRow
               key={lang.code}
-              icon={lang.flag}
+              icon="message"
               label={lang.nativeName}
+              subtitle={lang.code.toUpperCase()}
               isLast={index === SUPPORTED_LANGUAGES.length - 1}
               trailing={
                 <View
@@ -210,7 +191,7 @@ export function SettingsScreen() {
         {/* Darstellung */}
         <SettingsSection title={t('settings.appearance.title')}>
           <SettingsRow
-            icon="🌙"
+            icon="circle"
             label={t('settings.appearance.darkMode')}
             subtitle={t('settings.appearance.darkModeSubtitle')}
             trailing={
@@ -218,13 +199,13 @@ export function SettingsScreen() {
                 value={isDark}
                 onValueChange={toggleDarkMode}
                 trackColor={{ false: colors.border, true: colors.primary }}
-                thumbColor="#fff"
+                thumbColor={colors.textInverted}
                 disabled={mode === 'system'}
               />
             }
           />
           <SettingsRow
-            icon="📱"
+            icon="settings"
             label={t('settings.appearance.followSystem')}
             subtitle={t('settings.appearance.followSystemSubtitle')}
             isLast
@@ -233,7 +214,7 @@ export function SettingsScreen() {
                 value={mode === 'system'}
                 onValueChange={toggleSystemTheme}
                 trackColor={{ false: colors.border, true: colors.primary }}
-                thumbColor="#fff"
+                thumbColor={colors.textInverted}
               />
             }
           />
@@ -242,7 +223,7 @@ export function SettingsScreen() {
         {/* Notifications */}
         <SettingsSection title={t('settings.notifications.title')}>
           <SettingsRow
-            icon="🔔"
+            icon="streak"
             label={t('settings.notifications.streakReminder')}
             subtitle={t('settings.notifications.streakReminderSubtitle')}
             isLast
@@ -251,7 +232,7 @@ export function SettingsScreen() {
                 value={notificationsOn}
                 onValueChange={toggleNotifications}
                 trackColor={{ false: colors.border, true: colors.primary }}
-                thumbColor="#fff"
+                thumbColor={colors.textInverted}
               />
             }
           />
@@ -260,13 +241,13 @@ export function SettingsScreen() {
         {/* Lerntools */}
         <SettingsSection title={t('settings.tools.title')}>
           <SettingsRow
-            icon="📖"
+            icon="courses"
             label={t('glossary.title')}
             subtitle={t('glossary.subtitle')}
             onPress={() => navigation.navigate('Courses', { screen: 'Glossary' })}
           />
           <SettingsRow
-            icon="📌"
+            icon="snippets"
             label={t('snippets.title')}
             subtitle={t('snippets.subtitle')}
             onPress={() => navigation.navigate('Snippets')}
@@ -279,7 +260,7 @@ export function SettingsScreen() {
           <SettingsSection title={t('settings.management.title')}>
             {isAuthor && (
               <SettingsRow
-                icon="✏️"
+                icon="edit"
                 label={t('settings.management.author')}
                 subtitle={t('settings.management.authorSubtitle')}
                 onPress={() => navigation.navigate('Author')}
@@ -287,7 +268,7 @@ export function SettingsScreen() {
             )}
             {isAuthor && (
               <SettingsRow
-                icon="🗓️"
+                icon="clock"
                 label={t('settings.management.attendance')}
                 subtitle={t('settings.management.attendanceSubtitle')}
                 onPress={() => navigation.navigate('Attendance')}
@@ -295,7 +276,7 @@ export function SettingsScreen() {
             )}
             {isAuthor && (
               <SettingsRow
-                icon="👥"
+                icon="users"
                 label={t('settings.management.learners')}
                 subtitle={t('settings.management.learnersSubtitle')}
                 onPress={() => navigation.navigate('Learners')}
@@ -304,7 +285,7 @@ export function SettingsScreen() {
             )}
             {isAdmin && (
               <SettingsRow
-                icon="🛡️"
+                icon="lock"
                 label={t('settings.management.admin')}
                 subtitle={t('settings.management.adminSubtitle')}
                 onPress={() => navigation.navigate('Admin')}
@@ -316,7 +297,7 @@ export function SettingsScreen() {
         {(isAuthor || isAdmin) && !isManagementPlatform && (
           <SettingsSection title={t('settings.management.title')}>
             <SettingsRow
-              icon="🖥️"
+              icon="dashboard"
               label={t('settings.management.webOnly')}
               subtitle={t('settings.management.webOnlySubtitle')}
               isLast
@@ -327,7 +308,7 @@ export function SettingsScreen() {
         {/* Konto */}
         <SettingsSection title={t('settings.account.title')}>
           <SettingsRow
-            icon="🚪"
+            icon="logout"
             label={t('settings.account.logoutButton')}
             onPress={handleLogout}
             isLast
@@ -338,18 +319,12 @@ export function SettingsScreen() {
         {/* Über die App */}
         <SettingsSection title={t('settings.about.title')}>
           <SettingsRow
-            icon="📱"
+            icon="logo"
             label={t('settings.about.appName')}
             subtitle={t('settings.about.version', { version: '1.0.0' })}
             isLast
           />
         </SettingsSection>
-
-        <View style={[styles.devInfo, { backgroundColor: colors.accentSurface }]}>
-          <Text style={[styles.devInfoText, { color: colors.accent }]}>
-            🔧 AsyncStorage aktiv (Expo Go kompatibel)
-          </Text>
-        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -359,20 +334,11 @@ const styles = StyleSheet.create({
   safe: { flex: 1 },
   scrollContent: { padding: Spacing.lg, paddingBottom: Spacing.xxxl },
 
-  screenTitle: {
-    fontSize: FontSize.xxxl,
-    fontWeight: FontWeight.extrabold,
-    marginBottom: Spacing.lg,
-  },
-
   profileCard: {
-    borderRadius: Radius.xl,
-    padding: Spacing.lg,
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.md,
     marginBottom: Spacing.lg,
-    ...Shadow.sm,
   },
   profileAvatar: {
     width: 60,
@@ -381,34 +347,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  profileAvatarText: {
-    fontSize: FontSize.xxl,
-    fontWeight: FontWeight.bold,
-    color: '#FFFFFF',
-  },
-  profileName: { fontSize: FontSize.lg, fontWeight: FontWeight.bold },
-  profileEmail: { fontSize: FontSize.sm, marginBottom: 4 },
-  roleBadge: {
-    borderRadius: Radius.full,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 2,
-    alignSelf: 'flex-start',
-  },
-  roleBadgeText: { fontSize: FontSize.xs, fontWeight: FontWeight.medium },
+  profileMeta: { flex: 1 },
 
   section: { marginBottom: Spacing.lg },
   sectionLabel: {
-    fontSize: FontSize.xs,
-    fontWeight: FontWeight.bold,
     letterSpacing: 0.8,
     marginBottom: Spacing.xs,
     marginLeft: Spacing.sm,
   },
-  sectionCard: {
-    borderRadius: Radius.xl,
-    overflow: 'hidden',
-    ...Shadow.sm,
-  },
+  sectionCard: { overflow: 'hidden', ...Shadow.sm },
 
   row: {
     flexDirection: 'row',
@@ -424,11 +371,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  rowIconText: { fontSize: 18 },
   rowContent: { flex: 1 },
-  rowLabel: { fontSize: FontSize.md, fontWeight: FontWeight.medium },
-  rowSubtitle: { fontSize: FontSize.sm, marginTop: 2 },
-  rowArrow: { fontSize: 22 },
 
   langRadio: {
     width: 22,
@@ -439,12 +382,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   langRadioDot: { width: 11, height: 11, borderRadius: Radius.full },
-
-  devInfo: {
-    alignItems: 'center',
-    padding: Spacing.md,
-    borderRadius: Radius.md,
-    marginTop: Spacing.sm,
-  },
-  devInfoText: { fontSize: FontSize.xs, fontWeight: FontWeight.medium },
 });

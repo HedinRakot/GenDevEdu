@@ -6,9 +6,6 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -26,7 +23,8 @@ import {
   questionToDraft,
   type DraftQuestion,
 } from '@/components/author/QuestionEditor';
-import { FontSize, FontWeight, Radius, Spacing } from '@/config/theme';
+import { Spacing } from '@/config/theme';
+import { Button, Input, Typography } from '@/components/common';
 
 type NavProp = NativeStackNavigationProp<AuthorStackParamList, 'ChapterQuizEditor'>;
 type RoutePropType = RouteProp<AuthorStackParamList, 'ChapterQuizEditor'>;
@@ -74,7 +72,7 @@ export function ChapterQuizEditorScreen() {
       { questions: mapped, passThresholdPercent: pass, maxAttempts: attempts },
       {
         onSuccess: () => {
-          Alert.alert('✓', 'Abschlussquiz wurde gespeichert.');
+          Alert.alert('Gespeichert', 'Abschlussquiz wurde gespeichert.');
           navigation.goBack();
         },
         onError: () => Alert.alert('Fehler', 'Quiz konnte nicht gespeichert werden.'),
@@ -91,7 +89,7 @@ export function ChapterQuizEditorScreen() {
         onPress: () =>
           remove(undefined, {
             onSuccess: () => {
-              Alert.alert('✓', 'Quiz wurde gelöscht.');
+              Alert.alert('Gelöscht', 'Quiz wurde gelöscht.');
               navigation.goBack();
             },
             onError: () => Alert.alert('Fehler', 'Quiz konnte nicht gelöscht werden.'),
@@ -108,40 +106,31 @@ export function ChapterQuizEditorScreen() {
     );
   }
 
-  const numInput = [
-    styles.numInput,
-    { backgroundColor: colors.surface, color: colors.textPrimary, borderColor: colors.border },
-  ];
-
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['bottom']}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.form}>
-          <Text style={[styles.heading, { color: colors.textPrimary }]} numberOfLines={1}>
+          <Typography variant="h2" numberOfLines={1} style={{ marginBottom: Spacing.xs }}>
             Abschlussquiz · {chapterName}
-          </Text>
+          </Typography>
 
           <View style={styles.configRow}>
-            <View style={styles.configField}>
-              <Text style={[styles.label, { color: colors.textSecondary }]}>Bestehensgrenze (%)</Text>
-              <TextInput
-                style={numInput}
-                value={threshold}
-                onChangeText={setThreshold}
-                keyboardType="number-pad"
-                maxLength={3}
-              />
-            </View>
-            <View style={styles.configField}>
-              <Text style={[styles.label, { color: colors.textSecondary }]}>Max. Versuche (0 = ∞)</Text>
-              <TextInput
-                style={numInput}
-                value={maxAttempts}
-                onChangeText={setMaxAttempts}
-                keyboardType="number-pad"
-                maxLength={3}
-              />
-            </View>
+            <Input
+              containerStyle={{ flex: 1 }}
+              label="Bestehensgrenze (%)"
+              value={threshold}
+              onChangeText={setThreshold}
+              keyboardType="number-pad"
+              maxLength={3}
+            />
+            <Input
+              containerStyle={{ flex: 1 }}
+              label="Max. Versuche (0 = ∞)"
+              value={maxAttempts}
+              onChangeText={setMaxAttempts}
+              keyboardType="number-pad"
+              maxLength={3}
+            />
           </View>
 
           {questions.map((q, i) => (
@@ -155,29 +144,34 @@ export function ChapterQuizEditorScreen() {
             />
           ))}
 
-          <TouchableOpacity
-            style={[styles.addQButton, { borderColor: colors.primary }]}
+          <Button
+            title="Frage hinzufügen"
+            variant="secondary"
+            iconLeft="add"
+            fullWidth
             onPress={() => setQuestions((prev) => [...prev, emptyQuestion()])}
-          >
-            <Text style={[styles.addQText, { color: colors.primary }]}>+ Frage hinzufügen</Text>
-          </TouchableOpacity>
+          />
 
-          <TouchableOpacity
-            style={[styles.saveButton, { backgroundColor: colors.primary }]}
+          <Button
+            title={hasExisting ? 'Quiz ersetzen' : 'Quiz speichern'}
             onPress={onSave}
+            loading={isSaving}
             disabled={isSaving}
-          >
-            <Text style={styles.saveButtonText}>
-              {isSaving ? 'Wird gespeichert…' : hasExisting ? 'Quiz ersetzen' : 'Quiz speichern'}
-            </Text>
-          </TouchableOpacity>
+            fullWidth
+            style={{ marginTop: Spacing.md }}
+          />
 
           {hasExisting && (
-            <TouchableOpacity style={styles.deleteButton} onPress={onDelete} disabled={isDeleting}>
-              <Text style={[styles.deleteText, { color: colors.error }]}>
-                {isDeleting ? 'Wird gelöscht…' : 'Abschlussquiz löschen'}
-              </Text>
-            </TouchableOpacity>
+            <Button
+              title="Abschlussquiz löschen"
+              variant="destructive"
+              iconLeft="delete"
+              onPress={onDelete}
+              loading={isDeleting}
+              disabled={isDeleting}
+              fullWidth
+              style={{ marginTop: Spacing.sm }}
+            />
           )}
         </ScrollView>
       </KeyboardAvoidingView>
@@ -189,21 +183,5 @@ const styles = StyleSheet.create({
   safe: { flex: 1 },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   form: { padding: Spacing.lg, gap: Spacing.md },
-  heading: { fontSize: FontSize.xl, fontWeight: FontWeight.bold, marginBottom: Spacing.sm },
   configRow: { flexDirection: 'row', gap: Spacing.md },
-  configField: { flex: 1, gap: Spacing.xs },
-  label: { fontSize: FontSize.xs, fontWeight: FontWeight.medium },
-  numInput: { borderWidth: 1, borderRadius: Radius.md, padding: Spacing.sm, fontSize: FontSize.md },
-  addQButton: {
-    borderWidth: 1.5,
-    borderRadius: Radius.lg,
-    borderStyle: 'dashed',
-    padding: Spacing.md,
-    alignItems: 'center',
-  },
-  addQText: { fontSize: FontSize.md, fontWeight: FontWeight.semibold },
-  saveButton: { borderRadius: Radius.md, padding: Spacing.md, alignItems: 'center', marginTop: Spacing.md },
-  saveButtonText: { color: 'white', fontWeight: FontWeight.bold, fontSize: FontSize.md },
-  deleteButton: { padding: Spacing.md, alignItems: 'center' },
-  deleteText: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
 });

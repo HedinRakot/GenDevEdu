@@ -1,13 +1,5 @@
 import React, { useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -16,11 +8,20 @@ import { useTranslation } from 'react-i18next';
 import { useChapterQuiz, useSubmitChapterQuiz } from '@/hooks/useCourses';
 import { useTheme } from '@/context/ThemeContext';
 import { translate } from '@/utils/textUtils';
-import { QuestionPrompt } from '@/components/common/QuestionPrompt';
+import {
+  Badge,
+  Button,
+  Card,
+  Icon,
+  QuestionPrompt,
+  QuizOption,
+  Typography,
+  type QuizOptionState,
+} from '@/components/common';
 import { QuestionType } from '@/types/course';
 import type { Question, ChapterQuizResult } from '@/types/course';
 import type { CoursesStackParamList } from '@/navigation/CoursesStack';
-import { FontSize, FontWeight, Radius, Shadow, Spacing } from '@/config/theme';
+import { FontFamily, FontSize, Radius, Spacing } from '@/config/theme';
 
 type NavProp = NativeStackNavigationProp<CoursesStackParamList, 'ChapterQuiz'>;
 type RoutePropType = RouteProp<CoursesStackParamList, 'ChapterQuiz'>;
@@ -85,7 +86,10 @@ export function ChapterQuizScreen() {
   if (error || !quiz) {
     return (
       <SafeAreaView style={[styles.centered, { backgroundColor: colors.background }]}>
-        <Text style={[styles.muted, { color: colors.textSecondary }]}>{t('common.error')}</Text>
+        <Icon name="x-circle" size={40} color={colors.error} />
+        <Typography variant="body" color="secondary">
+          {t('common.error')}
+        </Typography>
       </SafeAreaView>
     );
   }
@@ -99,21 +103,30 @@ export function ChapterQuizScreen() {
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['bottom']}>
       <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={[styles.back, { color: colors.primary }]}>‹ {t('common.back')}</Text>
-        </TouchableOpacity>
-        <Text style={[styles.title, { color: colors.textPrimary }]} numberOfLines={1}>
+        <Button
+          title={t('common.back')}
+          variant="ghost"
+          size="sm"
+          iconLeft="arrow-left"
+          onPress={() => navigation.goBack()}
+        />
+        <Typography variant="h3" numberOfLines={1} style={styles.headerTitle}>
           {chapterName}
-        </Text>
+        </Typography>
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={[styles.meta, { color: colors.textSecondary }]}>
-          {t('chapterQuiz.passThreshold', { percent: quiz.passThresholdPercent })}
-          {quiz.maxAttempts > 0
-            ? `  ·  ${t('chapterQuiz.attemptsUsed', { used: quiz.attemptsUsed, max: quiz.maxAttempts })}`
-            : ''}
-        </Text>
+        <View style={styles.metaRow}>
+          <Typography variant="bodySm" color="secondary">
+            {t('chapterQuiz.passThreshold', { percent: quiz.passThresholdPercent })}
+          </Typography>
+          {quiz.maxAttempts > 0 && (
+            <Badge
+              tone="muted"
+              label={t('chapterQuiz.attemptsUsed', { used: quiz.attemptsUsed, max: quiz.maxAttempts })}
+            />
+          )}
+        </View>
 
         {/* Ergebnis-Banner */}
         {result && (
@@ -123,26 +136,32 @@ export function ChapterQuizScreen() {
               { backgroundColor: result.passed ? colors.successSurface : colors.errorSurface },
             ]}
           >
-            <Text
-              style={[styles.bannerTitle, { color: result.passed ? colors.success : colors.error }]}
-            >
-              {result.passed ? `✅ ${t('chapterQuiz.passed')}` : `❌ ${t('chapterQuiz.failed')}`}
-            </Text>
-            <Text style={[styles.bannerScore, { color: colors.textPrimary }]}>
-              {t('chapterQuiz.scoreOf', {
-                correct: result.correctCount,
-                total: result.totalCount,
-                percent: result.percent,
-              })}
-            </Text>
+            <Icon
+              name={result.passed ? 'check-circle' : 'x-circle'}
+              size={22}
+              color={result.passed ? colors.success : colors.error}
+            />
+            <View style={styles.bannerBody}>
+              <Typography variant="label" color={result.passed ? colors.success : colors.error}>
+                {result.passed ? t('chapterQuiz.passed') : t('chapterQuiz.failed')}
+              </Typography>
+              <Typography variant="bodySm" color="primary">
+                {t('chapterQuiz.scoreOf', {
+                  correct: result.correctCount,
+                  total: result.totalCount,
+                  percent: result.percent,
+                })}
+              </Typography>
+            </View>
           </View>
         )}
 
         {locked && (
           <View style={[styles.banner, { backgroundColor: colors.errorSurface }]}>
-            <Text style={[styles.bannerTitle, { color: colors.error }]}>
-              🔒 {t('chapterQuiz.noAttemptsLeft')}
-            </Text>
+            <Icon name="lock" size={20} color={colors.error} />
+            <Typography variant="label" color={colors.error}>
+              {t('chapterQuiz.noAttemptsLeft')}
+            </Typography>
           </View>
         )}
 
@@ -150,78 +169,68 @@ export function ChapterQuizScreen() {
           const sel = selected[q.elementId] ?? [];
           const isTrueFalse = q.questionType === QuestionType.TrueFalse;
           return (
-            <View
-              key={q.elementId}
-              style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}
-            >
+            <Card key={q.elementId}>
               <QuestionPrompt
                 text={translate(q.titel)}
                 textStyle={[styles.question, { color: colors.textPrimary }]}
                 containerStyle={styles.questionPrompt}
               />
-              <View style={[styles.answers, isTrueFalse && styles.tfRow]}>
+              <View style={styles.answers}>
                 {q.answers.map((a, idx) => {
                   const isSelected = sel.includes(a.id);
                   // Nach Abgabe sind a.isCorrect/comment aufgedeckt.
                   const showResult = !!result;
-                  let borderColor = colors.border;
-                  let bg = colors.surface;
+                  let state: QuizOptionState = 'default';
                   if (showResult) {
-                    if (a.isCorrect) {
-                      borderColor = colors.success;
-                      bg = colors.successSurface;
-                    } else if (isSelected) {
-                      borderColor = colors.error;
-                      bg = colors.errorSurface;
-                    }
+                    if (a.isCorrect) state = 'correct';
+                    else if (isSelected) state = 'incorrect';
                   } else if (isSelected) {
-                    borderColor = colors.primary;
-                    bg = colors.primarySurface;
+                    state = 'selected';
                   }
+                  const label = isTrueFalse
+                    ? t(idx === 0 ? 'quiz.true' : 'quiz.false')
+                    : translate(a.titel);
                   return (
-                    <View key={a.id} style={isTrueFalse && styles.tfCol}>
-                      <TouchableOpacity
-                        testID={isTrueFalse ? (idx === 0 ? 'cq-true' : 'cq-false') : undefined}
-                        style={[styles.answer, isTrueFalse && styles.tfButton, { borderColor, backgroundColor: bg }]}
+                    <View key={a.id} testID={isTrueFalse ? (idx === 0 ? 'cq-true' : 'cq-false') : undefined}>
+                      <QuizOption
+                        letter={String.fromCharCode(65 + idx)}
+                        label={label}
+                        state={state}
+                        disabled={!!result}
                         onPress={() => toggle(q, a.id)}
-                        activeOpacity={result ? 1 : 0.7}
-                      >
-                        <Text style={[styles.answerText, { color: colors.textPrimary }]}>
-                          {isTrueFalse ? t(idx === 0 ? 'quiz.true' : 'quiz.false') : translate(a.titel)}
-                        </Text>
-                        {showResult && a.isCorrect && (
-                          <Text style={{ color: colors.success, fontWeight: FontWeight.bold }}>✓</Text>
-                        )}
-                      </TouchableOpacity>
+                      />
                       {showResult && a.comment.length > 0 && (
-                        <Text style={[styles.comment, { color: colors.textSecondary }]}>{a.comment}</Text>
+                        <Typography variant="bodySm" color="secondary" style={styles.comment}>
+                          {a.comment}
+                        </Typography>
                       )}
                     </View>
                   );
                 })}
               </View>
-            </View>
+            </Card>
           );
         })}
 
         {!result && !locked && (
-          <TouchableOpacity
-            style={[styles.submit, { backgroundColor: colors.primary }, isPending && { opacity: 0.7 }]}
+          <Button
+            title={t('chapterQuiz.submit')}
+            variant="primary"
+            fullWidth
+            loading={isPending}
+            iconRight="arrow-right"
             onPress={onSubmit}
-            disabled={isPending}
-          >
-            {isPending ? (
-              <ActivityIndicator color="white" />
-            ) : (
-              <Text style={styles.submitText}>{t('chapterQuiz.submit')}</Text>
-            )}
-          </TouchableOpacity>
+          />
         )}
 
         {canRetry && (
-          <TouchableOpacity style={[styles.submit, { backgroundColor: colors.primary }]} onPress={retry}>
-            <Text style={styles.submitText}>{t('chapterQuiz.retry')}</Text>
-          </TouchableOpacity>
+          <Button
+            title={t('chapterQuiz.retry')}
+            variant="primary"
+            fullWidth
+            iconRight="arrow-right"
+            onPress={retry}
+          />
         )}
       </ScrollView>
     </SafeAreaView>
@@ -230,41 +239,32 @@ export function ChapterQuizScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  muted: { fontSize: FontSize.md },
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: Spacing.md },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     borderBottomWidth: 1,
-    gap: Spacing.md,
-  },
-  back: { fontSize: FontSize.md, fontWeight: FontWeight.medium },
-  title: { fontSize: FontSize.md, fontWeight: FontWeight.bold, flex: 1 },
-  content: { padding: Spacing.lg, gap: Spacing.md, paddingBottom: Spacing.xxxl },
-  meta: { fontSize: FontSize.sm },
-  banner: { borderRadius: Radius.lg, padding: Spacing.md, gap: Spacing.xs },
-  bannerTitle: { fontSize: FontSize.md, fontWeight: FontWeight.bold },
-  bannerScore: { fontSize: FontSize.sm },
-  card: { borderRadius: Radius.xl, padding: Spacing.lg, borderWidth: 1.5, ...Shadow.sm },
-  question: { fontSize: FontSize.md, fontWeight: FontWeight.bold, marginBottom: Spacing.md },
-  questionPrompt: { marginBottom: Spacing.sm },
-  answers: { gap: Spacing.sm },
-  tfRow: { flexDirection: 'row', gap: Spacing.md },
-  tfCol: { flex: 1 },
-  answer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: Spacing.md,
-    borderRadius: Radius.md,
-    borderWidth: 1.5,
     gap: Spacing.sm,
   },
-  tfButton: { justifyContent: 'center', paddingVertical: Spacing.lg },
-  answerText: { fontSize: FontSize.md },
-  comment: { fontSize: FontSize.sm, fontStyle: 'italic', paddingHorizontal: Spacing.md, paddingTop: Spacing.xs },
-  submit: { borderRadius: Radius.md, padding: Spacing.md, alignItems: 'center', marginTop: Spacing.sm },
-  submitText: { color: 'white', fontWeight: FontWeight.bold, fontSize: FontSize.md },
+  headerTitle: { flex: 1 },
+  content: { padding: Spacing.lg, gap: Spacing.md, paddingBottom: Spacing.xxxl },
+  metaRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, flexWrap: 'wrap' },
+  banner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    borderRadius: Radius.lg,
+    padding: Spacing.md,
+  },
+  bannerBody: { flex: 1, gap: 2 },
+  question: { fontFamily: FontFamily.serifSemibold, fontSize: FontSize.lg, marginBottom: Spacing.md },
+  questionPrompt: { marginBottom: Spacing.sm },
+  answers: { gap: Spacing.sm },
+  comment: {
+    fontStyle: 'italic',
+    paddingHorizontal: Spacing.md,
+    paddingTop: Spacing.xs,
+  },
 });
