@@ -362,9 +362,16 @@ function CodeQuestionCard({ question, onAnsweredCorrectly }: QuestionCardProps) 
       </TouchableOpacity>
 
       {result?.status === 'Error' && (
-        <Text style={[styles.feedbackText, { color: colors.error, marginTop: Spacing.md }]}>
-          ❌ {t('quiz.code.error')}
-        </Text>
+        <View style={{ marginTop: Spacing.md }}>
+          <Text style={[styles.feedbackText, { color: colors.error }]}>
+            ❌ {t('quiz.code.error')}
+          </Text>
+          {result.errorMessage ? (
+            <Text style={[styles.codeSummary, { color: colors.textSecondary }]}>
+              {result.errorMessage}
+            </Text>
+          ) : null}
+        </View>
       )}
 
       {result?.status === 'Completed' && (
