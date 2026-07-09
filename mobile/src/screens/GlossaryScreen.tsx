@@ -10,10 +10,10 @@ import { filterGlossary, GLOSSARY, type GlossaryEntry } from '@/data/glossary';
 import { FontSize, FontWeight, Radius, Shadow, Spacing } from '@/config/theme';
 
 const CATEGORY_BADGES: Record<GlossaryEntry['category'], string> = {
-  js: '🟡 JS',
-  ts: '🔷 TS',
-  rn: '⚛️ RN',
-  mongo: '🍃 Mongo',
+  csharp: '💜 C#',
+  oop: '🧩 OOP',
+  dotnet: '🔵 .NET',
+  tooling: '🛠️ Tooling',
   general: '🧠 General',
 };
 
@@ -69,7 +69,7 @@ export function GlossaryScreen() {
       </View>
 
       <View style={styles.chipRow}>
-        {(['all', 'js', 'ts', 'rn', 'mongo', 'general'] as const).map((cat) => {
+        {(['all', 'csharp', 'oop', 'dotnet', 'tooling', 'general'] as const).map((cat) => {
           const isActive = activeCategory === cat;
           return (
             <TouchableOpacity

@@ -7,18 +7,18 @@ describe('filterGlossary', () => {
   });
 
   it('matches term case-insensitively', () => {
-    const out = filterGlossary('CLOSURE');
-    expect(out.map((e) => e.id)).toContain('closure');
+    const out = filterGlossary('linq');
+    expect(out.map((e) => e.id)).toContain('linq');
   });
 
   it('matches keywords', () => {
-    const out = filterGlossary('async');
-    expect(out.map((e) => e.id)).toContain('promise');
+    const out = filterGlossary('asynchron');
+    expect(out.map((e) => e.id)).toContain('async-await');
   });
 
   it('matches against localized definitions', () => {
-    const out = filterGlossary('BSON');
-    expect(out.some((e) => e.id === 'mongo-document')).toBe(true);
+    const out = filterGlossary('reachable');
+    expect(out.some((e) => e.id === 'gc')).toBe(true);
   });
 
   it('returns empty array when nothing matches', () => {
