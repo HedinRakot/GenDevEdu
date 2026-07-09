@@ -23,6 +23,7 @@ import { DailyChallengeCard } from '@/components/widgets/DailyChallengeCard';
 import { useTheme } from '@/context/ThemeContext';
 import { useAuth } from '@/context/AuthContext';
 import { FontSize, FontWeight, Radius, Spacing, type Palette } from '@/config/theme';
+import { FEATURES } from '@/config/features';
 
 function StreakCard({
   currentStreak,
@@ -308,8 +309,12 @@ export function DashboardScreen() {
         <StatsSection />
         <View style={{ height: Spacing.lg }} />
 
-        <CertificatesSection />
-        <View style={{ height: Spacing.lg }} />
+        {FEATURES.certificates && (
+          <>
+            <CertificatesSection />
+            <View style={{ height: Spacing.lg }} />
+          </>
+        )}
 
         {/* Quick-Links */}
         <View style={styles.quickRow}>

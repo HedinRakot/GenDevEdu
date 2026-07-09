@@ -24,12 +24,14 @@ type RoutePropType = RouteProp<AuthorStackParamList, 'CourseEditor'>;
 
 function ChapterRow({
   chapter,
+  index,
   onPress,
   onQuiz,
   onDelete,
   deleting,
 }: {
   chapter: Chapter;
+  index: number;
   onPress: () => void;
   onQuiz: () => void;
   onDelete: () => void;
@@ -40,7 +42,7 @@ function ChapterRow({
     <View style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
       <TouchableOpacity style={styles.rowMain} onPress={onPress} activeOpacity={0.8}>
         <Text style={[styles.sortOrder, { color: colors.textSecondary }]}>
-          {String(chapter.sortOrder).padStart(2, '0')}
+          {String(index + 1).padStart(2, '0')}
         </Text>
         <Text style={[styles.rowTitle, { color: colors.textPrimary, flex: 1 }]}>
           {translate(chapter.titel) || chapter.name}
@@ -135,10 +137,11 @@ export function CourseEditorScreen() {
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.list}>
-          {(model?.chapters ?? []).map((ch) => (
+          {(model?.chapters ?? []).map((ch, index) => (
             <ChapterRow
               key={ch.elementId}
               chapter={ch}
+              index={index}
               deleting={isDeleting}
               onPress={() =>
                 navigation.navigate('AddChapterContent', {

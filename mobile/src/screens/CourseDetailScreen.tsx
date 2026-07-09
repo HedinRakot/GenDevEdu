@@ -23,7 +23,15 @@ import { FontSize, FontWeight, Radius, Shadow, Spacing } from '@/config/theme';
 type NavProp = NativeStackNavigationProp<CoursesStackParamList, 'CourseDetail'>;
 type RoutePropType = RouteProp<CoursesStackParamList, 'CourseDetail'>;
 
-function ChapterRow({ chapter, onPress }: { chapter: Chapter; onPress: () => void }) {
+function ChapterRow({
+  chapter,
+  index,
+  onPress,
+}: {
+  chapter: Chapter;
+  index: number;
+  onPress: () => void;
+}) {
   const { colors } = useTheme();
   const title = translate(chapter.titel);
   const isCompleted = chapter.completed;
@@ -56,7 +64,7 @@ function ChapterRow({ chapter, onPress }: { chapter: Chapter; onPress: () => voi
             { color: isCompleted ? colors.textInverted : colors.textSecondary },
           ]}
         >
-          {isCompleted ? '✓' : String(chapter.sortOrder)}
+          {isCompleted ? '✓' : String(index + 1)}
         </Text>
       </View>
       <View style={styles.chapterInfo}>
@@ -153,10 +161,11 @@ export function CourseDetailScreen() {
             📖 {t('courses.chapters')}
           </Text>
           <View style={styles.chapterList}>
-            {chapters.map((chapter) => (
+            {chapters.map((chapter, index) => (
               <View key={chapter.elementId} style={styles.chapterGroup}>
                 <ChapterRow
                   chapter={chapter}
+                  index={index}
                   onPress={() =>
                     navigation.navigate('Lesson', {
                       courseId,
