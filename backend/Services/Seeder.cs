@@ -152,7 +152,21 @@ public class Seeder
             CorrectAnswer = true,
         };
 
-        await _db.Questions.InsertManyAsync(new[] { single, multiple, trueFalse });
+        // ---- 1 chapter-scoped question (Kapitelquiz) ----
+        var chapterQuiz = new Question
+        {
+            CourseId = course.Id,
+            Scope = QuestionScope.Chapter,
+            ChapterId = chapter.Id,
+            Type = QuestionType.TrueFalse,
+            Prompt = "C# ist eine statisch typisierte Sprache.",
+            Explanation = "Richtig — Typen werden zur Kompilierzeit geprüft, nicht erst zur Laufzeit.",
+            Points = 1,
+            Difficulty = "Easy",
+            CorrectAnswer = true,
+        };
+
+        await _db.Questions.InsertManyAsync(new[] { single, multiple, trueFalse, chapterQuiz });
 
         _logger.LogInformation("Seeding complete. Demo course id: {CourseId}", course.Id);
     }

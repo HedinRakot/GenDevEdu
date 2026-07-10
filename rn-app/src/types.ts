@@ -127,15 +127,3 @@ export type AnswerPayload =
   | { selectedOptionId: string }
   | { selectedOptionIds: string[] }
   | { value: boolean };
-
-export interface CreateQuestionInput {
-  type: QuestionType;
-  prompt: string;
-  explanation?: string;
-  points: number;
-  difficulty: string;
-  options?: { id: string; text: string }[];
-  correctOptionId?: string;
-  correctOptionIds?: string[];
-  correctAnswer?: boolean;
-}

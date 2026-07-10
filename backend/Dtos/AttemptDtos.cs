@@ -17,3 +17,21 @@ public record AttemptResultDto(
     bool IsCorrect,
     int Score,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Explanation);
+
+// Chapter quiz submission
+public record QuizAnswerDto(string QuestionId, AnswerDto? Answer);
+public record SubmitChapterQuizRequest(List<QuizAnswerDto>? Answers);
+
+public record QuizAnswerResultDto(
+    string QuestionId,
+    bool IsCorrect,
+    int Score,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Explanation);
+
+public record ChapterQuizResultDto(
+    string ChapterId,
+    int EarnedPoints,
+    int TotalPoints,
+    int PassingThresholdPct,
+    bool Passed,
+    List<QuizAnswerResultDto> Results);

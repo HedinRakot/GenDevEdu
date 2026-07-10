@@ -45,9 +45,13 @@ public class EnrollmentService
     public async Task<List<ProgressDto>> GetProgressAsync(string userId)
     {
         var items = await _db.Progress.Find(p => p.UserId == userId).ToListAsync();
-        return items
-            .Select(p => new ProgressDto(p.CourseId, p.CompletedTopicIds, p.CompletedChapterIds))
-            .ToList();
+        return items.Select(p => new ProgressDto(
+            p.CourseId,
+            p.CompletedTopicIds,
+            p.CompletedChapterIds,
+            p.ChapterQuizResults.Select(r => new ChapterQuizSummaryDto(
+                r.ChapterId, r.EarnedPoints, r.TotalPoints, r.PassingThresholdPct, r.Passed)).ToList()
+        )).ToList();
     }
 
     public async Task<ServiceResult<ProgressDto>> CompleteTopicAsync(string topicId, string userId)
@@ -86,6 +90,8 @@ public class EnrollmentService
         await _db.Progress.ReplaceOneAsync(p => p.Id == progress.Id, progress);
 
         return ServiceResult<ProgressDto>.Ok(
-            new ProgressDto(progress.CourseId, progress.CompletedTopicIds, progress.CompletedChapterIds));
+            new ProgressDto(progress.CourseId, progress.CompletedTopicIds, progress.CompletedChapterIds,
+                progress.ChapterQuizResults.Select(r =>
+                    new ChapterQuizSummaryDto(r.ChapterId, r.EarnedPoints, r.TotalPoints, r.PassingThresholdPct, r.Passed)).ToList()));
     }
 }

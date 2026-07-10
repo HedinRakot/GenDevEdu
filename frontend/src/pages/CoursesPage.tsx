@@ -1,51 +1,31 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { api, ApiError } from "../api";
+import { ApiError } from "../api";
 import { getUser, isAuthor } from "../auth";
-import type { CourseSummary } from "../types";
+import { useCourseList } from "../hooks/useCourseList";
 
 export default function CoursesPage() {
   const navigate = useNavigate();
   const user = getUser();
   const author = isAuthor(user);
+  const { courses, loading, error, createCourse } = useCourseList();
 
-  const [courses, setCourses] = useState<CourseSummary[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Author create-course form state
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [level, setLevel] = useState("");
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
-
-  async function loadCourses() {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await api.listCourses();
-      setCourses(data);
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Fehler beim Laden.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    loadCourses();
-  }, []);
 
   async function handleCreate(e: FormEvent) {
     e.preventDefault();
     setCreating(true);
     setCreateError(null);
     try {
-      const created = await api.createCourse({ title, description });
-      await api.publishCourse(created.id);
+      const created = await createCourse({ title, description, level: level || undefined });
       setTitle("");
       setDescription("");
-      await loadCourses();
+      setLevel("");
+      navigate(`/courses/${created.id}/edit`);
     } catch (err) {
       setCreateError(
         err instanceof ApiError ? err.message : "Kurs konnte nicht angelegt werden.",
@@ -64,7 +44,7 @@ export default function CoursesPage() {
           <h2 className="mb-3 text-lg font-semibold">Kurs anlegen</h2>
           <form onSubmit={handleCreate} className="space-y-3">
             <div>
-              <label className="block text-sm font-medium mb-1">Titel</label>
+              <label className="mb-1 block text-sm font-medium">Titel</label>
               <input
                 data-testid="create-course-title"
                 type="text"
@@ -75,9 +55,7 @@ export default function CoursesPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">
-                Beschreibung
-              </label>
+              <label className="mb-1 block text-sm font-medium">Beschreibung</label>
               <textarea
                 data-testid="create-course-description"
                 value={description}
@@ -86,9 +64,21 @@ export default function CoursesPage() {
                 rows={2}
               />
             </div>
-            {createError && (
-              <p className="text-sm text-red-600">{createError}</p>
-            )}
+            <div>
+              <label className="mb-1 block text-sm font-medium">Level</label>
+              <select
+                data-testid="create-course-level"
+                value={level}
+                onChange={(e) => setLevel(e.target.value)}
+                className="w-full rounded border border-gray-300 bg-white px-3 py-2"
+              >
+                <option value="">-- Bitte wählen --</option>
+                <option value="Anfänger">Anfänger</option>
+                <option value="Fortgeschrittener">Fortgeschrittener</option>
+                <option value="Profi">Profi</option>
+              </select>
+            </div>
+            {createError && <p className="text-sm text-red-600">{createError}</p>}
             <button
               data-testid="create-course-submit"
               type="submit"
@@ -127,14 +117,21 @@ export default function CoursesPage() {
             )}
             <div className="mt-2 flex gap-2 text-xs text-gray-500">
               {course.level && (
-                <span className="rounded bg-gray-100 px-2 py-0.5">
-                  {course.level}
-                </span>
+                <span className="rounded bg-gray-100 px-2 py-0.5">{course.level}</span>
               )}
               {course.status && (
-                <span className="rounded bg-gray-100 px-2 py-0.5">
-                  {course.status}
-                </span>
+                <span className="rounded bg-gray-100 px-2 py-0.5">{course.status}</span>
+              )}
+              {author && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/courses/${course.id}/edit`);
+                  }}
+                  className="ml-auto rounded bg-indigo-50 px-2 py-0.5 text-indigo-700 hover:bg-indigo-100"
+                >
+                  Bearbeiten
+                </button>
               )}
             </div>
           </div>

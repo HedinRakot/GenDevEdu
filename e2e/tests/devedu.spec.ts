@@ -61,8 +61,11 @@ test('Learner kann einen Kurs öffnen, Beispiel sehen und Fragen beantworten', a
     await expect(q.getByTestId('answer-feedback')).toBeVisible();
   }
 
-  // Mark the topic complete.
-  await page.getByTestId('mark-complete').click();
+  // Mark the topic complete (idempotent: button is disabled if progress already persisted from a prior run).
+  const markBtn = page.getByTestId('mark-complete');
+  if (await markBtn.isEnabled()) {
+    await markBtn.click();
+  }
   await expect(page.getByTestId('topic-completed')).toBeVisible();
 });
 
@@ -77,6 +80,31 @@ test('Neuer Learner kann sich registrieren', async ({ page }) => {
 
   await expect(page).toHaveURL(/\/courses$/);
   await expect(page.getByTestId('user-displayname')).toBeVisible();
+});
+
+test('Learner kann das Kapitelquiz absolvieren und erhält ein Ergebnis', async ({ page }) => {
+  await login(page, LEARNER.email, LEARNER.password);
+  await openDemoCourse(page);
+
+  // Navigate to the chapter quiz via the sidebar nav item.
+  const quizNav = page.getByTestId('chapter-quiz-nav-item').first();
+  await expect(quizNav).toBeVisible();
+  await quizNav.click();
+
+  // A TrueFalse question is in the seeded chapter quiz.
+  const trueBtn = page.locator('input[type="radio"]').filter({ hasText: '' }).first();
+  // Pick "Wahr" (first radio in the form)
+  await page.locator('form').locator('input[type="radio"]').first().check();
+
+  // Submit the quiz.
+  await page.getByRole('button', { name: /Quiz einreichen/ }).click();
+
+  // Score summary must appear.
+  await expect(page.locator('text=/\\d+ \\/ \\d+ Punkte/')).toBeVisible();
+  // Pass or fail badge must appear.
+  await expect(
+    page.locator('[class*="bg-emerald"],[class*="bg-red"]').filter({ hasText: /Bestanden|Nicht bestanden/ }).first()
+  ).toBeVisible();
 });
 
 test('Autor kann einen Kurs anlegen und er erscheint in der Liste', async ({ page }) => {

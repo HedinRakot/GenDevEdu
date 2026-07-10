@@ -3,20 +3,15 @@ import type {
   AnswerPayload,
   AttemptResult,
   AuthResponse,
-  Chapter,
   ChapterQuizResult,
-  ContentBlock,
   CourseDetail,
   CourseSummary,
-  CreateQuestionInput,
-  Example,
   Progress,
-  Question,
   Role,
-  Topic,
 } from "./types";
 
-const BASE_URL = import.meta.env.VITE_API_URL || "/api";
+// Point to your backend. In development, set this to the local/cluster address.
+const BASE_URL = "http://localhost:8080/api";
 
 let _onUnauthorized: (() => void) | null = null;
 
@@ -127,22 +122,6 @@ export const api = {
     return request<CourseDetail>(`/courses/${id}`);
   },
 
-  createCourse(input: {
-    title: string;
-    description: string;
-    tags?: string[];
-    level?: string;
-  }): Promise<CourseSummary> {
-    return request<CourseSummary>("/courses", {
-      method: "POST",
-      body: input,
-    });
-  },
-
-  publishCourse(id: string): Promise<void> {
-    return request<void>(`/courses/${id}/publish`, { method: "POST" });
-  },
-
   enroll(courseId: string): Promise<unknown> {
     return request<unknown>("/enrollments", {
       method: "POST",
@@ -175,49 +154,6 @@ export const api = {
     return request<ChapterQuizResult>(`/chapters/${chapterId}/quiz/submit`, {
       method: "POST",
       body: { answers },
-    });
-  },
-
-  addChapter(courseId: string, input: { title: string; description?: string }): Promise<Chapter> {
-    return request<Chapter>(`/courses/${courseId}/chapters`, {
-      method: "POST",
-      body: { title: input.title, description: input.description ?? "", order: 0 },
-    });
-  },
-
-  addTopic(chapterId: string, input: { title: string }): Promise<Topic> {
-    return request<Topic>(`/chapters/${chapterId}/topics`, {
-      method: "POST",
-      body: { title: input.title, order: 0 },
-    });
-  },
-
-  addExample(
-    topicId: string,
-    input: { title: string; contentBlocks: ContentBlock[]; language?: string },
-  ): Promise<Example> {
-    return request<Example>(`/topics/${topicId}/examples`, {
-      method: "POST",
-      body: {
-        title: input.title,
-        contentBlocks: input.contentBlocks,
-        language: input.language,
-        order: 0,
-      },
-    });
-  },
-
-  addTopicQuestion(topicId: string, input: CreateQuestionInput): Promise<Question> {
-    return request<Question>(`/topics/${topicId}/questions`, {
-      method: "POST",
-      body: { ...input, scope: "Topic" },
-    });
-  },
-
-  addChapterQuestion(chapterId: string, input: CreateQuestionInput): Promise<Question> {
-    return request<Question>(`/chapters/${chapterId}/questions`, {
-      method: "POST",
-      body: { ...input, scope: "Chapter" },
     });
   },
 };

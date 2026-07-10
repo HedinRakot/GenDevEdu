@@ -26,7 +26,18 @@ public class Progress
     public string CourseId { get; set; } = string.Empty;
     public List<string> CompletedTopicIds { get; set; } = new();
     public List<string> CompletedChapterIds { get; set; } = new();
+    public List<ChapterQuizResult> ChapterQuizResults { get; set; } = new();
     public DateTime LastVisited { get; set; } = DateTime.UtcNow;
+}
+
+public class ChapterQuizResult
+{
+    public string ChapterId { get; set; } = string.Empty;
+    public int EarnedPoints { get; set; }
+    public int TotalPoints { get; set; }
+    public int PassingThresholdPct { get; set; }
+    public bool Passed { get; set; }
+    public DateTime AttemptedAt { get; set; } = DateTime.UtcNow;
 }
 
 public class RefreshToken

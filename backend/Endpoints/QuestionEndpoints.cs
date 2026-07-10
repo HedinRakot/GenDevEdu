@@ -26,5 +26,11 @@ public static class QuestionEndpoints
             async (string id, AttemptRequest req, ClaimsPrincipal user, QuestionService svc) =>
                 (await svc.GradeAttemptAsync(id, req, user.UserId())).ToHttp())
             .RequireAuthorization();
+
+        // ---- learner: submit chapter quiz ----
+        app.MapPost("/api/chapters/{id}/quiz/submit",
+            async (string id, SubmitChapterQuizRequest req, ClaimsPrincipal user, QuestionService svc) =>
+                (await svc.SubmitChapterQuizAsync(id, req, user.UserId())).ToHttp())
+            .RequireAuthorization();
     }
 }

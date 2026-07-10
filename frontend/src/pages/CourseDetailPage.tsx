@@ -1,102 +1,63 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { api, ApiError } from "../api";
+import ChapterQuizView from "../components/ChapterQuizView";
 import ExampleView from "../components/ExampleView";
 import QuestionItem from "../components/QuestionItem";
-import type { CourseDetail, Topic } from "../types";
+import { useCourseDetail } from "../hooks/useCourseDetail";
+import type { Topic } from "../types";
+
+type ActiveView =
+  | { kind: "topic"; topicId: string }
+  | { kind: "chapterQuiz"; chapterId: string };
 
 export default function CourseDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const {
+    course,
+    loading,
+    error,
+    completedTopics,
+    chapterQuizResults,
+    enrolling,
+    enrollMessage,
+    completing,
+    enroll,
+    completeTopic,
+    onQuizComplete,
+  } = useCourseDetail(id);
 
-  const [course, setCourse] = useState<CourseDetail | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
-
-  const [enrollMessage, setEnrollMessage] = useState<string | null>(null);
-  const [enrolling, setEnrolling] = useState(false);
-
-  const [completedTopics, setCompletedTopics] = useState<Set<string>>(
-    new Set(),
-  );
-  const [completing, setCompleting] = useState(false);
+  const [activeView, setActiveView] = useState<ActiveView | null>(null);
+  const initializedIdRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
-    if (!id) return;
-    let active = true;
-    setLoading(true);
-    setError(null);
-    api
-      .getCourse(id)
-      .then((data) => {
-        if (!active) return;
-        setCourse(data);
-        const firstTopic = data.chapters
-          .flatMap((c) => c.topics)
-          .sort((a, b) => a.order - b.order)[0];
-        setSelectedTopicId(firstTopic ? firstTopic.id : null);
-      })
-      .catch((err) => {
-        if (!active) return;
-        setError(err instanceof ApiError ? err.message : "Fehler beim Laden.");
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [id]);
+    if (!course || initializedIdRef.current === id) return;
+    initializedIdRef.current = id;
+    const firstTopic = course.chapters
+      .flatMap((c) => c.topics)
+      .sort((a, b) => a.order - b.order)[0];
+    setActiveView(firstTopic ? { kind: "topic", topicId: firstTopic.id } : null);
+  }, [course, id]);
 
   const topics: Topic[] = useMemo(() => {
     if (!course) return [];
-    return course.chapters
-      .flatMap((c) => c.topics)
-      .sort((a, b) => a.order - b.order);
+    return course.chapters.flatMap((c) => c.topics).sort((a, b) => a.order - b.order);
   }, [course]);
 
-  const selectedTopic = useMemo(
-    () => topics.find((t) => t.id === selectedTopicId) ?? null,
-    [topics, selectedTopicId],
-  );
-
-  async function handleEnroll() {
-    if (!course) return;
-    setEnrolling(true);
-    setEnrollMessage(null);
-    try {
-      await api.enroll(course.id);
-      setEnrollMessage("Erfolgreich eingeschrieben.");
-    } catch (err) {
-      setEnrollMessage(
-        err instanceof ApiError ? err.message : "Einschreiben fehlgeschlagen.",
-      );
-    } finally {
-      setEnrolling(false);
-    }
-  }
-
-  async function handleMarkComplete() {
-    if (!selectedTopic) return;
-    setCompleting(true);
-    try {
-      await api.completeTopic(selectedTopic.id);
-      setCompletedTopics((prev) => new Set(prev).add(selectedTopic.id));
-    } catch {
-      /* leave badge unset on failure */
-    } finally {
-      setCompleting(false);
-    }
-  }
+  const selectedTopic = useMemo(() => {
+    if (!activeView || activeView.kind !== "topic") return null;
+    return topics.find((t) => t.id === activeView.topicId) ?? null;
+  }, [topics, activeView]);
 
   if (loading) return <p>Lade Kurs…</p>;
   if (error) return <p className="text-red-600">{error}</p>;
   if (!course) return <p>Kurs nicht gefunden.</p>;
 
-  const topicCompleted = selectedTopic
-    ? completedTopics.has(selectedTopic.id)
-    : false;
+  const topicCompleted = selectedTopic ? completedTopics.has(selectedTopic.id) : false;
+  const activeChapterQuizId =
+    activeView?.kind === "chapterQuiz" ? activeView.chapterId : null;
+  const activeChapter = activeChapterQuizId
+    ? (course.chapters.find((c) => c.id === activeChapterQuizId) ?? null)
+    : null;
 
   return (
     <div>
@@ -109,7 +70,7 @@ export default function CourseDetailPage() {
         </div>
         <button
           data-testid="enroll-button"
-          onClick={handleEnroll}
+          onClick={enroll}
           disabled={enrolling}
           className="shrink-0 rounded bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700 disabled:opacity-50"
         >
@@ -121,42 +82,80 @@ export default function CourseDetailPage() {
       )}
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-[220px_1fr]">
-        <aside className="space-y-1">
-          <h2 className="mb-2 text-sm font-semibold uppercase text-gray-500">
-            Themen
-          </h2>
-          {topics.length === 0 && (
-            <p className="text-sm text-gray-500">Keine Themen.</p>
+        <aside className="space-y-3">
+          {course.chapters.length === 0 && (
+            <p className="text-sm text-gray-500">Keine Kapitel.</p>
           )}
-          {topics.map((topic) => (
-            <button
-              key={topic.id}
-              data-testid="topic-nav-item"
-              onClick={() => setSelectedTopicId(topic.id)}
-              className={`block w-full rounded px-3 py-2 text-left text-sm ${
-                topic.id === selectedTopicId
-                  ? "bg-indigo-100 font-medium text-indigo-800"
-                  : "hover:bg-gray-100"
-              }`}
-            >
-              {topic.title}
-              {completedTopics.has(topic.id) && (
-                <span className="ml-1 text-emerald-600">✓</span>
-              )}
-            </button>
-          ))}
+          {course.chapters
+            .slice()
+            .sort((a, b) => a.order - b.order)
+            .map((chapter) => (
+              <div key={chapter.id}>
+                <p className="mb-1 px-1 text-xs font-semibold uppercase text-gray-400">
+                  {chapter.title}
+                </p>
+                {chapter.topics
+                  .slice()
+                  .sort((a, b) => a.order - b.order)
+                  .map((topic) => (
+                    <button
+                      key={topic.id}
+                      data-testid="topic-nav-item"
+                      onClick={() => setActiveView({ kind: "topic", topicId: topic.id })}
+                      className={`block w-full rounded px-3 py-2 text-left text-sm ${
+                        activeView?.kind === "topic" && activeView.topicId === topic.id
+                          ? "bg-indigo-100 font-medium text-indigo-800"
+                          : "hover:bg-gray-100"
+                      }`}
+                    >
+                      {topic.title}
+                      {completedTopics.has(topic.id) && (
+                        <span className="ml-1 text-emerald-600">✓</span>
+                      )}
+                    </button>
+                  ))}
+                {chapter.questions.length > 0 && (
+                  <button
+                    data-testid="chapter-quiz-nav-item"
+                    onClick={() =>
+                      setActiveView({ kind: "chapterQuiz", chapterId: chapter.id })
+                    }
+                    className={`mt-1 block w-full rounded px-3 py-2 text-left text-sm ${
+                      activeView?.kind === "chapterQuiz" &&
+                      activeView.chapterId === chapter.id
+                        ? "bg-indigo-100 font-medium text-indigo-800"
+                        : "hover:bg-gray-100"
+                    }`}
+                  >
+                    Kapitelquiz
+                    {chapterQuizResults.find((r) => r.chapterId === chapter.id)?.passed && (
+                      <span className="ml-1 text-emerald-600">✓</span>
+                    )}
+                  </button>
+                )}
+              </div>
+            ))}
         </aside>
 
         <section>
-          {!selectedTopic && (
-            <p className="text-gray-500">Bitte ein Thema auswählen.</p>
+          {!activeView && <p className="text-gray-500">Bitte ein Thema auswählen.</p>}
+
+          {activeView?.kind === "chapterQuiz" && activeChapter && (
+            <ChapterQuizView
+              chapterId={activeChapter.id}
+              chapterTitle={activeChapter.title}
+              questions={activeChapter.questions}
+              previousResult={chapterQuizResults.find(
+                (r) => r.chapterId === activeChapter.id,
+              )}
+              onComplete={onQuizComplete}
+            />
           )}
-          {selectedTopic && (
+
+          {activeView?.kind === "topic" && selectedTopic && (
             <div className="space-y-6">
               <div className="flex items-center justify-between gap-4">
-                <h2 className="text-xl font-semibold">
-                  {selectedTopic.title}
-                </h2>
+                <h2 className="text-xl font-semibold">{selectedTopic.title}</h2>
                 <div className="flex items-center gap-3">
                   {topicCompleted && (
                     <span
@@ -168,7 +167,7 @@ export default function CourseDetailPage() {
                   )}
                   <button
                     data-testid="mark-complete"
-                    onClick={handleMarkComplete}
+                    onClick={() => completeTopic(selectedTopic.id)}
                     disabled={completing || topicCompleted}
                     className="rounded bg-emerald-600 px-3 py-1.5 text-sm text-white hover:bg-emerald-700 disabled:opacity-50"
                   >
