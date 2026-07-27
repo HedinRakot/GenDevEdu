@@ -515,7 +515,7 @@ function ContentItem({
         <View style={styles.lessonHeader}>
           <View style={styles.lessonTitleBlock}>
             <Typography variant="caption" color="accent" style={styles.eyebrow}>
-              {t('snippets.lesson')}
+              {t('snippets.source.lesson')}
             </Typography>
             <Typography variant="h2" color={colors.textPrimary}>
               {title}

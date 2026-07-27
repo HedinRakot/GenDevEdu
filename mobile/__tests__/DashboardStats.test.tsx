@@ -1,13 +1,16 @@
 import React from 'react';
-import { render, waitFor } from '@testing-library/react-native';
+import { render } from '@testing-library/react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import '@/i18n';
 
 jest.mock('@/api/courses', () => ({ getStats: jest.fn() }));
+jest.mock('@react-navigation/native', () => ({
+  useNavigation: () => ({ navigate: jest.fn(), goBack: jest.fn() }),
+}));
 
 import { ThemeProvider } from '@/context/ThemeContext';
-import { StatsSection } from '@/screens/DashboardScreen';
+import { StatsSection, ContinueLearningSection } from '@/screens/DashboardScreen';
 import type { LearnerStats } from '@/types/learner';
 import { getStats } from '@/api/courses';
 
@@ -33,7 +36,7 @@ function stats(overrides: Partial<LearnerStats> = {}): LearnerStats {
         completedContent: 1,
         totalContent: 2,
         chaptersPassed: 0,
-        totalChapters: 1,
+        totalChapters: 4,
         completed: false,
       },
     ],
@@ -41,13 +44,11 @@ function stats(overrides: Partial<LearnerStats> = {}): LearnerStats {
   };
 }
 
-function renderSection() {
+function renderSection(node: React.ReactElement) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={qc}>
-      <ThemeProvider>
-        <StatsSection />
-      </ThemeProvider>
+      <ThemeProvider>{node}</ThemeProvider>
     </QueryClientProvider>,
   );
 }
@@ -55,17 +56,27 @@ function renderSection() {
 beforeEach(() => jest.clearAllMocks());
 
 describe('StatsSection', () => {
-  it('renders the metric tiles and per-course progress', async () => {
+  it('renders the summary metrics', async () => {
     mockedStats.mockResolvedValue(stats());
-    const { getByText, findByText } = renderSection();
+    const { findByText, getByText } = renderSection(<StatsSection />);
 
-    expect(await findByText('60%')).toBeTruthy();        // Quiz-Trefferquote
-    expect(getByText('1/2')).toBeTruthy();               // Kapitel-Quizze passed/taken
-    expect(getByText('1/3')).toBeTruthy();               // Code solved/attempted
-    expect(getByText('C# Grundlagen')).toBeTruthy();     // Kurs-Fortschritt
+    expect(await findByText('60%')).toBeTruthy(); // Quiz-Trefferquote
+    expect(getByText('50%')).toBeTruthy(); // Gesamtfortschritt
+    expect(getByText('1')).toBeTruthy(); // Laufende Kurse
+    expect(getByText('2')).toBeTruthy(); // Abgeschlossen
+  });
+});
+
+describe('ContinueLearningSection', () => {
+  it('lists in-progress courses with their progress', async () => {
+    mockedStats.mockResolvedValue(stats());
+    const { findByText, getByText } = renderSection(<ContinueLearningSection />);
+
+    expect(await findByText('C# Grundlagen')).toBeTruthy();
+    expect(getByText('50%')).toBeTruthy();
   });
 
-  it('marks a completed course as done', async () => {
+  it('hides completed courses and shows an empty hint', async () => {
     mockedStats.mockResolvedValue(
       stats({
         courses: [
@@ -82,17 +93,8 @@ describe('StatsSection', () => {
         ],
       }),
     );
-    const { findByText, getByText } = renderSection();
+    const { findByText } = renderSection(<ContinueLearningSection />);
 
-    await findByText('Algorithmen');
-    // Status-Badge des abgeschlossenen Kurses (Kursname kollidiert nun nicht mit dem Regex).
-    expect(getByText(/fertig|done|готово/i)).toBeTruthy();
-  });
-
-  it('shows an empty hint when there are no courses', async () => {
-    mockedStats.mockResolvedValue(stats({ courses: [] }));
-    const { findByText } = renderSection();
-
-    await findByText(/noch keine aktivität|no activity yet|пока нет активности/i);
+    await findByText(/hier weiterzumachen|continue here|продолжить здесь/i);
   });
 });

@@ -139,8 +139,18 @@
       "days": "{{count}} день",
       "days_plural": "{{count}} дней",
       "longest": "Рекорд: {{count}} дней",
+      "daysInARow": "дней подряд",
+      "personalRecord": "Личный рекорд: {{count}} день",
+      "personalRecord_plural": "Личный рекорд: {{count}} дней",
+      "weekdaysShort": ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"],
       "keepGoing": "Молодец! Так держать!",
       "startStreak": "Начни серию сегодня!"
+    },
+    "continue": {
+      "title": "Продолжить обучение",
+      "allCourses": "Все курсы",
+      "chapterOf": "Глава {{current}} из {{total}}",
+      "empty": "Начните курс, чтобы продолжить здесь."
     },
     "progress": {
       "title": "Общий прогресс",
@@ -155,6 +165,7 @@
       "title": "Статистика",
       "activeCourses": "Активные курсы",
       "completedCourses": "Завершено",
+      "overallProgress": "Общий прогресс",
       "accuracy": "Точность тестов",
       "quizzesPassed": "Тесты глав",
       "codeSolved": "Код решено",

@@ -152,8 +152,18 @@
       "days": "{{count}} day",
       "days_plural": "{{count}} days",
       "longest": "Record: {{count}} days",
+      "daysInARow": "days in a row",
+      "personalRecord": "Personal record: {{count}} day",
+      "personalRecord_plural": "Personal record: {{count}} days",
+      "weekdaysShort": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
       "keepGoing": "Keep going! You're doing great.",
       "startStreak": "Start your streak today!"
+    },
+    "continue": {
+      "title": "Continue learning",
+      "allCourses": "All courses",
+      "chapterOf": "Chapter {{current}} of {{total}}",
+      "empty": "Start a course to continue here."
     },
     "progress": {
       "title": "Overall Progress",
@@ -168,6 +178,7 @@
       "title": "Statistics",
       "activeCourses": "Active courses",
       "completedCourses": "Completed",
+      "overallProgress": "Overall progress",
       "accuracy": "Quiz accuracy",
       "quizzesPassed": "Chapter quizzes",
       "codeSolved": "Code solved",

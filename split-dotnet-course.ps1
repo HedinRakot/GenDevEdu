@@ -109,9 +109,9 @@ function courseDoc(id, name, de, en, ru, chs) {
 }
 
 const c1 = courseDoc(P1, ".NET Grundlagen",
-  ".NET Grundlagen (Kapitel 1–6)", ".NET Fundamentals (Chapters 1–6)", ".NET Основы (главы 1–6)", part1);
+  ".NET Grundlagen", ".NET Fundamentals", ".NET Основы", part1);
 const c2 = courseDoc(P2, ".NET Aufbau",
-  ".NET Aufbau (Kapitel 7–12)", ".NET Advanced (Chapters 7–12)", ".NET Продвинутый (главы 7–12)", part2);
+  ".NET Aufbau", ".NET Advanced", ".NET Продвинутый", part2);
 
 const c1Contents = part1.reduce(function (s, ch) { return s + (ch.ChapterContent || []).length; }, 0);
 const c2Contents = part2.reduce(function (s, ch) { return s + (ch.ChapterContent || []).length; }, 0);

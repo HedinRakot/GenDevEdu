@@ -14,8 +14,8 @@ import { useNavigation } from '@react-navigation/native';
 
 import { useStreak } from '@/hooks/useStreak';
 import { useNotes } from '@/hooks/useNotes';
-import { useProgress, useStats, useCertificates } from '@/hooks/useCourses';
-import { Badge, Button, Card, Icon, Input, ProgressBar, Typography } from '@/components/common';
+import { useStats, useCertificates } from '@/hooks/useCourses';
+import { Button, Card, Icon, Input, ProgressBar, Typography } from '@/components/common';
 import { DailyChallengeCard } from '@/components/widgets/DailyChallengeCard';
 import { useTheme } from '@/context/ThemeContext';
 import { useAuth } from '@/context/AuthContext';
@@ -33,94 +33,152 @@ function StreakCard({
 }) {
   const { t } = useTranslation();
   const { colors } = useTheme();
-  return (
-    <Card>
-      <View style={styles.streakHeader}>
-        <Icon name="streak" size={28} color={colors.accent} />
-        <View style={{ flex: 1 }}>
-          <Typography variant="h3">{t('dashboard.streak.title')}</Typography>
-          <Typography variant="bodySm" color="secondary">
-            {currentStreak > 0 ? t('dashboard.streak.keepGoing') : t('dashboard.streak.startStreak')}
-          </Typography>
-        </View>
-      </View>
-      <View style={styles.streakStats}>
-        <View style={styles.statBox}>
-          {isLoading ? (
-            <ActivityIndicator size="small" color={colors.primary} />
-          ) : (
-            <Typography color={colors.primary} style={styles.statValue}>
-              {currentStreak}
-            </Typography>
-          )}
-          <Typography variant="caption" color="tertiary" style={styles.statLabel}>
-            {t('dashboard.streak.current')}
-          </Typography>
-        </View>
-        <View style={[styles.divider, { backgroundColor: colors.borderLight }]} />
-        <View style={styles.statBox}>
-          {isLoading ? (
-            <ActivityIndicator size="small" color={colors.textSecondary} />
-          ) : (
-            <Typography color="primary" style={styles.statValue}>
-              {longestStreak}
-            </Typography>
-          )}
-          <Typography variant="caption" color="tertiary" style={styles.statLabel}>
-            {t('dashboard.streak.best')}
-          </Typography>
-        </View>
-      </View>
-    </Card>
-  );
-}
 
-function ProgressCard() {
-  const { t } = useTranslation();
-  const { colors } = useTheme();
-  const { data: progress, isLoading } = useProgress();
-
-  const enrolledCourses = progress?.length ?? 0;
-  const completedItems =
-    progress?.reduce((sum, p) => sum + p.completedChapterContentIds.length, 0) ?? 0;
+  // Wochentags-Punkte (Mo–So): ein Tag gilt als "erledigt", wenn er nicht in der
+  // Zukunft liegt und innerhalb der aktuellen Streak-Länge bis heute zurückreicht.
+  const weekdays = t('dashboard.streak.weekdaysShort', { returnObjects: true }) as string[];
+  const todayIndex = (new Date().getDay() + 6) % 7; // 0 = Montag … 6 = Sonntag
+  const isFilled = (i: number) => i <= todayIndex && todayIndex - i < currentStreak;
 
   return (
     <Card>
-      <Typography variant="h3">{t('dashboard.progress.title')}</Typography>
+      <Typography variant="caption" color="tertiary" style={styles.eyebrow}>
+        {t('dashboard.streak.title')}
+      </Typography>
       {isLoading ? (
         <ActivityIndicator size="small" color={colors.primary} style={{ marginTop: Spacing.sm }} />
-      ) : enrolledCourses === 0 ? (
-        <Typography variant="bodySm" color="secondary" style={{ marginTop: Spacing.xs }}>
-          {t('dashboard.progress.empty')}
-        </Typography>
       ) : (
         <>
-          <View style={styles.progressRow}>
-            <Typography color={colors.primary} style={styles.progressText}>
-              {completedItems}
+          <View style={styles.streakValueRow}>
+            <Typography color={colors.primary} style={styles.streakBig}>
+              {currentStreak}
             </Typography>
-            <Typography variant="bodySm" color="secondary" style={{ marginBottom: 4 }}>
-              {t('dashboard.progress.itemsCompletedLabel')}
+            <Typography variant="body" color="secondary" style={styles.streakUnit}>
+              {t('dashboard.streak.daysInARow')}
             </Typography>
           </View>
-          <Typography variant="caption" color="tertiary">
-            {t('dashboard.progress.coursesEnrolled', { count: enrolledCourses })}
+          <Typography variant="bodySm" color="tertiary">
+            {t('dashboard.streak.personalRecord', { count: longestStreak })}
           </Typography>
+          <View style={styles.weekRow}>
+            {weekdays.map((label, i) => (
+              <View key={label} style={styles.weekDay}>
+                <View
+                  style={[
+                    styles.weekDot,
+                    {
+                      backgroundColor: isFilled(i) ? colors.accent : 'transparent',
+                      borderColor: isFilled(i) ? colors.accent : colors.border,
+                    },
+                  ]}
+                />
+                <Typography variant="caption" color="tertiary">
+                  {label}
+                </Typography>
+              </View>
+            ))}
+          </View>
         </>
       )}
     </Card>
   );
 }
 
-function StatTile({ value, label }: { value: string; label: string }) {
+/** Kurs-Initialen für das Badge, z. B. ".NET Grundlagen" → "NG", "SQL" → "SQL". */
+function courseInitials(name: string): string {
+  const words = name.replace(/[^\p{L}\p{N}\s]/gu, ' ').trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return '?';
+  if (words.length === 1) return words[0].slice(0, 3).toUpperCase();
+  return words
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join('')
+    .toUpperCase();
+}
+
+export function ContinueLearningSection() {
+  const { t } = useTranslation();
+  const { colors } = useTheme();
+  const navigation = useNavigation<any>();
+  const { data: stats, isLoading } = useStats();
+
+  // Nur laufende Kurse (angefangen, noch nicht abgeschlossen) – "weiter lernen".
+  const inProgress = (stats?.courses ?? []).filter((c) => !c.completed && c.progressPercent > 0);
+
+  return (
+    <Card>
+      <View style={styles.cardHeaderRow}>
+        <Typography variant="h3">{t('dashboard.continue.title')}</Typography>
+        <TouchableOpacity onPress={() => navigation.navigate('Courses', { screen: 'CoursesList' })}>
+          <Typography variant="label" color="accent">
+            {t('dashboard.continue.allCourses')}
+          </Typography>
+        </TouchableOpacity>
+      </View>
+
+      {isLoading ? (
+        <ActivityIndicator size="small" color={colors.primary} style={{ marginTop: Spacing.sm }} />
+      ) : inProgress.length === 0 ? (
+        <Typography variant="bodySm" color="secondary" style={{ marginTop: Spacing.xs }}>
+          {t('dashboard.continue.empty')}
+        </Typography>
+      ) : (
+        <View style={styles.continueList}>
+          {inProgress.map((c) => (
+            <TouchableOpacity
+              key={c.courseId}
+              style={styles.continueRow}
+              onPress={() =>
+                navigation.navigate('Courses', {
+                  screen: 'CourseDetail',
+                  params: { courseId: c.courseId },
+                })
+              }
+            >
+              <View style={[styles.courseBadge, { backgroundColor: colors.primarySurface }]}>
+                <Typography variant="label" color={colors.primary}>
+                  {courseInitials(c.courseName)}
+                </Typography>
+              </View>
+              <View style={{ flex: 1 }}>
+                <View style={styles.continueTitleRow}>
+                  <Typography variant="label" numberOfLines={1} style={{ flex: 1 }}>
+                    {c.courseName}
+                  </Typography>
+                  <Typography variant="label" color={colors.primary}>
+                    {c.progressPercent}%
+                  </Typography>
+                </View>
+                <Typography
+                  variant="caption"
+                  color="tertiary"
+                  numberOfLines={1}
+                  style={{ marginBottom: 6 }}
+                >
+                  {t('dashboard.continue.chapterOf', {
+                    current: Math.min(c.chaptersPassed + 1, c.totalChapters),
+                    total: c.totalChapters,
+                  })}
+                </Typography>
+                <ProgressBar progress={c.progressPercent} height={8} color={colors.primary} />
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+    </Card>
+  );
+}
+
+function StatRow({ label, value }: { label: string; value: string }) {
   const { colors } = useTheme();
   return (
-    <View style={[styles.tile, { backgroundColor: colors.surfaceElevated }]}>
-      <Typography color={colors.primary} style={styles.tileValue}>
-        {value}
-      </Typography>
-      <Typography variant="caption" color="secondary" center numberOfLines={2}>
+    <View style={[styles.statRow, { borderBottomColor: colors.borderLight }]}>
+      <Typography variant="body" color="secondary">
         {label}
+      </Typography>
+      <Typography variant="label" color={colors.textPrimary} style={styles.statRowValue}>
+        {value}
       </Typography>
     </View>
   );
@@ -133,7 +191,9 @@ export function StatsSection() {
 
   return (
     <Card>
-      <Typography variant="h3">{t('dashboard.stats.title')}</Typography>
+      <Typography variant="caption" color="tertiary" style={styles.eyebrow}>
+        {t('dashboard.stats.title')}
+      </Typography>
 
       {isLoading ? (
         <ActivityIndicator size="small" color={colors.primary} style={{ marginTop: Spacing.sm }} />
@@ -142,48 +202,28 @@ export function StatsSection() {
           {t('dashboard.stats.empty')}
         </Typography>
       ) : (
-        <>
-          <View style={styles.tileGrid}>
-            <StatTile value={String(stats.activeCourses)} label={t('dashboard.stats.activeCourses')} />
-            <StatTile value={String(stats.completedCourses)} label={t('dashboard.stats.completedCourses')} />
-            <StatTile value={`${stats.quizAccuracyPercent}%`} label={t('dashboard.stats.accuracy')} />
-            <StatTile
-              value={`${stats.chapterQuizzesPassed}/${stats.chapterQuizzesTaken}`}
-              label={t('dashboard.stats.quizzesPassed')}
-            />
-            <StatTile
-              value={`${stats.codeTasksSolved}/${stats.codeTasksAttempted}`}
-              label={t('dashboard.stats.codeSolved')}
-            />
-          </View>
-
-          {stats.courses.length === 0 ? (
-            <Typography variant="bodySm" color="secondary" style={{ marginTop: Spacing.sm }}>
-              {t('dashboard.stats.empty')}
-            </Typography>
-          ) : (
-            <View style={styles.courseStatsList}>
-              {stats.courses.map((c) => (
-                <View key={c.courseId} style={styles.courseStatRow}>
-                  <View style={styles.courseStatHeader}>
-                    <Typography variant="label" style={styles.courseStatName} numberOfLines={1}>
-                      {c.courseName}
-                    </Typography>
-                    <Badge
-                      label={c.completed ? t('dashboard.stats.done') : `${c.progressPercent}%`}
-                      tone={c.completed ? 'success' : 'muted'}
-                    />
-                  </View>
-                  <ProgressBar
-                    progress={c.progressPercent}
-                    height={8}
-                    color={c.completed ? colors.success : colors.primary}
-                  />
-                </View>
-              ))}
+        <View style={{ marginTop: Spacing.sm }}>
+          <StatRow label={t('dashboard.stats.activeCourses')} value={String(stats.activeCourses)} />
+          <StatRow
+            label={t('dashboard.stats.completedCourses')}
+            value={String(stats.completedCourses)}
+          />
+          <StatRow
+            label={t('dashboard.stats.accuracy')}
+            value={`${stats.quizAccuracyPercent}%`}
+          />
+          <View style={styles.overallBlock}>
+            <View style={styles.overallHeader}>
+              <Typography variant="body" color="secondary">
+                {t('dashboard.stats.overallProgress')}
+              </Typography>
+              <Typography variant="label" color={colors.textPrimary}>
+                {stats.overallProgressPercent}%
+              </Typography>
             </View>
-          )}
-        </>
+            <ProgressBar progress={stats.overallProgressPercent} height={8} color={colors.primary} />
+          </View>
+        </View>
       )}
     </Card>
   );
@@ -294,7 +334,7 @@ export function DashboardScreen() {
         />
         <View style={{ height: Spacing.lg }} />
 
-        <ProgressCard />
+        <ContinueLearningSection />
         <View style={{ height: Spacing.lg }} />
 
         <StatsSection />
@@ -432,31 +472,45 @@ const makeStyles = (colors: Palette) =>
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   scrollContent: { padding: Spacing.lg, paddingBottom: Spacing.xxxl },
-  streakHeader: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, marginBottom: Spacing.md },
-  streakStats: { flexDirection: 'row', alignItems: 'center', marginTop: Spacing.sm },
-  statBox: { flex: 1, alignItems: 'center' },
-  divider: { width: 1, height: '70%' },
-  statValue: { fontSize: FontSize.xxl, fontWeight: FontWeight.extrabold },
-  statLabel: { textTransform: 'uppercase' },
+  eyebrow: { textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: Spacing.xs },
 
-  progressRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: Spacing.xs },
-  progressText: { fontSize: FontSize.xxl, fontWeight: FontWeight.bold },
+  // Lern-Streak
+  streakValueRow: { flexDirection: 'row', alignItems: 'flex-end', gap: Spacing.sm },
+  streakBig: { fontSize: 44, fontWeight: FontWeight.extrabold, lineHeight: 48 },
+  streakUnit: { marginBottom: 8 },
+  weekRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: Spacing.md },
+  weekDay: { alignItems: 'center', gap: 6 },
+  weekDot: { width: 22, height: 22, borderRadius: 11, borderWidth: 1.5 },
 
-  tileGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, marginTop: Spacing.sm },
-  tile: {
-    flexGrow: 1,
-    flexBasis: '30%',
-    minWidth: 96,
-    padding: Spacing.md,
-    borderRadius: Radius.md,
+  // Weiter lernen
+  cardHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 2,
+    marginBottom: Spacing.sm,
   },
-  tileValue: { fontSize: FontSize.xl, fontWeight: FontWeight.extrabold },
-  courseStatsList: { marginTop: Spacing.lg, gap: Spacing.md },
-  courseStatRow: { gap: 6 },
-  courseStatHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  courseStatName: { flex: 1, marginRight: Spacing.sm },
+  continueList: { gap: Spacing.lg, marginTop: Spacing.xs },
+  continueRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
+  courseBadge: {
+    width: 44,
+    height: 44,
+    borderRadius: Radius.md,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  continueTitleRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginBottom: 2 },
+
+  // Statistik
+  statRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: Spacing.md,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  statRowValue: { fontSize: FontSize.md },
+  overallBlock: { marginTop: Spacing.md, gap: Spacing.xs },
+  overallHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
 
   certList: { marginTop: Spacing.sm, gap: Spacing.sm },
   certBadge: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, padding: Spacing.md, borderRadius: Radius.md },
