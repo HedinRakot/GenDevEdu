@@ -18,6 +18,7 @@ import { Card, Icon, ProgressBar, Typography } from '@/components/common';
 import type { CoursesStackParamList } from '@/navigation/CoursesStack';
 import type { Chapter } from '@/types/course';
 import { Radius, Spacing } from '@/config/theme';
+import { showScrollIndicator } from '@/utils/platform';
 
 type NavProp = NativeStackNavigationProp<CoursesStackParamList, 'CourseDetail'>;
 type RoutePropType = RouteProp<CoursesStackParamList, 'CourseDetail'>;
@@ -123,7 +124,7 @@ export function CourseDetailScreen() {
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['bottom']}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+      <ScrollView showsVerticalScrollIndicator={showScrollIndicator} contentContainerStyle={styles.content}>
         <TouchableOpacity
           style={styles.breadcrumb}
           onPress={() => navigation.goBack()}

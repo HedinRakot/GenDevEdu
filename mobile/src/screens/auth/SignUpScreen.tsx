@@ -9,6 +9,7 @@ import { useSignUp } from '@clerk/expo';
 import { useTheme } from '@/context/ThemeContext';
 import { Radius, Shadow, Spacing } from '@/config/theme';
 import { Button, Card, Icon, Input, Typography } from '@/components/common';
+import { clerkErrorMessage } from '@/utils/clerkError';
 import type { AuthStackParamList } from '@/navigation/AuthStack';
 
 type SignUpNavProp = NativeStackNavigationProp<AuthStackParamList, 'SignUp'>;
@@ -42,13 +43,13 @@ export function SignUpScreen() {
       if (createError) {
         // console.error always shows in the browser console (react-native-web), unlike Alert.alert
         console.error('[SignUp] create failed:', createError);
-        setErrorMsg(createError.longMessage ?? createError.message ?? t('auth.signUpError'));
+        setErrorMsg(clerkErrorMessage(createError, t, 'auth.signUpError'));
         return;
       }
       const { error: sendError } = await signUp.verifications.sendEmailCode();
       if (sendError) {
         console.error('[SignUp] sendEmailCode failed:', sendError);
-        setErrorMsg(sendError.longMessage ?? sendError.message ?? t('auth.signUpError'));
+        setErrorMsg(clerkErrorMessage(sendError, t, 'auth.signUpError'));
         return;
       }
       setPendingVerification(true);
@@ -73,7 +74,7 @@ export function SignUpScreen() {
       const { error } = await signUp.verifications.verifyEmailCode({ code });
       if (error) {
         console.error('[SignUp] verify failed:', error);
-        setErrorMsg(error.longMessage ?? error.message ?? t('auth.verifyError'));
+        setErrorMsg(clerkErrorMessage(error, t, 'auth.verifyError'));
         return;
       }
       if (signUp.status === 'complete') {

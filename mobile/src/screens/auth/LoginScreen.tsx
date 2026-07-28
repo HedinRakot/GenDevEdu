@@ -9,6 +9,7 @@ import { useSignIn } from '@clerk/expo';
 import { useTheme } from '@/context/ThemeContext';
 import { Radius, Shadow, Spacing } from '@/config/theme';
 import { Button, Card, Icon, Input, Typography } from '@/components/common';
+import { clerkErrorMessage } from '@/utils/clerkError';
 import type { AuthStackParamList } from '@/navigation/AuthStack';
 
 type LoginNavProp = NativeStackNavigationProp<AuthStackParamList, 'Login'>;
@@ -35,7 +36,7 @@ export function LoginScreen() {
       if (error) {
         // console.error always shows in the browser console (react-native-web), unlike Alert.alert
         console.error('[Login] failed:', error);
-        setErrorMsg(error.longMessage ?? error.message ?? t('auth.loginError'));
+        setErrorMsg(clerkErrorMessage(error, t, 'auth.loginError'));
         return;
       }
       if (signIn.status === 'complete') {

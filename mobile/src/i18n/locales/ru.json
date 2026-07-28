@@ -82,6 +82,18 @@
     "loginButton": "Войти через Identity Server",
     "loginError": "Ошибка входа. Попробуйте ещё раз.",
     "networkError": "Нет соединения. Проверьте подключение к сети.",
+    "errors": {
+      "form_identifier_not_found": "Аккаунт с таким адресом не найден.",
+      "form_password_incorrect": "Неверный пароль.",
+      "form_identifier_exists": "Этот адрес электронной почты уже зарегистрирован.",
+      "form_param_format_invalid": "Неверный формат. Проверьте введённые данные.",
+      "form_password_length_too_short": "Пароль слишком короткий.",
+      "form_password_pwned": "Этот пароль считается небезопасным. Выберите другой.",
+      "form_code_incorrect": "Неверный код.",
+      "verification_expired": "Срок действия кода истёк. Запросите новый.",
+      "too_many_requests": "Слишком много попыток. Подождите немного.",
+      "form_param_nil": "Пожалуйста, заполните все обязательные поля."
+    },
     "logoutConfirm": "Вы уверены, что хотите выйти?",
     "welcome": "С возвращением!",
     "tagline": "Изучай разработку ПО",
@@ -253,6 +265,7 @@
     "true": "Верно",
     "false": "Неверно",
     "selectAnswer": "Выберите хотя бы один ответ.",
+    "markLessonComplete": "Завершить раздел",
     "chapterCompleteTitle": "Глава пройдена!",
     "chapterCompleteBody": "Отлично! Все ответы правильные.",
     "code": {

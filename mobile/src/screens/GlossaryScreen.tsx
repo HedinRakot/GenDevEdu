@@ -9,6 +9,7 @@ import { translate } from '@/utils/textUtils';
 import { filterGlossary, GLOSSARY, type GlossaryEntry } from '@/data/glossary';
 import { Badge, Button, Input, Typography } from '@/components/common';
 import { Radius, Spacing } from '@/config/theme';
+import { showScrollIndicator } from '@/utils/platform';
 
 const CATEGORY_LABELS: Record<GlossaryEntry['category'], string> = {
   csharp: 'C#',
@@ -88,7 +89,7 @@ export function GlossaryScreen() {
         data={filtered}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={showScrollIndicator}
         ItemSeparatorComponent={() => <View style={{ height: Spacing.sm }} />}
         ListEmptyComponent={
           <View style={styles.empty}>

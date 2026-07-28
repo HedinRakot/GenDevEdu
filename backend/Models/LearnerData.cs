@@ -16,6 +16,7 @@ public class Enrollment
     public DateTime? CompletedAt { get; set; }
 }
 
+[BsonIgnoreExtraElements] // toleriert Altbestand-Felder wie das entfernte 'CompletedTopicIds'
 public class Progress
 {
     [BsonId]

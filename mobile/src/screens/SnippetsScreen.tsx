@@ -1,6 +1,7 @@
-import React, { useMemo, useState } from 'react';
-import { Alert, FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
 import { useSnippets } from '@/hooks/useSnippets';
@@ -8,6 +9,8 @@ import { useTheme } from '@/context/ThemeContext';
 import { MarkdownRenderer } from '@/components/common/MarkdownRenderer';
 import { Badge, Card, Icon, Input, Typography, type IconName } from '@/components/common';
 import { Spacing } from '@/config/theme';
+import { showScrollIndicator } from '@/utils/platform';
+import { confirmDialog } from '@/utils/confirm';
 import type { Snippet } from '@/types/snippet';
 
 const SOURCE_ICON: Record<Snippet['source'], IconName> = {
@@ -19,8 +22,16 @@ const SOURCE_ICON: Record<Snippet['source'], IconName> = {
 export function SnippetsScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
-  const { snippets, isLoading, remove } = useSnippets();
+  const { snippets, isLoading, remove, refresh } = useSnippets();
   const [query, setQuery] = useState('');
+
+  // Der Snippets-Tab bleibt gemountet; ohne Refresh-on-Focus erscheinen in der
+  // Lektion neu gespeicherte Snippets nicht (jede useSnippets-Instanz hat eigenen State).
+  useFocusEffect(
+    useCallback(() => {
+      refresh();
+    }, [refresh]),
+  );
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -34,10 +45,14 @@ export function SnippetsScreen() {
   }, [query, snippets]);
 
   const confirmDelete = (snippet: Snippet) => {
-    Alert.alert(t('snippets.delete'), t('snippets.deleteConfirm'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      { text: t('common.delete'), style: 'destructive', onPress: () => remove(snippet.id) },
-    ]);
+    confirmDialog({
+      title: t('snippets.delete'),
+      message: t('snippets.deleteConfirm'),
+      confirmLabel: t('common.delete'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+      onConfirm: () => remove(snippet.id),
+    });
   };
 
   return (
@@ -62,7 +77,7 @@ export function SnippetsScreen() {
         data={filtered}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={showScrollIndicator}
         ItemSeparatorComponent={() => <View style={{ height: Spacing.md }} />}
         ListEmptyComponent={
           isLoading ? null : (

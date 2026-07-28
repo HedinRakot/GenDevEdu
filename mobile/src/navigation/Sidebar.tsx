@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/context/ThemeContext';
 import { useAuth } from '@/context/AuthContext';
+import { confirmDialog } from '@/utils/confirm';
 import { Spacing } from '@/config/theme';
 import { Icon, type IconName, SidebarItem, Typography } from '@/components/common';
 
@@ -35,7 +36,16 @@ export const SIDEBAR_WIDTH = 248;
 export function Sidebar({ state, navigation }: BottomTabBarProps) {
   const { t } = useTranslation();
   const { colors } = useTheme();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+
+  const handleLogout = () =>
+    confirmDialog({
+      title: t('auth.logoutConfirm'),
+      confirmLabel: t('auth.logout'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+      onConfirm: () => logout(),
+    });
 
   const routes = state.routes
     .map((route, index) => ({ route, index, cfg: NAV_CONFIG[route.name] }))
@@ -162,6 +172,11 @@ export function Sidebar({ state, navigation }: BottomTabBarProps) {
             {t(`roles.${user?.role ?? 'student'}`, 'Lernende')}
           </Typography>
         </View>
+      </View>
+
+      {/* Abmelden */}
+      <View style={{ marginTop: Spacing.xs }}>
+        <SidebarItem icon="logout" label={t('auth.logout', 'Abmelden')} onPress={handleLogout} />
       </View>
     </View>
   );

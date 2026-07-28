@@ -84,6 +84,18 @@
     "loginButton": "Anmelden",
     "loginError": "Anmeldung fehlgeschlagen. Bitte E-Mail und Passwort prüfen.",
     "networkError": "Keine Netzwerkverbindung. Bitte prüfe deine Verbindung.",
+    "errors": {
+      "form_identifier_not_found": "Kein Konto mit dieser E-Mail-Adresse gefunden.",
+      "form_password_incorrect": "Falsches Passwort.",
+      "form_identifier_exists": "Diese E-Mail-Adresse ist bereits registriert.",
+      "form_param_format_invalid": "Ungültiges Format. Bitte prüfe deine Eingabe.",
+      "form_password_length_too_short": "Das Passwort ist zu kurz.",
+      "form_password_pwned": "Dieses Passwort gilt als unsicher. Bitte wähle ein anderes.",
+      "form_code_incorrect": "Der Code ist ungültig.",
+      "verification_expired": "Der Code ist abgelaufen. Bitte fordere einen neuen an.",
+      "too_many_requests": "Zu viele Versuche. Bitte warte einen Moment.",
+      "form_param_nil": "Bitte fülle alle Pflichtfelder aus."
+    },
     "logoutConfirm": "Möchtest du dich wirklich abmelden?",
     "welcome": "Willkommen zurück!",
     "tagline": "Softwareentwicklung lernen",

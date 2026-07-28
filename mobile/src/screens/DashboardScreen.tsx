@@ -20,6 +20,7 @@ import { DailyChallengeCard } from '@/components/widgets/DailyChallengeCard';
 import { useTheme } from '@/context/ThemeContext';
 import { useAuth } from '@/context/AuthContext';
 import { FontSize, FontWeight, Radius, Spacing, type Palette } from '@/config/theme';
+import { showScrollIndicator } from '@/utils/platform';
 import { FEATURES } from '@/config/features';
 
 function StreakCard({
@@ -319,7 +320,7 @@ export function DashboardScreen() {
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={showScrollIndicator}>
         <Typography variant="h1" style={{ marginBottom: Spacing.lg }}>
           {user ? t('dashboard.greeting', { name: user.name.split(' ')[0] }) : t('dashboard.title')}
         </Typography>

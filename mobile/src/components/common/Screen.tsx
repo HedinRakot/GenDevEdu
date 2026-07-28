@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useTheme } from '@/context/ThemeContext';
 import { Spacing } from '@/config/theme';
+import { showScrollIndicator } from '@/utils/platform';
 
 interface ScreenProps {
   children: React.ReactNode;
@@ -39,7 +40,7 @@ export function Screen({
         <ScrollView
           contentContainerStyle={[pad, contentContainerStyle]}
           keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
+          showsVerticalScrollIndicator={showScrollIndicator}
         >
           {children}
         </ScrollView>

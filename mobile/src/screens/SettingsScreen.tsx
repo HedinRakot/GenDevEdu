@@ -8,7 +8,8 @@ import i18n, { SUPPORTED_LANGUAGES, type SupportedLanguage } from '@/i18n';
 import { saveLanguage } from '@/store/storage';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
-import { isManagementPlatform } from '@/utils/platform';
+import { isManagementPlatform, showScrollIndicator } from '@/utils/platform';
+import { confirmDialog } from '@/utils/confirm';
 import {
   cancelStreakReminder,
   isStreakReminderEnabled,
@@ -107,10 +108,13 @@ export function SettingsScreen() {
   };
 
   const handleLogout = () => {
-    Alert.alert(t('auth.logoutConfirm'), '', [
-      { text: t('common.cancel'), style: 'cancel' },
-      { text: t('auth.logout'), style: 'destructive', onPress: () => logout() },
-    ]);
+    confirmDialog({
+      title: t('auth.logoutConfirm'),
+      confirmLabel: t('auth.logout'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+      onConfirm: () => logout(),
+    });
   };
 
   const toggleDarkMode = () => {
@@ -140,7 +144,7 @@ export function SettingsScreen() {
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={showScrollIndicator}>
         <Typography variant="h1" style={{ marginBottom: Spacing.lg }}>
           {t('settings.title')}
         </Typography>

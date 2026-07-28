@@ -18,6 +18,7 @@ import type { CoursesStackParamList } from '@/navigation/CoursesStack';
 import type { Course } from '@/types/course';
 import { Badge, Button, Icon, Typography } from '@/components/common';
 import { FontSize, Radius, Shadow, Spacing } from '@/config/theme';
+import { showScrollIndicator } from '@/utils/platform';
 
 type NavProp = NativeStackNavigationProp<CoursesStackParamList, 'CoursesList'>;
 
@@ -95,12 +96,12 @@ export function CoursesScreen() {
   }
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top']}>
       <FlatList
         data={courses ?? []}
         keyExtractor={(item) => item.elementId}
         contentContainerStyle={styles.list}
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={showScrollIndicator}
         ListHeaderComponent={
           <View style={styles.listHeader}>
             <Typography variant="h1">{t('courses.title')}</Typography>
@@ -133,9 +134,9 @@ export function CoursesScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: Spacing.md },
-  list: { padding: Spacing.lg, paddingBottom: Spacing.xxxl },
+  list: { paddingHorizontal: Spacing.lg, paddingTop: Spacing.md, paddingBottom: Spacing.xxxl },
 
-  listHeader: { marginBottom: Spacing.lg, gap: Spacing.md },
+  listHeader: { marginBottom: Spacing.md, gap: Spacing.xs },
 
   card: { borderRadius: Radius.xl, overflow: 'hidden', flexDirection: 'row', ...Shadow.md },
   stripe: { width: 6 },

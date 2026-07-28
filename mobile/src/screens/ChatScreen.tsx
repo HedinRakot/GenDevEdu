@@ -21,6 +21,7 @@ import { useTheme } from '@/context/ThemeContext';
 import { useSnippets } from '@/hooks/useSnippets';
 import { ChatBubble, Icon, Typography } from '@/components/common';
 import { FontFamily, FontSize, Radius, Shadow, Spacing } from '@/config/theme';
+import { showScrollIndicator } from '@/utils/platform';
 
 interface MessageRowProps {
   message: ChatMessage;
@@ -208,7 +209,7 @@ export function ChatScreen() {
             data={messages}
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.messageList}
-            showsVerticalScrollIndicator={false}
+            showsVerticalScrollIndicator={showScrollIndicator}
             renderItem={({ item }) => (
               <MessageRow
                 message={item}

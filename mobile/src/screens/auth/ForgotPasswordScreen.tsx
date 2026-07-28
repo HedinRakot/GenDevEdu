@@ -9,6 +9,7 @@ import { useSignIn } from '@clerk/expo';
 import { useTheme } from '@/context/ThemeContext';
 import { Radius, Shadow, Spacing } from '@/config/theme';
 import { Button, Card, Icon, Input, Typography } from '@/components/common';
+import { clerkErrorMessage } from '@/utils/clerkError';
 import type { AuthStackParamList } from '@/navigation/AuthStack';
 
 type ForgotPasswordNavProp = NativeStackNavigationProp<AuthStackParamList, 'ForgotPassword'>;
@@ -45,13 +46,13 @@ export function ForgotPasswordScreen() {
       if (createError) {
         // console.error always shows in the browser console (react-native-web), unlike Alert.alert
         console.error('[ForgotPassword] create failed:', createError);
-        setErrorMsg(createError.longMessage ?? createError.message ?? t('auth.resetPasswordError'));
+        setErrorMsg(clerkErrorMessage(createError, t, 'auth.resetPasswordError'));
         return;
       }
       const { error: sendError } = await signIn.resetPasswordEmailCode.sendCode();
       if (sendError) {
         console.error('[ForgotPassword] sendCode failed:', sendError);
-        setErrorMsg(sendError.longMessage ?? sendError.message ?? t('auth.resetPasswordError'));
+        setErrorMsg(clerkErrorMessage(sendError, t, 'auth.resetPasswordError'));
         return;
       }
       setPendingReset(true);
@@ -80,13 +81,13 @@ export function ForgotPasswordScreen() {
       const { error: verifyError } = await signIn.resetPasswordEmailCode.verifyCode({ code });
       if (verifyError) {
         console.error('[ForgotPassword] verifyCode failed:', verifyError);
-        setErrorMsg(verifyError.longMessage ?? verifyError.message ?? t('auth.verifyError'));
+        setErrorMsg(clerkErrorMessage(verifyError, t, 'auth.verifyError'));
         return;
       }
       const { error: submitError } = await signIn.resetPasswordEmailCode.submitPassword({ password });
       if (submitError) {
         console.error('[ForgotPassword] submitPassword failed:', submitError);
-        setErrorMsg(submitError.longMessage ?? submitError.message ?? t('auth.resetPasswordError'));
+        setErrorMsg(clerkErrorMessage(submitError, t, 'auth.resetPasswordError'));
         return;
       }
       if (signIn.status === 'complete') {
