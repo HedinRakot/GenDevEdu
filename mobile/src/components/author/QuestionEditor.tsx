@@ -141,12 +141,18 @@ export function QuestionEditor({
   index,
   onChange,
   onRemove,
+  onMoveUp,
+  onMoveDown,
   allowCode = true,
 }: {
   q: DraftQuestion;
   index: number;
   onChange: (q: DraftQuestion) => void;
   onRemove: () => void;
+  /** undefined = erste Frage (kein Hoch-Schieben möglich) */
+  onMoveUp?: () => void;
+  /** undefined = letzte Frage */
+  onMoveDown?: () => void;
   /** Code-Fragen erlauben? Für Kapitel-Abschlussquizze false (nur auto-bewertbar). */
   allowCode?: boolean;
 }) {
@@ -213,7 +219,31 @@ export function QuestionEditor({
   return (
     <View style={[styles.questionBox, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
       <View style={styles.questionHeader}>
-        <Text style={[styles.questionNum, { color: colors.textSecondary }]}>Frage {index + 1}</Text>
+        <View style={styles.headerLeft}>
+          {(onMoveUp || onMoveDown) && (
+            <View style={styles.moveColumn}>
+              <TouchableOpacity
+                testID={`question-move-up-${index}`}
+                onPress={onMoveUp}
+                disabled={!onMoveUp}
+                hitSlop={{ top: 4, bottom: 4, left: 6, right: 6 }}
+              >
+                <View style={styles.moveUp}>
+                  <Icon name="chevron-down" size={FontSize.md} color={onMoveUp ? colors.primary : colors.borderLight} />
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity
+                testID={`question-move-down-${index}`}
+                onPress={onMoveDown}
+                disabled={!onMoveDown}
+                hitSlop={{ top: 4, bottom: 4, left: 6, right: 6 }}
+              >
+                <Icon name="chevron-down" size={FontSize.md} color={onMoveDown ? colors.primary : colors.borderLight} />
+              </TouchableOpacity>
+            </View>
+          )}
+          <Text style={[styles.questionNum, { color: colors.textSecondary }]}>Frage {index + 1}</Text>
+        </View>
         <TouchableOpacity onPress={onRemove} style={styles.removeRow}>
           <Icon name="close" size={14} color={colors.error} />
           <Text style={{ color: colors.error, fontSize: FontSize.sm }}>Entfernen</Text>
@@ -389,6 +419,9 @@ export function QuestionEditor({
 const styles = StyleSheet.create({
   questionBox: { borderWidth: 1, borderRadius: Radius.lg, padding: Spacing.md, gap: Spacing.sm },
   questionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
+  moveColumn: { alignItems: 'center' },
+  moveUp: { transform: [{ rotate: '180deg' }] },
   removeRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs / 2 },
   questionNum: { fontSize: FontSize.sm, fontWeight: FontWeight.bold },
   label: { fontSize: FontSize.xs, fontWeight: FontWeight.medium },

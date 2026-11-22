@@ -1,0 +1,101 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# F7 Prod-Härtung der Code-Sandbox (Cluster-Ebene).
+#
+# Die Lerner-Container laufen genestet im rootless Podman-Sidecar (bereits
+# `--network none`, cap-drop ALL, read-only, non-root — siehe 20-backend.yaml +
+# sandbox/csharp-runner/Dockerfile). Dieses Manifest ergänzt die Isolation auf
+# Kubernetes-Ebene:
+#   1) NetworkPolicy: Default-Deny + minimal nötige Egress (unten, wird angewandt).
+#   2) gVisor/Kata-RuntimeClass + getainteter Node-Pool (Patch, s. Kommentar unten) —
+#      NICHT unbedingt hier aktiv, weil der Cluster die Voraussetzungen mitbringen muss
+#      (RuntimeClass installiert, Node-Pool gelabelt/getaintet). Sonst schlägt Scheduling
+#      auf Dev-Clustern (Kind/k3s) fehl.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── 1) NetworkPolicy: Default-Deny (Ingress + Egress) im gesamten Namespace ──
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: devedu
+spec:
+  podSelector: {}
+  policyTypes: [Ingress, Egress]
+  # Kein ingress/egress-Block ⇒ alles verboten (Baseline). Erlaubnisse folgen additiv.
+---
+# ── Backend: nur das wirklich Nötige erlauben ──
+# Ingress: HTTP 8080 (vom Ingress-Controller/Service). Egress: DNS, Mongo (in-cluster),
+# HTTPS nach außen (Clerk/Gemini). Der genestete Sandbox-Container hat weiterhin GAR
+# kein Netz (--network none), ist von dieser Policy also unberührt.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: backend-allow
+  namespace: devedu
+spec:
+  podSelector:
+    matchLabels: { app: backend }
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - ports:
+        - port: 8080
+          protocol: TCP
+  egress:
+    # DNS
+    - ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+    # MongoDB (in-cluster)
+    - to:
+        - podSelector:
+            matchLabels: { app: mongo }
+      ports:
+        - port: 27017
+          protocol: TCP
+    # Externe HTTPS-APIs (Clerk-Auth, Gemini-Chat). Bei Bedarf per ipBlock enger fassen.
+    - ports:
+        - port: 443
+          protocol: TCP
+---
+# ── Mongo: nur Ingress vom Backend auf 27017 ──
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mongo-allow
+  namespace: devedu
+spec:
+  podSelector:
+    matchLabels: { app: mongo }
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels: { app: backend }
+      ports:
+        - port: 27017
+          protocol: TCP
+---
+# ── 2) RuntimeClass für gVisor (setzt runsc/gVisor auf den Nodes voraus) ──
+# Installation z. B. via gvisor-containerd-shim + RuntimeClass "gvisor" auf einem
+# dedizierten Node-Pool. Danach den Backend-Deployment-Pod so patchen, dass er unter
+# gVisor auf dem getainteten Sandbox-Pool läuft:
+#
+#   apiVersion: node.k8s.io/v1
+#   kind: RuntimeClass
+#   metadata: { name: gvisor }
+#   handler: runsc
+#
+# Patch für k8s/20-backend.yaml (spec.template.spec):
+#   runtimeClassName: gvisor
+#   nodeSelector:
+#     devedu.io/sandbox: "true"          # Label des getainteten Sandbox-Node-Pools
+#   tolerations:
+#     - key: "devedu.io/sandbox"
+#       operator: "Exists"
+#       effect: "NoSchedule"
+#
+# Der Node-Pool wird getaintet, damit NUR Sandbox-Workloads dort landen:
+#   kubectl taint nodes <node> devedu.io/sandbox=true:NoSchedule
+#   kubectl label  nodes <node> devedu.io/sandbox=true

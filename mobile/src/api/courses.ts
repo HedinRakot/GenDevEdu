@@ -16,6 +16,7 @@ import type {
 import type { ProgressDto, LearnerStats, Certificate } from '@/types/learner';
 import type {
   CreateCourseRequest,
+  UpdateCourseRequest,
   CreateChapterRequest,
   CreateChapterContentRequest,
   CreateQuestionListRequest,
@@ -130,6 +131,14 @@ export async function createCourse(req: CreateCourseRequest): Promise<CourseSumm
   return data;
 }
 
+export async function updateCourse(courseId: string, req: UpdateCourseRequest): Promise<CourseSummary> {
+  const { data } = await apiClient.put<CourseSummary>(
+    `/api/courses/${encodeURIComponent(courseId)}`,
+    req,
+  );
+  return data;
+}
+
 export async function publishCourse(courseId: string): Promise<CourseSummary> {
   const { data } = await apiClient.post<CourseSummary>(
     `/api/courses/${encodeURIComponent(courseId)}/publish`,
@@ -140,6 +149,14 @@ export async function publishCourse(courseId: string): Promise<CourseSummary> {
 export async function addChapter(courseId: string, req: CreateChapterRequest): Promise<Chapter> {
   const { data } = await apiClient.post<Chapter>(
     `/api/courses/${encodeURIComponent(courseId)}/chapters`,
+    req,
+  );
+  return data;
+}
+
+export async function updateChapter(chapterId: string, req: CreateChapterRequest): Promise<Chapter> {
+  const { data } = await apiClient.put<Chapter>(
+    `/api/chapters/${encodeURIComponent(chapterId)}`,
     req,
   );
   return data;

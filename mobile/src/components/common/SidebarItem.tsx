@@ -11,26 +11,30 @@ interface SidebarItemProps {
   label: string;
   active?: boolean;
   onPress?: () => void;
+  /** Eingeklappte Sidebar: nur Icon, zentriert, Label als accessibilityLabel. */
+  collapsed?: boolean;
 }
 
 /**
  * Navigationszeile der Desktop-/Web-Sidebar. Aktiv = Primär-Surface-Hintergrund
  * + Akzent-Icon, analog zum aktiven Tab-Pill auf dem Phone.
  */
-export function SidebarItem({ icon, label, active = false, onPress }: SidebarItemProps) {
+export function SidebarItem({ icon, label, active = false, onPress, collapsed = false }: SidebarItemProps) {
   const { colors } = useTheme();
 
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={label}
       accessibilityState={{ selected: active }}
       onPress={onPress}
       style={({ pressed }) => ({
         flexDirection: 'row',
         alignItems: 'center',
-        gap: Spacing.sm + 4,
+        justifyContent: collapsed ? 'center' : 'flex-start',
+        gap: collapsed ? 0 : Spacing.sm + 4,
         paddingVertical: Spacing.sm + 2,
-        paddingHorizontal: Spacing.md,
+        paddingHorizontal: collapsed ? Spacing.xs : Spacing.md,
         borderRadius: Radius.md,
         backgroundColor: active ? colors.primarySurface : 'transparent',
         opacity: pressed ? 0.8 : 1,
@@ -42,14 +46,16 @@ export function SidebarItem({ icon, label, active = false, onPress }: SidebarIte
         color={active ? colors.accent : colors.textSecondary}
         strokeWidth={active ? 2 : 1.75}
       />
-      <View style={{ flex: 1 }}>
-        <Typography
-          variant={active ? 'label' : 'bodySm'}
-          color={active ? 'primary' : 'secondary'}
-        >
-          {label}
-        </Typography>
-      </View>
+      {!collapsed && (
+        <View style={{ flex: 1 }}>
+          <Typography
+            variant={active ? 'label' : 'bodySm'}
+            color={active ? 'primary' : 'secondary'}
+          >
+            {label}
+          </Typography>
+        </View>
+      )}
     </Pressable>
   );
 }

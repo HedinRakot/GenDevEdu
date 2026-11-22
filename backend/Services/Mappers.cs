@@ -19,12 +19,12 @@ public static class Mappers
             PassThresholdPercent: ch.PassThresholdPercent,
             MaxAttempts: ch.MaxAttempts);
 
-    public static ChapterContentDto ToChapterContentDto(ChapterContent cc) =>
+    public static ChapterContentDto ToChapterContentDto(ChapterContent cc, bool completed = false) =>
         new(cc.ElementId, cc.Name, cc.CourseId, cc.ChapterId, cc.Titel,
             (int)cc.ContentType, cc.LessonText, cc.LessonTexte,
             cc.VideoUrl, cc.QuestionListId, cc.SortOrder,
             QuestionLists: new List<object>(),
-            cc.AverageRank, cc.MaxRank, Completed: false);
+            cc.AverageRank, cc.MaxRank, Completed: completed);
 
     // ─── Questions ────────────────────────────────────────────────────────────
 

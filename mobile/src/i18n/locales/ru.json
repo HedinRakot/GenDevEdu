@@ -82,6 +82,14 @@
     "loginButton": "Войти через Identity Server",
     "loginError": "Ошибка входа. Попробуйте ещё раз.",
     "networkError": "Нет соединения. Проверьте подключение к сети.",
+    "verificationCode": "Код подтверждения",
+    "verificationCodePlaceholder": "6-значный код",
+    "verifyButton": "Подтвердить",
+    "twoFactorTitle": "Двухфакторное подтверждение",
+    "twoFactorInfo": "Введите код подтверждения, чтобы завершить вход.",
+    "codeRequired": "Введите код подтверждения.",
+    "needsNewPassword": "Необходимо сбросить пароль. Используйте «Забыли пароль?».",
+    "needsClientTrust": "Это устройство нужно подтвердить. Войдите один раз через веб-приложение, чтобы подтвердить его.",
     "errors": {
       "form_identifier_not_found": "Аккаунт с таким адресом не найден.",
       "form_password_incorrect": "Неверный пароль.",
@@ -123,7 +131,9 @@
     "admin": "Управление",
     "settings": "Настройки",
     "sectionLearn": "Обучение",
-    "sectionManage": "Управление"
+    "sectionManage": "Управление",
+    "collapseSidebar": "Свернуть меню",
+    "expandSidebar": "Развернуть меню"
   },
   "admin": {
     "title": "Управление пользователями",
@@ -266,6 +276,10 @@
     "false": "Неверно",
     "selectAnswer": "Выберите хотя бы один ответ.",
     "markLessonComplete": "Завершить раздел",
+    "lessonCompleted": "Завершено",
+    "quizLabel": "Тест",
+    "openQuiz": "Открыть тест",
+    "reviewQuiz": "Посмотреть тест",
     "chapterCompleteTitle": "Глава пройдена!",
     "chapterCompleteBody": "Отлично! Все ответы правильные.",
     "code": {
@@ -274,6 +288,13 @@
       "askTutor": "Спросить репетитора",
       "placeholder": "Напишите свой код здесь…",
       "error": "Ошибка при выполнении кода.",
+      "outcomes": {
+        "InternalError": "Внутренняя ошибка среды выполнения. Повторите попытку позже.",
+        "TimeLimit": "Превышен лимит времени — код выполнялся слишком долго.",
+        "MemoryLimit": "Превышен лимит памяти.",
+        "RuntimeError": "Ошибка выполнения программы.",
+        "CompileError": "Ошибка компиляции."
+      },
       "allTestsPassed": "Все тесты пройдены!",
       "testsFailed": "Некоторые тесты не пройдены.",
       "passedOf": "Пройдено тестов: {{passed}} из {{total}}",

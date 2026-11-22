@@ -76,6 +76,14 @@ function ChapterRow({
           <Typography variant="caption" color="tertiary" style={styles.chapterMeta}>
             {chapter.rank} Punkte
           </Typography>
+          {/* #16: Kapitel-Fortschritt (Inhalte + ggf. Quiz), 100 % = grün. */}
+          {chapter.totalContent > 0 && (
+            <ProgressBar
+              progress={chapter.progressPercent}
+              height={6}
+              color={chapter.progressPercent >= 100 ? colors.success : colors.primary}
+            />
+          )}
         </View>
         <Icon name="chevron-right" size={20} color={colors.textTertiary} />
       </Card>
@@ -119,8 +127,11 @@ export function CourseDetailScreen() {
 
   const chapters = model.chapters || [];
   const completedCount = chapters.filter((c) => c.completed).length;
-  const progress =
-    chapters.length > 0 ? Math.round((completedCount / chapters.length) * 100) : 0;
+  // #15: Kurs-% aus den backend-gewichteten Kapitelwerten (Inhalte + Quiz), nicht
+  // binär über abgeschlossene Kapitel — konsistent mit Kapitel- und Statistik-%.
+  const sumCompleted = chapters.reduce((s, c) => s + (c.completedContent ?? 0), 0);
+  const sumTotal = chapters.reduce((s, c) => s + (c.totalContent ?? 0), 0);
+  const progress = sumTotal > 0 ? Math.round((sumCompleted / sumTotal) * 100) : 0;
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['bottom']}>

@@ -12,6 +12,16 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Lokale, gitignorte Overrides (z. B. externer Mongo-Connectionstring) — siehe .gitignore
+// (appsettings.*.local.json). Nur in Development, und Umgebungsvariablen danach erneut
+// anhängen, damit sie Vorrang behalten (z. B. das Test-Mongo aus DevEduApiFactory via Mongo__*).
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration
+        .AddJsonFile("appsettings.Development.local.json", optional: true, reloadOnChange: true)
+        .AddEnvironmentVariables();
+}
+
 // ---- MongoDB ----
 var mongoOptions = new MongoOptions
 {
@@ -35,13 +45,18 @@ builder.Services.AddScoped<Seeder>();
 // ---- F7: Code-Aufgaben & Sandbox ----
 var sandboxOptions = new SandboxOptions
 {
+    UseStub = builder.Configuration.GetValue<bool>("Sandbox:UseStub"),
     PodmanSocketUri = builder.Configuration["Sandbox:PodmanSocketUri"] ?? "unix:///podman/podman.sock",
     RunnerImage = builder.Configuration["Sandbox:RunnerImage"] ?? "localhost/devedu/csharp-runner:local",
     ScratchDir = builder.Configuration["Sandbox:ScratchDir"] ?? "/sandbox",
 };
 builder.Services.AddSingleton(sandboxOptions);
 builder.Services.AddSingleton<ICodeSubmissionQueue, CodeSubmissionQueue>();
-builder.Services.AddSingleton<ISandboxRunner, PodmanSandboxRunner>();
+// Dev ohne Podman-Socket: Stub-Runner, damit Code-Aufgaben lokal nicht in InternalError laufen.
+if (sandboxOptions.UseStub)
+    builder.Services.AddSingleton<ISandboxRunner, StubSandboxRunner>();
+else
+    builder.Services.AddSingleton<ISandboxRunner, PodmanSandboxRunner>();
 builder.Services.AddScoped<CodeSubmissionService>();
 builder.Services.AddHostedService<CodeExecutionWorker>();
 
@@ -168,6 +183,7 @@ app.MapAuthEndpoints();
 app.MapCourseEndpoints();
 app.MapQuestionEndpoints();
 app.MapEnrollmentEndpoints();
+app.MapCertificateEndpoints();
 app.MapAdminEndpoints();
 app.MapCodeSubmissionEndpoints();
 app.MapChapterQuizEndpoints();

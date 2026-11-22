@@ -72,6 +72,25 @@ public class CertificateService
         }
     }
 
+    /// <summary>
+    /// Öffentliche Verifikation per <see cref="Certificate.VerificationCode"/> (ohne Auth).
+    /// Gibt bei unbekanntem/leerem Code <c>Valid=false</c> zurück (kein Enumerieren interner Ids).
+    /// </summary>
+    public async Task<CertificateVerificationDto> VerifyByCodeAsync(string code)
+    {
+        if (string.IsNullOrWhiteSpace(code))
+            return new CertificateVerificationDto(false, null, null, null);
+
+        var normalized = code.Trim().ToUpperInvariant();
+        var cert = await _db.Certificates
+            .Find(c => c.VerificationCode == normalized)
+            .FirstOrDefaultAsync();
+
+        return cert is null
+            ? new CertificateVerificationDto(false, null, null, null)
+            : new CertificateVerificationDto(true, cert.CourseName, cert.LearnerName, cert.IssuedAt);
+    }
+
     public async Task<List<CertificateDto>> GetMineAsync(string userId)
     {
         var certs = await _db.Certificates

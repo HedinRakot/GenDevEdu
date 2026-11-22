@@ -62,11 +62,25 @@ public class CourseService
 
         var chapters = course.Chapters
             .OrderBy(ch => ch.SortOrder)
-            .Select(ch => Mappers.ToChapterResponseDto(ch) with
+            .Select(ch =>
             {
-                // F8: geteilte Abschluss-Logik (CourseCompletion).
-                Completed = CourseCompletion.IsChapterComplete(ch, completedIds, passedQuizIds),
-                QuizPassed = passedQuizIds.Contains(ch.Id),
+                // #15/#16: Kapitel-Fortschritt = erledigte Inhalte (+ Quiz, falls vorhanden)
+                // gewichtet gegen Gesamtzahl. Einheitlich mit der Kurs-Formel (Grading.Percent).
+                bool hasQuiz = !string.IsNullOrEmpty(ch.ChapterQuizId);
+                bool quizPassed = passedQuizIds.Contains(ch.Id);
+                int totalContent = ch.ChapterContent.Count + (hasQuiz ? 1 : 0);
+                int completedContent =
+                    ch.ChapterContent.Count(cc => completedIds.Contains(cc.ElementId))
+                    + (hasQuiz && quizPassed ? 1 : 0);
+                return Mappers.ToChapterResponseDto(ch) with
+                {
+                    // F8: geteilte Abschluss-Logik (CourseCompletion).
+                    Completed = CourseCompletion.IsChapterComplete(ch, completedIds, passedQuizIds),
+                    QuizPassed = quizPassed,
+                    CompletedContent = completedContent,
+                    TotalContent = totalContent,
+                    ProgressPercent = Grading.Percent(completedContent, totalContent),
+                };
             })
             .ToList();
 
@@ -88,10 +102,17 @@ public class CourseService
         if (course.Status != CourseStatus.Published && !isAdmin && !isOwner)
             return ServiceResult<ChapterContentListModel>.NotFound("Chapter not found.");
 
+        // Fortschritt laden, damit je Inhalt `Completed` korrekt gesetzt wird (#3/#6:
+        // Frontend seedet daraus die erledigten Positionen + springt zur ersten offenen).
+        var progress = await _db.Progress
+            .Find(p => p.UserId == userId && p.CourseId == course.Id)
+            .FirstOrDefaultAsync();
+        var completedIds = (progress?.CompletedChapterContentIds ?? new()).ToHashSet();
+
         var chapter = course.Chapters.First(ch => ch.Id == chapterId || ch.ElementId == chapterId);
         var content = chapter.ChapterContent
             .OrderBy(cc => cc.SortOrder)
-            .Select(Mappers.ToChapterContentDto)
+            .Select(cc => Mappers.ToChapterContentDto(cc, completedIds.Contains(cc.ElementId)))
             .ToList();
 
         return ServiceResult<ChapterContentListModel>.Ok(
@@ -123,6 +144,41 @@ public class CourseService
             Level = CourseLevel.IsValid(req.Level) ? req.Level! : string.Empty,
         };
         await _db.Courses.InsertOneAsync(course);
+        return ServiceResult<CourseDto>.Ok(Mappers.ToCourseDto(course));
+    }
+
+    /// <summary>
+    /// Metadaten (Name/Titel/Tags/Level) nachträglich editieren (F11). Nur gesetzte
+    /// Felder werden übernommen; null lässt den bestehenden Wert unverändert.
+    /// </summary>
+    public async Task<ServiceResult<CourseDto>> UpdateAsync(
+        string courseId, UpdateCourseRequest req, string userId, bool isAdmin)
+    {
+        var course = await _db.Courses.Find(c => c.Id == courseId).FirstOrDefaultAsync();
+        if (course is null)
+            return ServiceResult<CourseDto>.NotFound("Course not found.");
+        if (!isAdmin && course.AuthorId != userId)
+            return ServiceResult<CourseDto>.Forbidden("Not your course.");
+
+        if (req.Name is not null)
+        {
+            if (string.IsNullOrWhiteSpace(req.Name))
+                return ServiceResult<CourseDto>.Validation("name must not be empty.");
+            course.Name = req.Name.Trim();
+        }
+        if (req.TitelItems is not null || req.Name is not null)
+            course.Titel = Mappers.BuildTexte(req.TitelItems, course.Name);
+        if (req.Tags is not null)
+            course.Tags = req.Tags
+                .Select(t => t.Trim().ToLowerInvariant())
+                .Where(t => t.Length > 0)
+                .Distinct()
+                .ToList();
+        if (req.Level is not null)
+            course.Level = CourseLevel.IsValid(req.Level) ? req.Level : string.Empty;
+
+        course.UpdatedAt = DateTime.UtcNow;
+        await _db.Courses.ReplaceOneAsync(c => c.Id == courseId, course);
         return ServiceResult<CourseDto>.Ok(Mappers.ToCourseDto(course));
     }
 
@@ -174,6 +230,34 @@ public class CourseService
         course.UpdatedAt = DateTime.UtcNow;
         await _db.Courses.ReplaceOneAsync(c => c.Id == courseId, course);
 
+        return ServiceResult<ChapterResponseDto>.Ok(Mappers.ToChapterResponseDto(chapter));
+    }
+
+    /// <summary>
+    /// Kapitel-Metadaten (Name + Titel) editieren (#10). Id/ElementId/SortOrder bleiben
+    /// erhalten; matcht auf Id ODER ElementId (UI schickt teils elementId).
+    /// </summary>
+    public async Task<ServiceResult<ChapterResponseDto>> UpdateChapterAsync(
+        string chapterId, CreateChapterRequest req, string userId, bool isAdmin)
+    {
+        var course = await _db.Courses
+            .Find(c => c.Chapters.Any(ch => ch.Id == chapterId || ch.ElementId == chapterId))
+            .FirstOrDefaultAsync();
+        if (course is null)
+            return ServiceResult<ChapterResponseDto>.NotFound("Chapter not found.");
+        if (!isAdmin && course.AuthorId != userId)
+            return ServiceResult<ChapterResponseDto>.Forbidden("Not your course.");
+        if (string.IsNullOrWhiteSpace(req.Name))
+            return ServiceResult<ChapterResponseDto>.Validation("name is required.");
+
+        var chapter = course.Chapters.First(ch => ch.Id == chapterId || ch.ElementId == chapterId);
+        chapter.Name = req.Name.Trim();
+        chapter.Titel = Mappers.BuildTexte(req.TitelItems, req.Name);
+        chapter.Show = req.Show;
+        // Id/ElementId/SortOrder bleiben unangetastet (Reihenfolge per Reorder-Endpoint).
+
+        course.UpdatedAt = DateTime.UtcNow;
+        await _db.Courses.ReplaceOneAsync(c => c.Id == course.Id, course);
         return ServiceResult<ChapterResponseDto>.Ok(Mappers.ToChapterResponseDto(chapter));
     }
 
@@ -347,15 +431,16 @@ public class CourseService
 
     public async Task<ServiceResult<bool>> DeleteChapterAsync(string chapterId, string userId, bool isAdmin)
     {
+        // UI schickt teils elementId → auf Id ODER ElementId matchen (wie Reorder).
         var course = await _db.Courses
-            .Find(c => c.Chapters.Any(ch => ch.Id == chapterId))
+            .Find(c => c.Chapters.Any(ch => ch.Id == chapterId || ch.ElementId == chapterId))
             .FirstOrDefaultAsync();
         if (course is null)
             return ServiceResult<bool>.NotFound("Chapter not found.");
         if (!isAdmin && course.AuthorId != userId)
             return ServiceResult<bool>.Forbidden("Not your course.");
 
-        var chapter = course.Chapters.First(ch => ch.Id == chapterId);
+        var chapter = course.Chapters.First(ch => ch.Id == chapterId || ch.ElementId == chapterId);
         var questionListIds = chapter.ChapterContent
             .Select(cc => cc.QuestionListId)
             .Where(qlId => !string.IsNullOrEmpty(qlId))
@@ -363,13 +448,13 @@ public class CourseService
         if (!string.IsNullOrEmpty(chapter.ChapterQuizId))
             questionListIds.Add(chapter.ChapterQuizId);
 
-        course.Chapters.RemoveAll(ch => ch.Id == chapterId);
+        course.Chapters.RemoveAll(ch => ch.Id == chapter.Id);
         course.UpdatedAt = DateTime.UtcNow;
         await _db.Courses.ReplaceOneAsync(c => c.Id == course.Id, course);
 
         if (questionListIds.Count > 0)
             await _db.QuestionLists.DeleteManyAsync(q => questionListIds.Contains(q.Id));
-        await _db.ChapterQuizAttempts.DeleteManyAsync(a => a.ChapterId == chapterId);
+        await _db.ChapterQuizAttempts.DeleteManyAsync(a => a.ChapterId == chapter.Id);
 
         return ServiceResult<bool>.Ok(true);
     }

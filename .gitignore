@@ -25,6 +25,9 @@ Thumbs.db
 # --- Claude Code (local) ---
 .claude/
 
+# --- macOS-Dev-Umgebung (dev-macos.sh Laufzeit-State) ---
+.dev-macos/
+
 # --- Logs ---
 *.log
 npm-debug.log*

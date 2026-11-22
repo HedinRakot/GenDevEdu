@@ -15,14 +15,17 @@ interface QuizOptionProps {
   state?: QuizOptionState;
   disabled?: boolean;
   onPress?: () => void;
+  /** 'radio' (Single Choice) = runder Buchstaben-Badge; 'checkbox' (Multiple Choice) = eckige Box. */
+  marker?: 'radio' | 'checkbox';
 }
 
 /**
  * Antwort-Option im Quiz-Fokus-Modus: Buchstaben-Badge + Text, mit Auswahl-/Auswertungszustand
  * (selected = Kupfer-Rahmen, correct = grün, incorrect = rot).
  */
-export function QuizOption({ letter, label, state = 'default', disabled, onPress }: QuizOptionProps) {
+export function QuizOption({ letter, label, state = 'default', disabled, onPress, marker = 'radio' }: QuizOptionProps) {
   const { colors } = useTheme();
+  const isCheckbox = marker === 'checkbox';
 
   const palette: Record<QuizOptionState, { border: string; bg: string; badgeBg: string; badgeFg: string }> = {
     default: {
@@ -79,10 +82,11 @@ export function QuizOption({ letter, label, state = 'default', disabled, onPress
         style={{
           width: 26,
           height: 26,
-          borderRadius: 13,
-          borderWidth: active ? 0 : 1.5,
-          borderColor: colors.border,
-          backgroundColor: p.badgeBg,
+          // Checkbox = eckig (Multiple Choice), Radio = rund (Single Choice).
+          borderRadius: isCheckbox ? 7 : 13,
+          borderWidth: active && !isCheckbox ? 0 : 1.5,
+          borderColor: active ? p.border : colors.border,
+          backgroundColor: isCheckbox && state !== 'selected' && !active ? 'transparent' : p.badgeBg,
           alignItems: 'center',
           justifyContent: 'center',
         }}
@@ -91,6 +95,8 @@ export function QuizOption({ letter, label, state = 'default', disabled, onPress
           <Icon name="check" size={15} color={p.badgeFg} strokeWidth={2.4} />
         ) : state === 'incorrect' ? (
           <Icon name="close" size={15} color={p.badgeFg} strokeWidth={2.4} />
+        ) : isCheckbox ? (
+          state === 'selected' ? <Icon name="check" size={15} color={p.badgeFg} strokeWidth={2.4} /> : null
         ) : (
           <Typography variant="label" style={{ color: p.badgeFg }}>
             {letter}

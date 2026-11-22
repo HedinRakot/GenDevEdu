@@ -17,7 +17,7 @@ export type AuthorStackParamList = {
   AuthorCourses: undefined;
   CreateCourse: undefined;
   CourseEditor: { courseId: string; courseName: string };
-  AddChapter: { courseId: string };
+  AddChapter: { courseId: string; chapterId?: string };
   AddChapterContent: {
     chapterId: string;
     courseId: string;

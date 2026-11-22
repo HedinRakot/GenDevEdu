@@ -31,6 +31,7 @@ export const STORAGE_KEYS = {
   // Einstellungen
   LANGUAGE: 'settings.language',
   THEME: 'settings.theme',
+  SIDEBAR_COLLAPSED: 'settings.sidebarCollapsed',
 
   // Notifications
   NOTIFICATION_ID: 'notifications.streakReminderId',

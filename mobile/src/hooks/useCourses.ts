@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { offlineMutationKeys } from '@/context/QueryProvider';
 import {
   fetchCourses,
   fetchCourseTags,
@@ -15,8 +16,10 @@ import {
   getStats,
   getCertificates,
   createCourse,
+  updateCourse,
   publishCourse,
   addChapter,
+  updateChapter,
   addChapterContent,
   updateChapterContent,
   createQuestionList,
@@ -34,6 +37,7 @@ import {
 import type { SubmitAttemptRequest, SubmitChapterQuizRequest } from '@/types/course';
 import type {
   CreateCourseRequest,
+  UpdateCourseRequest,
   CreateChapterRequest,
   CreateChapterContentRequest,
   CreateQuestionListRequest,
@@ -131,6 +135,9 @@ export function useEnrollment() {
 export function useCompleteContent() {
   const qc = useQueryClient();
   return useMutation({
+    // mutationKey + Defaults in QueryProvider => offline gequeuete Completes
+    // überleben einen App-Neustart und werden bei Rückkehr der Verbindung nachgesendet.
+    mutationKey: offlineMutationKeys.completeContent,
     mutationFn: completeChapterContent,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: courseKeys.all });
@@ -228,6 +235,17 @@ export function useCreateCourse() {
   });
 }
 
+export function useUpdateCourse(courseId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (req: UpdateCourseRequest) => updateCourse(courseId, req),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: courseKeys.lists() });
+      qc.invalidateQueries({ queryKey: courseKeys.all });
+    },
+  });
+}
+
 export function usePublishCourse() {
   const qc = useQueryClient();
   return useMutation({
@@ -240,6 +258,15 @@ export function useAddChapter(courseId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (req: CreateChapterRequest) => addChapter(courseId, req),
+    onSuccess: () => qc.invalidateQueries({ queryKey: courseKeys.chapters(courseId) }),
+  });
+}
+
+export function useUpdateChapter(courseId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ chapterId, req }: { chapterId: string; req: CreateChapterRequest }) =>
+      updateChapter(chapterId, req),
     onSuccess: () => qc.invalidateQueries({ queryKey: courseKeys.chapters(courseId) }),
   });
 }

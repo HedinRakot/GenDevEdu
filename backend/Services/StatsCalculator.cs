@@ -47,7 +47,9 @@ public static class StatsCalculator
             courseStats.Add(new CourseStatDto(
                 course.Id,
                 Mappers.PrimaryText(course.Titel),
-                Grading.Percent(completedContent, totalContent),
+                // #15: Quiz mitgewichten (Inhalte + bestandene Abschlussquizze), damit
+                // Kurs-%, Kapitel-% (GetChaptersAsync) und Gesamt-% dieselbe Formel nutzen.
+                Grading.Percent(completedContent + chaptersPassed, totalContent + totalChapters),
                 completedContent,
                 totalContent,
                 chaptersPassed,
@@ -55,8 +57,8 @@ public static class StatsCalculator
                 completed));
         }
 
-        int sumCompleted = courseStats.Sum(c => c.CompletedContent);
-        int sumTotal = courseStats.Sum(c => c.TotalContent);
+        int sumCompleted = courseStats.Sum(c => c.CompletedContent + c.ChaptersPassed);
+        int sumTotal = courseStats.Sum(c => c.TotalContent + c.TotalChapters);
 
         int correct = attempts.Count(a => a.IsCorrect);
         int chapterQuizzesPassed = quizAttempts.Where(a => a.Passed).Select(a => a.ChapterId).Distinct().Count();

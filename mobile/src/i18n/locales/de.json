@@ -114,6 +114,11 @@
     "verificationCodePlaceholder": "6-stelliger Code",
     "verifyButton": "Bestätigen",
     "verifyError": "Ungültiger Code. Bitte erneut versuchen.",
+    "twoFactorTitle": "Zwei-Faktor-Bestätigung",
+    "twoFactorInfo": "Bitte gib deinen Bestätigungscode ein, um die Anmeldung abzuschließen.",
+    "codeRequired": "Bitte gib den Bestätigungscode ein.",
+    "needsNewPassword": "Dein Passwort muss zurückgesetzt werden. Bitte nutze „Passwort vergessen?“.",
+    "needsClientTrust": "Dieses Gerät muss verifiziert werden. Bitte melde dich einmalig über die Web-App an, um es zu bestätigen.",
     "loginPrompt": "Bereits registriert?",
     "loginLink": "Anmelden",
     "forgotPasswordTitle": "Passwort zurücksetzen",
@@ -136,7 +141,9 @@
     "admin": "Verwaltung",
     "settings": "Einstellungen",
     "sectionLearn": "Lernen",
-    "sectionManage": "Verwaltung"
+    "sectionManage": "Verwaltung",
+    "collapseSidebar": "Menü einklappen",
+    "expandSidebar": "Menü ausklappen"
   },
   "admin": {
     "title": "Nutzerverwaltung",
@@ -279,6 +286,10 @@
     "false": "Falsch",
     "selectAnswer": "Bitte wähle mindestens eine Antwort.",
     "markLessonComplete": "Abschnitt abschließen",
+    "lessonCompleted": "Abgeschlossen",
+    "quizLabel": "Quiz",
+    "openQuiz": "Quiz öffnen",
+    "reviewQuiz": "Quiz ansehen",
     "chapterCompleteTitle": "Kapitel abgeschlossen!",
     "chapterCompleteBody": "Großartig! Du hast alle Inhalte dieses Kapitels abgeschlossen.",
     "code": {
@@ -287,6 +298,13 @@
       "askTutor": "Hilfe vom Tutor",
       "placeholder": "Schreibe deinen Code hier…",
       "error": "Fehler beim Ausführen des Codes.",
+      "outcomes": {
+        "InternalError": "Interner Fehler in der Ausführungsumgebung. Bitte versuche es später erneut.",
+        "TimeLimit": "Zeitlimit überschritten – dein Code lief zu lange.",
+        "MemoryLimit": "Speicherlimit überschritten.",
+        "RuntimeError": "Laufzeitfehler im Programm.",
+        "CompileError": "Kompilierungsfehler."
+      },
       "allTestsPassed": "Alle Tests bestanden!",
       "testsFailed": "Einige Tests sind fehlgeschlagen.",
       "passedOf": "{{passed}} von {{total}} Tests bestanden",

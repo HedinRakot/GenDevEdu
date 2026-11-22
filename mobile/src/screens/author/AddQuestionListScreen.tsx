@@ -54,12 +54,29 @@ export function AddQuestionListScreen() {
   const updateQ = (i: number, q: DraftQuestion) =>
     setQuestions((prev) => prev.map((old, idx) => (idx === i ? q : old)));
 
+  /** Frage um dir (−1 hoch / +1 runter) verschieben (Array-Reihenfolge = Persistenz-Reihenfolge). */
+  const moveQ = (i: number, dir: -1 | 1) =>
+    setQuestions((prev) => {
+      const j = i + dir;
+      if (j < 0 || j >= prev.length) return prev;
+      const next = [...prev];
+      [next[i], next[j]] = [next[j], next[i]];
+      return next;
+    });
+
   const onSave = () => {
-    let mapped: CreateQuestionRequest[];
-    try {
-      mapped = questions.map((q, i) => draftToCreateRequest(q, i));
-    } catch (e: any) {
-      Alert.alert('Validierung', e.message);
+    // #12: ALLE ungültigen Fragen sammeln (nicht beim ersten Fehler abbrechen).
+    const mapped: CreateQuestionRequest[] = [];
+    const errors: string[] = [];
+    questions.forEach((q, i) => {
+      try {
+        mapped.push(draftToCreateRequest(q, i));
+      } catch (e: any) {
+        errors.push(e.message);
+      }
+    });
+    if (errors.length > 0) {
+      Alert.alert('Validierung', errors.join('\n'));
       return;
     }
 
@@ -82,7 +99,9 @@ export function AddQuestionListScreen() {
       {
         onSuccess: () => {
           Alert.alert('Gespeichert', 'Fragenliste wurde gespeichert.');
-          navigation.navigate('AuthorCourses');
+          // #12: im Kontext bleiben (zum Inhalts-Editor zurück), damit das Quiz
+          // direkt weiter editierbar ist — statt raus zur Kursliste.
+          navigation.goBack();
         },
         onError: () => Alert.alert('Fehler', 'Fragenliste konnte nicht gespeichert werden.'),
       },
@@ -112,6 +131,8 @@ export function AddQuestionListScreen() {
               index={i}
               onChange={(updated) => updateQ(i, updated)}
               onRemove={() => setQuestions((prev) => prev.filter((_, idx) => idx !== i))}
+              onMoveUp={i > 0 ? () => moveQ(i, -1) : undefined}
+              onMoveDown={i < questions.length - 1 ? () => moveQ(i, 1) : undefined}
             />
           ))}
 

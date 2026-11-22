@@ -12,7 +12,7 @@ import { FontWeight } from '@/config/theme';
 export type CoursesStackParamList = {
   CoursesList: undefined;
   CourseDetail: { courseId: string };
-  Lesson: { courseId: string; lessonId: string; chapterId: string };
+  Lesson: { courseId: string; lessonId: string; chapterId: string; focusContentId?: string };
   ChapterQuiz: { courseId: string; chapterId: string; chapterName: string };
   Glossary: undefined;
 };

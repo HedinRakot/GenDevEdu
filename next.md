@@ -9,31 +9,34 @@ Datei-Angaben sind `Pfad:Zeile` zum Zeitpunkt der Diagnose (vor Umsetzung ggf. n
 
 ## 1. Bekannte Bugs — Status
 
-| # | Bug | Status | Kurz |
-|---|-----|--------|------|
-| 1 | Abmelden funktioniert nicht | ✅ | web-sicherer `confirmDialog` (Alert.alert ist No-op im Web) |
-| 2 | Scrollbar in Web-Variante fehlt | ✅ | `showScrollIndicator` (nur Web) statt `false` |
-| 3 | Abschnitt abschließen + Fortschritt animieren | ⬜ | Backend liefert Completion nicht; ProgressBar statisch |
-| 4 | Abmelden-Button im Menü | ✅ | Logout-Eintrag in `Sidebar.tsx` |
-| 5 | Snippet-Button funktioniert nicht | ✅ | `useFocusEffect`-Refresh + web-sicherer Delete |
-| 6 | Direkt zur letzten offenen Lektion springen | ⬜ | hängt an #3 (Completion-Daten) |
-| 7 | Multiple-Choice als Checkboxen statt Radio | ⬜ | Marker verzweigt nur auf TrueFalse |
-| 8 | Autoren: Fragen verschieben (▲/▼) | ⬜ | Muster von Inhalten kopieren |
-| 9 | Neues Kapitel: Validierung + RU-Feld fehlen | ⬜ | nur DE/EN-Titel, kaum Validierung |
-| 10 | Kapitel editieren/löschen | ⬜ | kein `PUT /chapters/{id}`; Delete matcht nur `Id` |
-| 11 | Nach „Inhalt erstellen" auf Seite bleiben | ⬜ | `goBack()` → stattdessen Formular resetten |
-| 12 | Quiz nach Fehler nicht editierbar / Validierung | ⬜ | Content wird vor gültiger Frage persistiert |
-| 13 | Einheitliche Markierung selektierter Antworten | ⬜ | Abschlusstest vs. Fragenliste unterschiedlich |
-| 14 | „Abschnitt abschließen" RU nicht übersetzt | ✅ | Key `quiz.markLessonComplete` in `ru.json` ergänzt |
-| 15 | Gesamtfortschritt Kapitel fixen | ⬜ | zwei divergente, quizlose Formeln |
-| 16 | Kapitel-Fortschritt in Liste + Quiz berücksichtigen | ⬜ | DTO trägt keine Progress-Daten |
-| 17 | Web-Sidebar links, einklappbar | 🟡 | links ✅ vorhanden; „einklappbar" ⬜ offen |
-| 18 | Kurse-Seite: leerer Bereich oben | ✅ | `edges={['top']}` + Padding reduziert (visuell bestätigen) |
-| 19 | Login-Fehlermeldungen in richtiger Sprache | ✅ | Clerk `error.code` → `auth.errors.*` (de/en/ru) |
+| #  | Bug                                                           | Status | Kurz |
+|----|---------------------------------------------------------------|--------|------|
+| 1  | Abmelden funktioniert nicht                                   | ✅ | web-sicherer `confirmDialog` (Alert.alert ist No-op im Web) |
+| 2  | Scrollbar in Web-Variante fehlt                               | ✅ | `showScrollIndicator` (nur Web) statt `false` |
+| 3  | Abschnitt abschließen + Fortschritt animieren                 | ✅ | Content-`Completed` aus Backend + `ProgressBar` mit `Animated` |
+| 4  | Abmelden-Button im Menü                                       | ✅ | Logout-Eintrag in `Sidebar.tsx` |
+| 5  | Snippet-Button funktioniert nicht                             | ✅ | `useFocusEffect`-Refresh + web-sicherer Delete |
+| 6  | Direkt zur letzten offenen Lektion springen                   | ✅ | seed completedIds + Scroll zur ersten offenen (`LessonScreen`) |
+| 7  | Multiple-Choice als Checkboxen statt Radio                    | ✅ | `QuizOption marker` + `LessonScreen` eckige Checkbox |
+| 8  | Autoren: Fragen verschieben (▲/▼)                             | ✅ | `onMoveUp/Down` in `QuestionEditor` + beide Editor-Screens |
+| 9  | Neues Kapitel: Validierung + RU-Feld fehlen                   | ✅ | RU-Input (lang 0) + Titel/Name-Pflicht + Maximallänge |
+| 10 | Kapitel editieren/löschen                                     | ✅ | `PUT /chapters/{id}` + `UpdateChapterAsync`; Delete `Id\|\|ElementId`; Edit-UI |
+| 11 | Nach „Inhalt erstellen" auf Seite bleiben                     | ✅ | Formular reset statt `goBack()` (non-Questions) |
+| 12 | Quiz nach Fehler nicht editierbar / Validierung               | 🟡 | on-success `goBack` + alle Validierungsfehler gesammelt; Defer-Persistenz ⬜ |
+| 13 | Einheitliche Markierung selektierter Antworten                | ✅ | `QuizOption marker` in Lektion + Abschlusstest identisch |
+| 14 | „Abschnitt abschließen" RU nicht übersetzt                    | ✅ | Key `quiz.markLessonComplete` in `ru.json` ergänzt |
+| 15 | Gesamtfortschritt Kapitel fixen                               | ✅ | einheitliche quiz-gewichtete Formel (`StatsCalculator`/`GetChaptersAsync`) |
+| 16 | Kapitel-Fortschritt in Liste + Quiz berücksichtigen           | ✅ | `ChapterResponseDto` Progress-Felder + per-Kapitel `ProgressBar` |
+| 17 | Web-Sidebar links, einklappbar                                | ✅ | Collapse-State persistiert (`storage`) + Toggle-Chevron |
+| 18 | Kurse-Seite: leerer Bereich oben                              | ✅ | `edges={['top']}` + Padding reduziert (visuell bestätigen) |
+| 19 | Login-Fehlermeldungen in richtiger Sprache                    | ✅ | Clerk `error.code` → `auth.errors.*` (de/en/ru) |
 | 20 | Quiz in separater View, mehrere Quiz/Kapitel, Prüfung am Ende | ⬜ | großes Refactoring |
-| — | Lernende/Teilnehmer werden nicht geladen (500) | ✅ | `Progress` `[BsonIgnoreExtraElements]`, Backend deployed |
+| 21 | Abmelden mit custom (nicht system) Popup                      | ⬜ |  |
+| —  | Lernende/Teilnehmer werden nicht geladen (500)                | ✅ | `Progress` `[BsonIgnoreExtraElements]`, Backend deployed |
 
 Erledigte Änderungen: `tsc --noEmit` grün. **Noch nicht** end-to-end in laufender App/Web verifiziert (bei nächstem Go am Emulator + Web durchklicken).
+
+**Umsetzungspass 2026-07-29 (Abschnitt 3, Wellen 1–5):** #3,#6,#7,#8,#9,#10,#11,#13,#15,#16,#17 erledigt; #12 teilweise (Flow/Validierung ✅, Defer-Persistenz offen). Backend 159/159, Mobile 209/209, `tsc` grün. **#20 bewusst zurückgestellt** — „großes Refactoring" (Quiz in separater View, mehrere Quiz/Kapitel, deferred Prüfung); als eigener Schritt sicherer.
 
 Neue Hilfen (wiederverwendbar): `mobile/src/utils/confirm.ts` (plattformsicherer Dialog), `mobile/src/utils/clerkError.ts` (Clerk-Fehler → i18n), `showScrollIndicator` in `utils/platform.ts`.
 
@@ -125,40 +128,41 @@ Empfehlung: Wellen 1 parallel starten; jede Welle nach Umsetzung am **Emulator +
 
 ## Auth & Rollen
 
-- **Login: Nicht-`complete`-Status behandeln** — `LoginScreen` wertet nur
-  `signIn.status === 'complete'` aus; jeder andere Status fällt in den generischen
-  Fehlerzweig. Auf **neuem nativem Gerät** liefert Clerk bei aktivem **Device Trust**
-  `needs_client_trust` → Login schlägt trotz korrekter Credentials fehl. Workaround:
-  Device Trust auf **Dev**-Instanz deaktiviert. Vor Produktion ausimplementieren
-  (Code senden → Eingabe → `finalize()`); betrifft auch `needs_second_factor`/`needs_new_password`.
-  (Fehler-Lokalisierung #19 ist bereits erledigt.)
+- 🟡 **Login: Nicht-`complete`-Status behandeln** — ✅ umgesetzt (2026-07-28): `LoginScreen`
+  verzweigt auf `signIn.status` — Second-Factor-Code-Stufe (TOTP/phone/email/backup via
+  `signIn.mfa.*`) sowie spezifische Meldungen für `needs_new_password`/`needs_client_trust`.
+  ⏳ Verbleibt: interaktiver 2FA-Flow gegen eine live 2FA-fähige Clerk-Instanz testen.
+  (Fehler-Lokalisierung #19 war bereits erledigt.)
 
 ## Backend / API
 
-- **Code-Aufgaben zeigen Fehler trotz erfolgreichem Request** — `POST /api/code-submissions`
-  → `202`, Polling `GET /api/code-submissions/{id}` ok, aber der Sandbox-Worker setzt
-  `Status = Error`. Ursache: Sandbox-Umgebung (Podman-Sidecar + Runner-Image; nach Reboot
-  Images neu pushen). Schritte: (1) Polling-Response prüfen (`outcome: InternalError` ⇒
-  Cluster-Umgebung fixen), (2) in `LessonScreen`/CodeQuestionCard `errorMessage`/`outcome`
-  differenziert anzeigen + Worker-Exception besser loggen, (3) optional Stub-`ISandboxRunner` für Dev.
+- ✅ **Code-Aufgaben zeigen Fehler trotz erfolgreichem Request** — umgesetzt (2026-07-28):
+  Dev-Stub `StubSandboxRunner` + DI-Switch `Sandbox:UseStub` (in `appsettings.Development.json`
+  aktiv) → lokal ohne Podman-Socket kein „Execution failed" mehr; zusätzlich `LessonScreen`
+  zeigt `outcome` (InternalError/TimeLimit/…) differenziert (`quiz.code.outcomes.*`, de/en/ru).
+  ⏳ Cluster-Umgebung (Podman-Sidecar + Runner-Image) bleibt separat.
 - **Kapitel/Inhalte per Drag & Drop sortieren** — aktuell ▲/▼ (Reorder-Endpoints). Echtes
   D&D im Web als Ausbaustufe (`react-native-draggable-flatlist` web-tauglich prüfen).
-- **Tags/Level nachträglich editieren** (F11) — `PUT /api/courses/{id}` (Metadaten).
-- **Öffentliche Zertifikat-Verifikation** (F10) — `GET /api/certificates/{code}`; `VerificationCode` vorhanden.
-- **Verwaiste Attempts** — Quiz-Bearbeitung erzeugt neue Frage-IDs, verwaist alte Attempts
-  (Dashboard toleriert sie); sauberes Migrations-/Cleanup-Konzept steht aus.
+- ✅ **Tags/Level nachträglich editieren** (F11) — `PUT /api/courses/{id}` +
+  `CourseService.UpdateAsync`; Mobile `updateCourse` + `useUpdateCourse` (2026-07-28).
+- ✅ **Öffentliche Zertifikat-Verifikation** (F10) — `GET /api/certificates/{code}` (anonym) +
+  `CertificateService.VerifyByCodeAsync`, schlankes öffentliches DTO (2026-07-28).
+- ✅ **Verwaiste Attempts** — `QuestionService.UpdateQuestionListAsync` löscht Attempts der
+  alten Frage-Ids (`DeleteManyAsync`) (2026-07-28).
 
 ## Offline-Modus (Ausbaustufe)
 
-- **Offline-Mutations-Queue** — Queries werden persistiert/pausiert; Mutations verhalten sich
-  offline sauber (Fehler statt Hänger), aber Queue-and-Sync bei Reconnect fehlt.
+- ✅ **Offline-Mutations-Queue** — umgesetzt (2026-07-28): `QueryProvider` persistiert
+  pausierte Mutations (`shouldDehydrateMutation`) + `resumePausedMutations` beim Rehydrieren;
+  `offlineMutationKeys` + `setMutationDefaults` für `completeContent`; Test in `queryOffline.test.ts`.
 
 ## Sicherheit / Sandbox (F7)
 
-- **Prod-Härtung der Code-Sandbox** — Container-Isolation ist dev-only. Prod-Pfad (nicht gebaut):
-  Jobs-Runner hinter `ISandboxRunner` + gVisor/Kata, getainteter Sandbox-Node-Pool, NetworkPolicy
-  deny-all. Rootless ohne cgroup-v2-Delegation setzt `--memory` ggf. nicht durch.
-- **End-to-End-Submit über die Expo-App** (Clerk-Login) für F7 noch nicht verifiziert.
+- 🟡 **Prod-Härtung der Code-Sandbox** — ✅ NetworkPolicies (Default-Deny + minimaler Egress)
+  in `k8s/30-sandbox-hardening.yaml` (2026-07-28). ⏳ gVisor/Kata-RuntimeClass + getainteter
+  Node-Pool als dokumentierter Patch (braucht Cluster-Voraussetzungen).
+- 🟡 **End-to-End-Submit über die Expo-App** (Clerk-Login) für F7 — Spec `code-submit.spec.ts`
+  vorhanden; noch nicht gegen laufenden Stack ausgeführt.
 
 ## Content / i18n
 
@@ -168,12 +172,16 @@ Empfehlung: Wellen 1 parallel starten; jede Welle nach Umsetzung am **Emulator +
 
 ## CRM
 
-- **E-Mail-Versand** — aktuell nur Vorschau (`NoOpEmailSender`); echter SMTP-Versand via DI + Config steht aus.
+- ✅ **E-Mail-Versand** — umgesetzt (2026-07-28): `SmtpEmailSender` (MailKit) + Config-Switch
+  `Email:Sender=smtp` (`crm/api`); Default bleibt NoOp/Vorschau. Zugangsdaten via Secret/Env.
 
 ## Tests / CI
 
-- **CI-Pipeline** — GitHub Actions für `dotnet test` + `npm test` (+ optional E2E).
-- **E2E erweitern** — Specs für F7/F8/F9/F10 (testIDs vorhanden).
+- ✅ **CI-Pipeline** — `.github/workflows/ci.yml` (2026-07-28): dotnet test (Backend + CRM),
+  tsc + npm test (Mobile), E2E gated (workflow_dispatch/Label).
+- 🟡 **E2E erweitern** — ✅ neu: `certificate-verify.spec.ts` (F10), `offline.spec.ts` (F9),
+  `code-submit.spec.ts` (F7); testIDs an der Code-Karte ergänzt. ⏳ F8 offen; Positiv-Fälle
+  brauchen Seed (`E2E_CERT_CODE`, Kurs mit Code-Frage) + Clerk-Secrets in CI.
 
 ## Backlog (F13)
 

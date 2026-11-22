@@ -12,6 +12,14 @@ export interface CreateCourseRequest {
   level?: string;
 }
 
+/** Metadaten-Update (PUT /api/courses/{id}); gesetzte Felder werden übernommen. */
+export interface UpdateCourseRequest {
+  name?: string;
+  titelItems?: TextItemDto[];
+  tags?: string[];
+  level?: string;
+}
+
 export interface CreateChapterRequest {
   name: string;
   titelItems: TextItemDto[];

@@ -32,6 +32,7 @@ function ChapterRow({
   index,
   onPress,
   onQuiz,
+  onEdit,
   onDelete,
   onMoveUp,
   onMoveDown,
@@ -42,6 +43,7 @@ function ChapterRow({
   index: number;
   onPress: () => void;
   onQuiz: () => void;
+  onEdit: () => void;
   onDelete: () => void;
   /** undefined = erste Zeile (kein Hoch-Schieben möglich) */
   onMoveUp?: () => void;
@@ -95,6 +97,14 @@ function ChapterRow({
         style={styles.quizButton}
       >
         <Badge label={chapter.hasQuiz ? 'Quiz' : '+ Quiz'} tone={chapter.hasQuiz ? 'success' : 'default'} />
+      </TouchableOpacity>
+      <TouchableOpacity
+        testID={`chapter-edit-${index}`}
+        onPress={onEdit}
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        style={styles.deleteButton}
+      >
+        <Icon name="edit" size={FontSize.lg} color={colors.primary} />
       </TouchableOpacity>
       <TouchableOpacity
         onPress={onDelete}
@@ -220,6 +230,7 @@ export function CourseEditorScreen() {
                   chapterName: translate(ch.titel) || ch.name,
                 })
               }
+              onEdit={() => navigation.navigate('AddChapter', { courseId, chapterId: ch.elementId })}
               onDelete={() => onDeleteChapter(ch)}
             />
           ))}

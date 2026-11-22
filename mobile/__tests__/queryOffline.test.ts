@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
-import { QueryClient, onlineManager } from '@tanstack/react-query';
+import { QueryClient, MutationObserver, dehydrate, hydrate, onlineManager } from '@tanstack/react-query';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 import {
   persistQueryClientSave,
@@ -54,6 +54,54 @@ describe('query cache persistence (AsyncStorage roundtrip)', () => {
     await persistQueryClientRestore({ queryClient: second, persister, maxAge: 1000 * 60 * 60 * 24 });
 
     expect(second.getQueryData(['courses'])).toEqual([{ id: 'c1', name: '.NET Grundlagen' }]);
+
+    first.clear();
+    second.clear();
+  });
+});
+
+describe('offline mutations queue (pause → persist → restart → resume)', () => {
+  const KEY = ['completeContent'];
+  // networkMode 'online' pausiert eine Mutation offline sofort (ohne die fn zu starten) —
+  // damit lässt sich der Persist/Resume-Mechanismus des QueryProviders isoliert prüfen.
+  const clientOpts = {
+    defaultOptions: { mutations: { networkMode: 'online' as const, retry: 0 } },
+  };
+
+  afterEach(() => onlineManager.setOnline(true));
+
+  it('persists a paused mutation and re-sends it on the next client once online', async () => {
+    // ── Session 1: offline → Mutation pausiert statt zu laufen ──
+    onlineManager.setOnline(false);
+    expect(onlineManager.isOnline()).toBe(false);
+    const first = new QueryClient(clientOpts);
+    const firstFn = jest.fn().mockResolvedValue(undefined);
+    first.setMutationDefaults(KEY, { mutationFn: firstFn });
+
+    const observer = new MutationObserver<unknown, Error, string>(first, { mutationKey: KEY });
+    observer.mutate('content-1').catch(() => {});
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(firstFn).not.toHaveBeenCalled(); // offline → nicht ausgeführt
+
+    // ── Dehydrieren wie im QueryProvider (nur pausierte Mutations) ──
+    const dehydrated = dehydrate(first, {
+      shouldDehydrateMutation: (m) => m.state.isPaused,
+    });
+    expect(dehydrated.mutations).toHaveLength(1);
+
+    // ── Session 2: frischer Client rehydriert + geht online → nachsenden ──
+    const second = new QueryClient(clientOpts);
+    const secondFn = jest.fn().mockResolvedValue(undefined);
+    second.setMutationDefaults(KEY, { mutationFn: secondFn });
+    hydrate(second, dehydrated);
+
+    onlineManager.setOnline(true);
+    await second.resumePausedMutations();
+
+    // react-query übergibt der mutationFn zusätzlich ein Kontext-Objekt → nur erstes Arg prüfen.
+    expect(secondFn).toHaveBeenCalledTimes(1);
+    expect(secondFn.mock.calls[0][0]).toBe('content-1');
 
     first.clear();
     second.clear();

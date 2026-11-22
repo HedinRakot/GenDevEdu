@@ -114,6 +114,11 @@
     "verificationCodePlaceholder": "6-digit code",
     "verifyButton": "Verify",
     "verifyError": "Invalid code. Please try again.",
+    "twoFactorTitle": "Two-factor verification",
+    "twoFactorInfo": "Enter your verification code to finish signing in.",
+    "codeRequired": "Please enter the verification code.",
+    "needsNewPassword": "Your password must be reset. Please use “Forgot password?”.",
+    "needsClientTrust": "This device needs to be verified. Please sign in once via the web app to confirm it.",
     "loginPrompt": "Already have an account?",
     "loginLink": "Sign in",
     "forgotPasswordTitle": "Reset password",
@@ -136,7 +141,9 @@
     "admin": "Administration",
     "settings": "Settings",
     "sectionLearn": "Learn",
-    "sectionManage": "Manage"
+    "sectionManage": "Manage",
+    "collapseSidebar": "Collapse menu",
+    "expandSidebar": "Expand menu"
   },
   "admin": {
     "title": "User management",
@@ -278,6 +285,10 @@
     "true": "True",
     "false": "False",
     "markLessonComplete": "Mark section complete",
+    "lessonCompleted": "Completed",
+    "quizLabel": "Quiz",
+    "openQuiz": "Open quiz",
+    "reviewQuiz": "Review quiz",
     "selectAnswer": "Please select at least one answer.",
     "chapterCompleteTitle": "Chapter complete!",
     "chapterCompleteBody": "Great job! You answered all questions correctly.",
@@ -287,6 +298,13 @@
       "askTutor": "Ask the tutor",
       "placeholder": "Write your code here…",
       "error": "Error while running the code.",
+      "outcomes": {
+        "InternalError": "Internal error in the execution environment. Please try again later.",
+        "TimeLimit": "Time limit exceeded — your code ran too long.",
+        "MemoryLimit": "Memory limit exceeded.",
+        "RuntimeError": "Runtime error in the program.",
+        "CompileError": "Compilation error."
+      },
       "allTestsPassed": "All tests passed!",
       "testsFailed": "Some tests failed.",
       "passedOf": "{{passed}} of {{total}} tests passed",

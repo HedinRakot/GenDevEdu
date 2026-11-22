@@ -24,8 +24,67 @@ export function LoginScreen() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [code, setCode] = useState('');
+  // 'credentials' = E-Mail/Passwort; 'secondFactor' = 2FA-Code (needs_second_factor).
+  const [stage, setStage] = useState<'credentials' | 'secondFactor'>('credentials');
+  const [secondFactor, setSecondFactor] =
+    useState<'totp' | 'phone_code' | 'email_code' | 'backup_code'>('totp');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const mapThrown = (err: unknown) => {
+    // Future-API-Methoden liefern { error }; ein throw hier ist ein Transport-/Netzfehler.
+    console.error('[Login] failed:', err);
+    setErrorMsg(err instanceof Error && /network/i.test(err.message) ? t('auth.networkError') : t('auth.loginError'));
+  };
+
+  /**
+   * Reagiert auf signIn.status nach password()/2FA-Verify. Behandelt die
+   * Clerk-Zwischenstatus statt sie pauschal als Fehler zu werten.
+   */
+  const advance = async () => {
+    if (!signIn) return;
+    switch (signIn.status) {
+      case 'complete':
+        await signIn.finalize();
+        return;
+      case 'needs_second_factor':
+        await beginSecondFactor();
+        return;
+      case 'needs_new_password':
+        setErrorMsg(t('auth.needsNewPassword'));
+        return;
+      case 'needs_client_trust':
+        setErrorMsg(t('auth.needsClientTrust'));
+        return;
+      default:
+        console.error('[Login] unhandled status:', signIn.status);
+        setErrorMsg(t('auth.loginError'));
+    }
+  };
+
+  /** Zweiten Faktor vorbereiten: Strategie wählen und ggf. Code versenden. */
+  const beginSecondFactor = async () => {
+    if (!signIn) return;
+    const strategies = (signIn.supportedSecondFactors ?? []).map((f) => f.strategy);
+    const chosen =
+      strategies.includes('totp') ? 'totp' :
+      strategies.includes('phone_code') ? 'phone_code' :
+      strategies.includes('email_code') ? 'email_code' :
+      strategies.includes('backup_code') ? 'backup_code' : 'totp';
+    setSecondFactor(chosen);
+
+    // phone_code/email_code müssen erst versendet werden; totp/backup_code nicht.
+    if (chosen === 'phone_code') {
+      const { error } = await signIn.mfa.sendPhoneCode();
+      if (error) { setErrorMsg(clerkErrorMessage(error, t, 'auth.loginError')); return; }
+    } else if (chosen === 'email_code') {
+      const { error } = await signIn.mfa.sendEmailCode();
+      if (error) { setErrorMsg(clerkErrorMessage(error, t, 'auth.loginError')); return; }
+    }
+    setCode('');
+    setStage('secondFactor');
+  };
 
   const handleLogin = async () => {
     if (isSubmitting || !signIn) return;
@@ -39,20 +98,34 @@ export function LoginScreen() {
         setErrorMsg(clerkErrorMessage(error, t, 'auth.loginError'));
         return;
       }
-      if (signIn.status === 'complete') {
-        await signIn.finalize();
-      } else {
-        console.error('[Login] incomplete, status:', signIn.status);
-        setErrorMsg(t('auth.loginError'));
-      }
+      await advance();
     } catch (err: unknown) {
-      // Future-API methods return { error }; a throw here is a transport/network failure.
-      console.error('[Login] failed:', err);
-      if (err instanceof Error && /network/i.test(err.message)) {
-        setErrorMsg(t('auth.networkError'));
-      } else {
-        setErrorMsg(t('auth.loginError'));
+      mapThrown(err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    if (isSubmitting || !signIn) return;
+    if (!code.trim()) { setErrorMsg(t('auth.codeRequired')); return; }
+    setIsSubmitting(true);
+    setErrorMsg(null);
+    try {
+      const params = { code: code.trim() };
+      const { error } =
+        secondFactor === 'phone_code' ? await signIn.mfa.verifyPhoneCode(params) :
+        secondFactor === 'email_code' ? await signIn.mfa.verifyEmailCode(params) :
+        secondFactor === 'backup_code' ? await signIn.mfa.verifyBackupCode(params) :
+        await signIn.mfa.verifyTOTP(params);
+      if (error) {
+        console.error('[Login] 2FA failed:', error);
+        setErrorMsg(clerkErrorMessage(error, t, 'auth.verifyError'));
+        return;
       }
+      await advance();
+    } catch (err: unknown) {
+      mapThrown(err);
     } finally {
       setIsSubmitting(false);
     }
@@ -78,63 +151,118 @@ export function LoginScreen() {
           </View>
 
           <Card style={styles.card}>
-            <Typography variant="h3" style={{ marginBottom: Spacing.lg }}>
-              {t('auth.welcome')}
-            </Typography>
+            {stage === 'secondFactor' ? (
+              <>
+                <Typography variant="h3" style={{ marginBottom: Spacing.xs }}>
+                  {t('auth.twoFactorTitle')}
+                </Typography>
+                <Typography variant="body" color="secondary" style={{ marginBottom: Spacing.lg }}>
+                  {t('auth.twoFactorInfo')}
+                </Typography>
 
-            <Input
-              testID="login-email-input"
-              containerStyle={{ marginBottom: Spacing.md }}
-              placeholder={t('auth.emailPlaceholder')}
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
-              textContentType="emailAddress"
-              autoComplete="email"
-              leftIcon="mail"
-            />
+                <Input
+                  testID="login-2fa-input"
+                  containerStyle={{ marginBottom: Spacing.md }}
+                  placeholder={t('auth.verificationCodePlaceholder')}
+                  value={code}
+                  onChangeText={setCode}
+                  autoCapitalize="none"
+                  keyboardType="number-pad"
+                  autoComplete="one-time-code"
+                  textContentType="oneTimeCode"
+                  leftIcon="lock"
+                />
 
-            <Input
-              testID="login-password-input"
-              containerStyle={{ marginBottom: Spacing.md }}
-              placeholder={t('auth.passwordPlaceholder')}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              textContentType="password"
-              autoComplete="current-password"
-              leftIcon="lock"
-            />
+                {errorMsg && (
+                  <Typography
+                    testID="login-error"
+                    variant="bodySm"
+                    style={{ color: colors.error, marginBottom: Spacing.md }}
+                  >
+                    {errorMsg}
+                  </Typography>
+                )}
 
-            {errorMsg && (
-              <Typography
-                testID="login-error"
-                variant="bodySm"
-                style={{ color: colors.error, marginBottom: Spacing.md }}
-              >
-                {errorMsg}
-              </Typography>
+                <Button
+                  testID="login-2fa-submit"
+                  title={t('auth.verifyButton')}
+                  onPress={handleVerifyCode}
+                  loading={isSubmitting}
+                  disabled={isSubmitting}
+                  fullWidth
+                  iconRight="arrow-right"
+                  style={{ marginTop: Spacing.sm }}
+                />
+
+                <Button
+                  testID="login-2fa-back"
+                  title={t('common.back')}
+                  variant="ghost"
+                  onPress={() => { setStage('credentials'); setErrorMsg(null); }}
+                  style={{ alignSelf: 'center', marginTop: Spacing.sm }}
+                />
+              </>
+            ) : (
+              <>
+                <Typography variant="h3" style={{ marginBottom: Spacing.lg }}>
+                  {t('auth.welcome')}
+                </Typography>
+
+                <Input
+                  testID="login-email-input"
+                  containerStyle={{ marginBottom: Spacing.md }}
+                  placeholder={t('auth.emailPlaceholder')}
+                  value={email}
+                  onChangeText={setEmail}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                  textContentType="emailAddress"
+                  autoComplete="email"
+                  leftIcon="mail"
+                />
+
+                <Input
+                  testID="login-password-input"
+                  containerStyle={{ marginBottom: Spacing.md }}
+                  placeholder={t('auth.passwordPlaceholder')}
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry
+                  textContentType="password"
+                  autoComplete="current-password"
+                  leftIcon="lock"
+                />
+
+                {errorMsg && (
+                  <Typography
+                    testID="login-error"
+                    variant="bodySm"
+                    style={{ color: colors.error, marginBottom: Spacing.md }}
+                  >
+                    {errorMsg}
+                  </Typography>
+                )}
+
+                <Button
+                  testID="oidc-login-button"
+                  title={t('auth.loginButton')}
+                  onPress={handleLogin}
+                  loading={isSubmitting}
+                  disabled={isSubmitting}
+                  fullWidth
+                  iconRight="arrow-right"
+                  style={{ marginTop: Spacing.sm }}
+                />
+
+                <Button
+                  testID="forgot-password-link"
+                  title={t('auth.forgotPassword')}
+                  variant="ghost"
+                  onPress={() => navigation.navigate('ForgotPassword')}
+                  style={{ alignSelf: 'center', marginTop: Spacing.sm }}
+                />
+              </>
             )}
-
-            <Button
-              testID="oidc-login-button"
-              title={t('auth.loginButton')}
-              onPress={handleLogin}
-              loading={isSubmitting}
-              disabled={isSubmitting}
-              fullWidth
-              iconRight="arrow-right"
-              style={{ marginTop: Spacing.sm }}
-            />
-
-            <Button
-              testID="forgot-password-link"
-              title={t('auth.forgotPassword')}
-              variant="ghost"
-              onPress={() => navigation.navigate('ForgotPassword')}
-              style={{ alignSelf: 'center', marginTop: Spacing.sm }}
-            />
           </Card>
 
           <View style={styles.footer}>

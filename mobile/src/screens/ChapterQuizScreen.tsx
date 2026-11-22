@@ -196,6 +196,7 @@ export function ChapterQuizScreen() {
                         letter={String.fromCharCode(65 + idx)}
                         label={label}
                         state={state}
+                        marker={q.questionType === QuestionType.MultipleChoice ? 'checkbox' : 'radio'}
                         disabled={!!result}
                         onPress={() => toggle(q, a.id)}
                       />

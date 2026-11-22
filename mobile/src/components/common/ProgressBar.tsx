@@ -1,5 +1,5 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { Animated, StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '@/context/ThemeContext';
 import { FontSize, FontWeight } from '@/config/theme';
 
@@ -28,6 +28,16 @@ export function ProgressBar({
   const trackColor = backgroundColor ?? colors.surfaceElevated;
   const clamped = Math.min(100, Math.max(0, progress));
 
+  // #3: Füllbreite bei Fortschrittsänderung animieren (useNativeDriver:false, da Layout).
+  const anim = useRef(new Animated.Value(clamped)).current;
+  useEffect(() => {
+    Animated.timing(anim, { toValue: clamped, duration: 400, useNativeDriver: false }).start();
+  }, [clamped, anim]);
+  const animatedWidth = anim.interpolate({
+    inputRange: [0, 100],
+    outputRange: ['0%', '100%'],
+  });
+
   return (
     <View>
       {showLabel && (
@@ -39,11 +49,11 @@ export function ProgressBar({
           { height, backgroundColor: trackColor, borderRadius: height / 2 },
         ]}
       >
-        <View
+        <Animated.View
           style={[
             styles.fill,
             {
-              width: `${clamped}%`,
+              width: animatedWidth,
               backgroundColor: fillColor,
               borderRadius: height / 2,
               height,

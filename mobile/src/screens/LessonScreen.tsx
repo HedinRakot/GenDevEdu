@@ -169,12 +169,17 @@ function ChoiceQuestionCard({ question, onAnsweredCorrectly }: QuestionCardProps
                   <View
                     style={[
                       styles.radio,
+                      // #7/#13: Multiple Choice = eckige Checkbox, Single Choice = runder Radio.
+                      isMulti && styles.checkbox,
                       { borderColor: isSelected ? colors.primary : colors.border },
                     ]}
                   >
-                    {isSelected && (
-                      <View style={[styles.radioDot, { backgroundColor: colors.primary }]} />
-                    )}
+                    {isSelected &&
+                      (isMulti ? (
+                        <Icon name="check" size={14} color={colors.primary} strokeWidth={2.5} />
+                      ) : (
+                        <View style={[styles.radioDot, { backgroundColor: colors.primary }]} />
+                      ))}
                   </View>
                 )}
                 <Typography
@@ -313,6 +318,7 @@ function CodeQuestionCard({ question, onAnsweredCorrectly }: QuestionCardProps) 
       />
 
       <TextInput
+        testID="code-input"
         style={[
           styles.codeInput,
           { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border },
@@ -329,6 +335,7 @@ function CodeQuestionCard({ question, onAnsweredCorrectly }: QuestionCardProps) 
       />
 
       <Button
+        testID="code-submit"
         title={polling ? t('quiz.code.grading') : t('quiz.code.submit')}
         variant="primary"
         fullWidth
@@ -361,7 +368,10 @@ function CodeQuestionCard({ question, onAnsweredCorrectly }: QuestionCardProps) 
           <View style={styles.feedbackTextRow}>
             <Icon name="x-circle" size={18} color={colors.error} />
             <Typography variant="label" color={colors.error}>
-              {t('quiz.code.error')}
+              {/* Ursache differenziert (InternalError/TimeLimit/…) statt pauschal „Fehler". */}
+              {result.outcome
+                ? t(`quiz.code.outcomes.${result.outcome}`, { defaultValue: t('quiz.code.error') })
+                : t('quiz.code.error')}
             </Typography>
           </View>
           {result.errorMessage ? (
@@ -373,7 +383,7 @@ function CodeQuestionCard({ question, onAnsweredCorrectly }: QuestionCardProps) 
       )}
 
       {result?.status === 'Completed' && (
-        <View style={styles.codeResult}>
+        <View testID="code-result" style={styles.codeResult}>
           <View style={styles.feedbackTextRow}>
             <Icon
               name={passed ? 'check-circle' : 'x-circle'}
@@ -494,15 +504,45 @@ function QuestionsSection({
 
 function ContentItem({
   content,
+  completed,
+  inQuizView,
+  onOpenQuiz,
   onCompleted,
 }: {
   content: ChapterContentModel;
+  completed: boolean;
+  /** true = Fokus-View (Quiz wird tatsächlich angezeigt); false = Kapitel-Liste (nur Link). */
+  inQuizView: boolean;
+  onOpenQuiz: (contentId: string) => void;
   onCompleted: (contentId: string) => void;
 }) {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const { save: saveSnippet, isFavorited } = useSnippets();
   const title = translate(content.titel);
+
+  // Sichtbares Abschluss-Feedback: nach dem Klick „Abgeschlossen" (grün, Häkchen)
+  // statt weiterhin den unveränderten „Abschnitt abschließen"-Button.
+  const CompleteControl = () =>
+    completed ? (
+      <View
+        testID="lesson-completed"
+        style={[styles.completedBanner, { backgroundColor: colors.successSurface, borderColor: colors.success }]}
+      >
+        <Icon name="check-circle" size={18} color={colors.success} />
+        <Text style={[styles.completedText, { color: colors.success }]}>{t('quiz.lessonCompleted')}</Text>
+      </View>
+    ) : (
+      <Button
+        testID="mark-complete"
+        title={t('quiz.markLessonComplete')}
+        variant="primary"
+        fullWidth
+        iconRight="arrow-right"
+        onPress={() => onCompleted(content.elementId)}
+        style={styles.completeButton}
+      />
+    );
 
   if (content.contentType === ChapterContentType.Lesson) {
     // Kursinhalt ist HTML (Legacy-Editor) → in Markdown wandeln, damit Tags wie
@@ -538,14 +578,7 @@ function ContentItem({
           </TouchableOpacity>
         </View>
         <MarkdownRenderer content={text} />
-        <Button
-          title={t('quiz.markLessonComplete')}
-          variant="primary"
-          fullWidth
-          iconRight="arrow-right"
-          onPress={() => onCompleted(content.elementId)}
-          style={styles.completeButton}
-        />
+        <CompleteControl />
       </View>
     );
   }
@@ -558,17 +591,56 @@ function ContentItem({
           <Icon name="play" size={18} color="white" />
           <Text style={styles.videoPlaceholderText}>Video: {content.videoUrl || 'URL'}</Text>
         </View>
-        <TouchableOpacity
-          style={[styles.completeButton, { backgroundColor: colors.primary }]}
-          onPress={() => onCompleted(content.elementId)}
-        >
-          <Text style={styles.completeButtonText}>{t('quiz.markLessonComplete')}</Text>
-        </TouchableOpacity>
+        <CompleteControl />
       </View>
     );
   }
 
   if (content.contentType === ChapterContentType.Questions) {
+    // #20: In der Kapitel-Liste wird das Quiz NICHT inline gezeigt, sondern als
+    // Eintrag, der eine separate View öffnet. Nur im Fokus-Modus die Fragen rendern.
+    if (!inQuizView) {
+      return (
+        <View style={styles.contentSection}>
+          <View style={styles.lessonHeader}>
+            <View style={styles.lessonTitleBlock}>
+              <Typography variant="caption" color="accent" style={styles.eyebrow}>
+                {t('quiz.quizLabel')}
+              </Typography>
+              <Typography variant="h2" color={colors.textPrimary}>
+                {title}
+              </Typography>
+            </View>
+            <Icon name="message" size={22} color={colors.textTertiary} />
+          </View>
+          {completed && (
+            <View
+              testID="quiz-completed"
+              style={[styles.completedBanner, { backgroundColor: colors.successSurface, borderColor: colors.success, marginTop: Spacing.sm }]}
+            >
+              <Icon name="check-circle" size={18} color={colors.success} />
+              <Text style={[styles.completedText, { color: colors.success }]}>{t('quiz.lessonCompleted')}</Text>
+            </View>
+          )}
+          {content.questionListId ? (
+            <Button
+              testID="open-quiz"
+              title={completed ? t('quiz.reviewQuiz') : t('quiz.openQuiz')}
+              variant={completed ? 'secondary' : 'primary'}
+              fullWidth
+              iconRight="arrow-right"
+              onPress={() => onOpenQuiz(content.elementId)}
+              style={styles.completeButton}
+            />
+          ) : (
+            <Text style={[styles.errorText, { color: colors.textSecondary }]}>
+              Keine Fragen verfügbar.
+            </Text>
+          )}
+        </View>
+      );
+    }
+
     return (
       <View style={styles.contentSection}>
         <Text style={[styles.h1, { color: colors.textPrimary }]}>{title}</Text>
@@ -596,7 +668,9 @@ export function LessonScreen() {
   const { colors } = useTheme();
   const route = useRoute<RoutePropType>();
   const navigation = useNavigation<NavProp>();
-  const { chapterId, courseId } = route.params;
+  const { chapterId, courseId, focusContentId } = route.params;
+  // #20: Fokus-Modus — nur ein Quiz-Inhalt als eigene View (statt inline in der Lektion).
+  const inQuizView = !!focusContentId;
 
   const { data: model, isLoading, error } = useChapterContent(chapterId);
   const { recordActivity } = useStreak();
@@ -604,6 +678,26 @@ export function LessonScreen() {
 
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
   const chapterCompleteShown = useRef(false);
+
+  // #3/#6: Fortschritt aus dem Backend seeden (überlebt Sessions) und zur ersten
+  // offenen Position scrollen.
+  const seeded = useRef(false);
+  const scrollRef = useRef<ScrollView>(null);
+  const itemOffsets = useRef<Record<string, number>>({});
+  const didScroll = useRef(false);
+  const firstOpenId = model?.chapterContent.find((c) => !c.completed)?.elementId;
+
+  useEffect(() => {
+    if (!model || seeded.current) return;
+    seeded.current = true;
+    const done = model.chapterContent.filter((c) => c.completed).map((c) => c.elementId);
+    if (done.length > 0) setCompletedIds(new Set(done));
+    // Bereits komplett? Dann den „Kapitel abgeschlossen"-Alert beim Wiedereinstieg unterdrücken.
+    if (model.chapterContent.length > 0 && done.length === model.chapterContent.length) {
+      chapterCompleteShown.current = true;
+      didScroll.current = true; // nichts Offenes → nicht scrollen
+    }
+  }, [model]);
 
   const handleContentCompleted = useCallback(
     (contentId: string) => {
@@ -657,7 +751,9 @@ export function LessonScreen() {
           <Text style={[styles.backText, { color: colors.primary }]}>‹ {t('common.back')}</Text>
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.textPrimary, flex: 1 }]} numberOfLines={1}>
-          {model.chapterName}
+          {inQuizView
+            ? translate(model.chapterContent.find((c) => c.elementId === focusContentId)?.titel) || model.chapterName
+            : model.chapterName}
         </Text>
         <TouchableOpacity
           testID="ask-tutor"
@@ -674,13 +770,38 @@ export function LessonScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
-        {model.chapterContent.map((content) => (
-          <ContentItem
+      <ScrollView ref={scrollRef} style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+        {(inQuizView
+          ? model.chapterContent.filter((c) => c.elementId === focusContentId)
+          : model.chapterContent
+        ).map((content) => (
+          <View
             key={content.elementId}
-            content={content}
-            onCompleted={handleContentCompleted}
-          />
+            onLayout={(e) => {
+              const y = e.nativeEvent.layout.y;
+              itemOffsets.current[content.elementId] = y;
+              // Beim Layout der ersten offenen Position genau dorthin scrollen (#6).
+              if (!inQuizView && !didScroll.current && content.elementId === firstOpenId && y > 0) {
+                didScroll.current = true;
+                scrollRef.current?.scrollTo({ y: Math.max(0, y - Spacing.md), animated: true });
+              }
+            }}
+          >
+            <ContentItem
+              content={content}
+              completed={completedIds.has(content.elementId)}
+              inQuizView={inQuizView}
+              onOpenQuiz={(cid) =>
+                navigation.push('Lesson', {
+                  courseId,
+                  chapterId,
+                  lessonId: route.params.lessonId,
+                  focusContentId: cid,
+                })
+              }
+              onCompleted={handleContentCompleted}
+            />
+          </View>
         ))}
       </ScrollView>
     </SafeAreaView>
@@ -792,6 +913,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   radioDot: { width: 10, height: 10, borderRadius: 5 },
+  checkbox: { borderRadius: 5 },
+  completedBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.sm,
+    borderWidth: 1.5,
+    borderRadius: Radius.md,
+    paddingVertical: Spacing.md,
+    marginTop: Spacing.lg,
+  },
+  completedText: { fontSize: FontSize.md, fontWeight: FontWeight.semibold },
 
   checkButton: { borderRadius: Radius.md, padding: Spacing.md, alignItems: 'center' },
   checkButtonText: { color: 'white', fontWeight: FontWeight.bold, fontSize: FontSize.md },

@@ -31,7 +31,11 @@ public record ChapterResponseDto(
     bool HasQuiz = false,
     int PassThresholdPercent = 0,
     int MaxAttempts = 0,
-    bool QuizPassed = false);
+    bool QuizPassed = false,
+    // #15/#16: Kapitel-Fortschritt (Inhalte + ggf. Quiz gewichtet) für Progress-Bars.
+    int CompletedContent = 0,
+    int TotalContent = 0,
+    int ProgressPercent = 0);
 
 // ─── Kapitelinhalte (GET /api/chapters/{id}/content) ─────────────────────────
 
@@ -61,6 +65,9 @@ public record ChapterContentDto(
 // ─── Requests (Author) ───────────────────────────────────────────────────────
 
 public record CreateCourseRequest(string? Name, List<TextItemDto>? TitelItems, List<string>? Tags = null, string? Level = null);
+
+// Metadaten-Update (F11): gesetzte Felder werden übernommen, null bleibt unverändert.
+public record UpdateCourseRequest(string? Name, List<TextItemDto>? TitelItems, List<string>? Tags = null, string? Level = null);
 
 public record CreateChapterRequest(
     string? Name,

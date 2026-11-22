@@ -157,11 +157,23 @@ export function AddChapterContentScreen() {
             courseId,
           });
         } else {
-          navigation.goBack();
+          // #11: auf der Seite bleiben — Formular leeren, damit direkt der nächste
+          // Inhalt angelegt werden kann. Die Liste oben refetcht automatisch
+          // (useAddChapterContent invalidiert useChapterContent). Zurück via „Fertig".
+          resetForm();
         }
       },
       onError: () => Alert.alert('Fehler', 'Inhalt konnte nicht erstellt werden.'),
     });
+  };
+
+  /** Textfelder leeren (Typ bleibt, damit man schnell mehrere gleichartige Inhalte anlegt). */
+  const resetForm = () => {
+    setName('');
+    setTitelDe('');
+    setTitelEn('');
+    setLessonTextDe('');
+    setVideoUrl('');
   };
 
   const saveLabel = isEdit
@@ -386,7 +398,7 @@ export function AddChapterContentScreen() {
           />
 
           <Button
-            title="Abbrechen"
+            title={isEdit ? 'Abbrechen' : 'Fertig'}
             variant="ghost"
             onPress={() => navigation.goBack()}
             style={{ alignSelf: 'center', marginTop: Spacing.xs }}

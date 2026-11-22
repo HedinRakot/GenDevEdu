@@ -170,6 +170,10 @@ export interface Chapter extends EntityBase {
   passThresholdPercent: number;
   maxAttempts: number;
   quizPassed: boolean;
+  // #15/#16: Kapitel-Fortschritt (Inhalte + ggf. Quiz gewichtet).
+  completedContent: number;
+  totalContent: number;
+  progressPercent: number;
 }
 
 // ─── Kapitel-Abschlussquiz (F8) ──────────────────────────────────────────────

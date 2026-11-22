@@ -37,13 +37,14 @@ public class StatsCalculatorTests
         var cs = Assert.Single(dto.Courses);
         Assert.Equal(2, cs.CompletedContent);
         Assert.Equal(4, cs.TotalContent);
-        Assert.Equal(50, cs.ProgressPercent);
+        // #15: Quiz mitgewichtet → (2 Inhalte + 1 Quiz) / (4 + 1) = 60 %.
+        Assert.Equal(60, cs.ProgressPercent);
         Assert.Equal(1, cs.ChaptersPassed);
         Assert.Equal(1, cs.TotalChapters);
         Assert.False(cs.Completed);          // Inhalte noch nicht fertig
         Assert.Equal(1, dto.ActiveCourses);
         Assert.Equal(0, dto.CompletedCourses);
-        Assert.Equal(50, dto.OverallProgressPercent);
+        Assert.Equal(60, dto.OverallProgressPercent);
     }
 
     [Fact]

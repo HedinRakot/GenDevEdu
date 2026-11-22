@@ -5,6 +5,8 @@ import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persi
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo, { type NetInfoState } from '@react-native-community/netinfo';
 
+import { completeChapterContent } from '@/api/courses';
+
 // ─── Query Client Konfiguration ───────────────────────────────────────────────
 const ONE_HOUR = 1000 * 60 * 60;
 const ONE_DAY = ONE_HOUR * 24;
@@ -48,6 +50,28 @@ const queryClient = new QueryClient({
       retry: 1,
       networkMode: 'offlineFirst',
     },
+  },
+});
+
+/**
+ * Offline-Mutations-Queue: Damit eine offline ausgelöste Mutation einen App-Neustart
+ * überlebt, muss sie (a) über einen mutationKey mit registrierten Defaults laufen —
+ * die mutationFn-Closure selbst wird NICHT persistiert — und (b) beim Rehydrieren
+ * fortgesetzt werden (resumePausedMutations, s. u.). Neue offline-fähige Mutations
+ * hier registrieren und im Hook denselben mutationKey setzen.
+ */
+export const offlineMutationKeys = {
+  completeContent: ['completeContent'] as const,
+};
+
+queryClient.setMutationDefaults(offlineMutationKeys.completeContent, {
+  mutationFn: (contentId: string) => completeChapterContent(contentId),
+  onSuccess: () => {
+    // Beim Fortsetzen aus dem Persist-Cache (kein Component) trotzdem UI-Daten auffrischen.
+    queryClient.invalidateQueries({ queryKey: ['courses'] });
+    queryClient.invalidateQueries({ queryKey: ['progress'] });
+    queryClient.invalidateQueries({ queryKey: ['stats'] });
+    queryClient.invalidateQueries({ queryKey: ['certificates'] });
   },
 });
 
@@ -99,7 +123,14 @@ export function QueryProvider({ children }: QueryProviderProps) {
         dehydrateOptions: {
           // Nur erfolgreiche Queries persistieren (keine Fehler/laufenden).
           shouldDehydrateQuery: (query) => query.state.status === 'success',
+          // Offline pausierte Mutations mitpersistieren, damit sie einen
+          // App-Neustart überleben und danach nachgesendet werden können.
+          shouldDehydrateMutation: (mutation) => mutation.state.isPaused,
         },
+      }}
+      onSuccess={() => {
+        // Nach dem Rehydrieren offline gequeuete Mutations fortsetzen (sobald online).
+        queryClient.resumePausedMutations();
       }}
     >
       {children}

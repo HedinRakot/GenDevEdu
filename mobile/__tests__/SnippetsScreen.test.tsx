@@ -11,6 +11,12 @@ jest.mock('@/hooks/useSnippets', () => ({
   useSnippets: () => ({ ...mockState, remove: mockRemove }),
 }));
 
+// SnippetsScreen nutzt useFocusEffect; ohne NavigationContainer im Test mocken.
+jest.mock('@react-navigation/native', () => ({
+  useFocusEffect: jest.fn(),
+  useNavigation: () => ({ navigate: jest.fn(), goBack: jest.fn() }),
+}));
+
 import { ThemeProvider } from '@/context/ThemeContext';
 import { SnippetsScreen } from '@/screens/SnippetsScreen';
 

@@ -21,9 +21,18 @@ builder.Services.AddScoped<ParticipantService>();
 builder.Services.AddScoped<ActivityService>();
 builder.Services.AddScoped<EmailTemplateService>();
 builder.Services.AddScoped<Seeder>();
-// v1: kein echter Versand — Vorschau-Modus. Später per Config-Switch (Email:Sender)
-// gegen einen SmtpEmailSender austauschbar, ohne Endpoints/Frontend anzufassen.
-builder.Services.AddSingleton<IEmailSender, NoOpEmailSender>();
+// Versand-Sender per Config-Switch: Email:Sender = "smtp" → echter SMTP-Versand,
+// sonst NoOp (Vorschau-Modus). Endpoints/Frontend bleiben unverändert.
+if (string.Equals(builder.Configuration["Email:Sender"], "smtp", StringComparison.OrdinalIgnoreCase))
+{
+    var smtpOptions = builder.Configuration.GetSection("Email:Smtp").Get<SmtpOptions>() ?? new SmtpOptions();
+    builder.Services.AddSingleton(smtpOptions);
+    builder.Services.AddSingleton<IEmailSender, SmtpEmailSender>();
+}
+else
+{
+    builder.Services.AddSingleton<IEmailSender, NoOpEmailSender>();
+}
 
 // ---- JSON: camelCase, Enums als camelCase-Strings ----
 builder.Services.ConfigureHttpJsonOptions(o =>

@@ -43,6 +43,10 @@ public static class CourseEndpoints
             async (CreateCourseRequest req, ClaimsPrincipal user, CourseService svc) =>
                 (await svc.CreateAsync(req, user.UserId())).ToHttp());
 
+        author.MapPut("/api/courses/{id}",
+            async (string id, UpdateCourseRequest req, ClaimsPrincipal user, CourseService svc) =>
+                (await svc.UpdateAsync(id, req, user.UserId(), user.IsAdmin())).ToHttp());
+
         author.MapPost("/api/courses/{id}/publish",
             async (string id, ClaimsPrincipal user, CourseService svc) =>
                 (await svc.PublishAsync(id, user.UserId(), user.IsAdmin())).ToHttp());
@@ -50,6 +54,10 @@ public static class CourseEndpoints
         author.MapPost("/api/courses/{id}/chapters",
             async (string id, CreateChapterRequest req, ClaimsPrincipal user, CourseService svc) =>
                 (await svc.AddChapterAsync(id, req, user.UserId(), user.IsAdmin())).ToHttp());
+
+        author.MapPut("/api/chapters/{id}",
+            async (string id, CreateChapterRequest req, ClaimsPrincipal user, CourseService svc) =>
+                (await svc.UpdateChapterAsync(id, req, user.UserId(), user.IsAdmin())).ToHttp());
 
         author.MapPost("/api/chapters/{id}/content",
             async (string id, CreateChapterContentRequest req, ClaimsPrincipal user, CourseService svc) =>

@@ -72,15 +72,17 @@ describe('LoginScreen', () => {
   });
 
   it('shows an inline error when sign-in returns an error', async () => {
+    // clerkErrorMessage bildet den stabilen Fehler-code auf auth.errors.<code> ab
+    // (message/longMessage sind nur Englisch). Also einen bekannten Code liefern.
     mockedUseSignIn.mockReturnValue(
-      makeSignInMock(jest.fn().mockResolvedValue({ error: { message: 'boom', longMessage: 'boom long' } })),
+      makeSignInMock(jest.fn().mockResolvedValue({ error: { code: 'form_password_incorrect' } })),
     );
 
     const { getByTestId, findByTestId } = renderScreen();
     fireEvent.press(getByTestId('oidc-login-button'));
 
     const banner = await findByTestId('login-error');
-    expect(banner.props.children).toBe('boom long');
+    expect(banner.props.children).toBe('Falsches Passwort.');
   });
 
   it('uses the network-specific error message for network failures', async () => {

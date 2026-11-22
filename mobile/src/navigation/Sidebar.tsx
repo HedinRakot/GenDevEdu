@@ -1,11 +1,12 @@
-import React from 'react';
-import { View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Pressable, View } from 'react-native';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/context/ThemeContext';
 import { useAuth } from '@/context/AuthContext';
 import { confirmDialog } from '@/utils/confirm';
+import { getJson, setJson, STORAGE_KEYS } from '@/store/storage';
 import { Spacing } from '@/config/theme';
 import { Icon, type IconName, SidebarItem, Typography } from '@/components/common';
 
@@ -25,8 +26,9 @@ const NAV_CONFIG: Record<
   Admin: { icon: 'users', section: 'manage', labelKey: 'navigation.admin', fallback: 'Verwaltung' },
 };
 
-/** Feste Sidebar-Breite auf Desktop/Web. */
+/** Sidebar-Breite auf Desktop/Web (ausgeklappt / eingeklappt). */
 export const SIDEBAR_WIDTH = 248;
+export const SIDEBAR_WIDTH_COLLAPSED = 72;
 
 /**
  * Desktop-/Web-Seitennavigation. Wird als `tabBar` des Bottom-Tab-Navigators auf breiten
@@ -37,6 +39,20 @@ export function Sidebar({ state, navigation }: BottomTabBarProps) {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const { user, logout } = useAuth();
+
+  // Einklapp-Zustand, persistiert (überlebt Reload). Start expanded; nach Rehydrierung ggf. collapsed.
+  const [collapsed, setCollapsed] = useState(false);
+  useEffect(() => {
+    getJson<boolean>(STORAGE_KEYS.SIDEBAR_COLLAPSED).then((v) => {
+      if (v != null) setCollapsed(v);
+    });
+  }, []);
+  const toggleCollapsed = () =>
+    setCollapsed((c) => {
+      const next = !c;
+      void setJson(STORAGE_KEYS.SIDEBAR_COLLAPSED, next);
+      return next;
+    });
 
   const handleLogout = () =>
     confirmDialog({
@@ -77,6 +93,7 @@ export function Sidebar({ state, navigation }: BottomTabBarProps) {
         icon={cfg.icon}
         label={t(cfg.labelKey, cfg.fallback)}
         active={isFocused}
+        collapsed={collapsed}
         onPress={() => onPress(route.name, route.key, isFocused)}
       />
     );
@@ -85,54 +102,71 @@ export function Sidebar({ state, navigation }: BottomTabBarProps) {
   return (
     <View
       style={{
-        width: SIDEBAR_WIDTH,
+        width: collapsed ? SIDEBAR_WIDTH_COLLAPSED : SIDEBAR_WIDTH,
         backgroundColor: colors.tabBackground,
         borderRightWidth: 1,
         borderRightColor: colors.border,
-        paddingHorizontal: Spacing.md,
+        paddingHorizontal: collapsed ? Spacing.xs : Spacing.md,
         paddingVertical: Spacing.lg,
       }}
     >
-      {/* Logo / Wortmarke */}
+      {/* Logo / Wortmarke + Einklapp-Toggle */}
       <View
         style={{
           flexDirection: 'row',
           alignItems: 'center',
+          justifyContent: collapsed ? 'center' : 'space-between',
           gap: Spacing.sm + 4,
-          paddingHorizontal: Spacing.sm,
+          paddingHorizontal: collapsed ? 0 : Spacing.sm,
           paddingBottom: Spacing.lg,
         }}
       >
-        <Icon name="logo" size={26} color={colors.accent} strokeWidth={1.75} />
-        <Typography variant="h3">EduCode</Typography>
+        {!collapsed && (
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm + 4 }}>
+            <Icon name="logo" size={26} color={colors.accent} strokeWidth={1.75} />
+            <Typography variant="h3">EduCode</Typography>
+          </View>
+        )}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t(collapsed ? 'navigation.expandSidebar' : 'navigation.collapseSidebar', collapsed ? 'Menü ausklappen' : 'Menü einklappen')}
+          onPress={toggleCollapsed}
+          style={({ pressed }) => ({ padding: Spacing.xs, opacity: pressed ? 0.7 : 1 })}
+        >
+          <Icon name={collapsed ? 'chevron-right' : 'chevron-left'} size={20} color={colors.textSecondary} />
+        </Pressable>
       </View>
 
       {/* Sektion Lernen */}
-      <Typography
-        variant="caption"
-        color="tertiary"
-        style={{ letterSpacing: 1.4, paddingHorizontal: Spacing.md, paddingBottom: Spacing.xs }}
-      >
-        {t('navigation.sectionLearn', 'LERNEN').toUpperCase()}
-      </Typography>
+      {!collapsed && (
+        <Typography
+          variant="caption"
+          color="tertiary"
+          style={{ letterSpacing: 1.4, paddingHorizontal: Spacing.md, paddingBottom: Spacing.xs }}
+        >
+          {t('navigation.sectionLearn', 'LERNEN').toUpperCase()}
+        </Typography>
+      )}
       <View style={{ gap: 2 }}>{learn.map(renderItem)}</View>
 
       {/* Sektion Verwaltung (nur wenn Rollen-Screens registriert sind) */}
       {manage.length > 0 && (
         <>
-          <Typography
-            variant="caption"
-            color="tertiary"
-            style={{
-              letterSpacing: 1.4,
-              paddingHorizontal: Spacing.md,
-              paddingTop: Spacing.lg,
-              paddingBottom: Spacing.xs,
-            }}
-          >
-            {t('navigation.sectionManage', 'VERWALTUNG').toUpperCase()}
-          </Typography>
-          <View style={{ gap: 2 }}>{manage.map(renderItem)}</View>
+          {!collapsed && (
+            <Typography
+              variant="caption"
+              color="tertiary"
+              style={{
+                letterSpacing: 1.4,
+                paddingHorizontal: Spacing.md,
+                paddingTop: Spacing.lg,
+                paddingBottom: Spacing.xs,
+              }}
+            >
+              {t('navigation.sectionManage', 'VERWALTUNG').toUpperCase()}
+            </Typography>
+          )}
+          <View style={{ gap: 2, marginTop: collapsed ? Spacing.sm : 0 }}>{manage.map(renderItem)}</View>
         </>
       )}
 
@@ -143,9 +177,10 @@ export function Sidebar({ state, navigation }: BottomTabBarProps) {
         style={{
           flexDirection: 'row',
           alignItems: 'center',
+          justifyContent: collapsed ? 'center' : 'flex-start',
           gap: Spacing.sm + 2,
           paddingTop: Spacing.md,
-          paddingHorizontal: Spacing.sm,
+          paddingHorizontal: collapsed ? 0 : Spacing.sm,
           borderTopWidth: 1,
           borderTopColor: colors.border,
         }}
@@ -164,19 +199,21 @@ export function Sidebar({ state, navigation }: BottomTabBarProps) {
             {initials || '?'}
           </Typography>
         </View>
-        <View style={{ flex: 1, minWidth: 0 }}>
-          <Typography variant="label" numberOfLines={1}>
-            {user?.name || user?.email || 'Gast'}
-          </Typography>
-          <Typography variant="caption" color="tertiary" numberOfLines={1}>
-            {t(`roles.${user?.role ?? 'student'}`, 'Lernende')}
-          </Typography>
-        </View>
+        {!collapsed && (
+          <View style={{ flex: 1, minWidth: 0 }}>
+            <Typography variant="label" numberOfLines={1}>
+              {user?.name || user?.email || 'Gast'}
+            </Typography>
+            <Typography variant="caption" color="tertiary" numberOfLines={1}>
+              {t(`roles.${user?.role ?? 'student'}`, 'Lernende')}
+            </Typography>
+          </View>
+        )}
       </View>
 
       {/* Abmelden */}
       <View style={{ marginTop: Spacing.xs }}>
-        <SidebarItem icon="logout" label={t('auth.logout', 'Abmelden')} onPress={handleLogout} />
+        <SidebarItem icon="logout" label={t('auth.logout', 'Abmelden')} collapsed={collapsed} onPress={handleLogout} />
       </View>
     </View>
   );

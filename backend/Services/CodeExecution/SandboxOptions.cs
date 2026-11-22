@@ -5,6 +5,13 @@ namespace DevEdu.Api.Services.CodeExecution;
 /// </summary>
 public class SandboxOptions
 {
+    /// <summary>
+    /// Dev-Schalter: statt des Podman-Runners den <see cref="StubSandboxRunner"/> verwenden.
+    /// Ohne Podman-Socket (lokale macOS-Entwicklung) läuft der echte Runner sonst in
+    /// InternalError. Nur für Development gedacht.
+    /// </summary>
+    public bool UseStub { get; set; }
+
     /// <summary>Docker-kompatibler Podman-Socket des Sidecars.</summary>
     public string PodmanSocketUri { get; set; } = "unix:///podman/podman.sock";
 

@@ -90,10 +90,16 @@ public class QuestionService
         if (!isAdmin && course.AuthorId != userId)
             return ServiceResult<QuestionListResponseModel>.Forbidden("Not your course.");
 
-        // Fragen werden vollständig ersetzt (Replace-Semantik wie beim Kapitel-Quiz);
-        // neue Frage-Ids => zu ersetzten Fragen gehörende Attempts werden verwaist.
+        // Fragen werden vollständig ersetzt (Replace-Semantik wie beim Kapitel-Quiz).
+        // Die neuen Fragen bekommen neue Ids => alte Attempts würden verwaisen. Daher
+        // die zu den alten Frage-Ids gehörenden Attempts aufräumen (analog
+        // ChapterQuizService beim Quiz-Löschen).
+        var oldQuestionIds = ql.Questions.Select(q => q.Id).ToList();
         ql.Questions = (req.Questions ?? new()).Select(Mappers.ToQuestion).ToList();
         await _db.QuestionLists.ReplaceOneAsync(x => x.Id == ql.Id, ql);
+
+        if (oldQuestionIds.Count > 0)
+            await _db.Attempts.DeleteManyAsync(a => oldQuestionIds.Contains(a.QuestionId));
 
         return ServiceResult<QuestionListResponseModel>.Ok(Mappers.ToQuestionListModel(ql, true));
     }

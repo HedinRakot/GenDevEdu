@@ -99,9 +99,15 @@ Web". Das Backend erzwingt die Rechte zusätzlich per Policy (403).
 ### Linux (Docker + k3s)
 - Docker, k3s (lokaler Cluster), `sudo`-Rechte
 
-> Es wird **kein** lokales .NET-SDK oder Node für das Cluster-Deployment benötigt — alle
-> Builds laufen in Containern. Für die lokale Mobile-Entwicklung und Tests braucht es
-> Node 18+ bzw. das .NET-10-SDK.
+### macOS (nativ + iOS-Simulator)
+- .NET-10-SDK (`brew install --cask dotnet-sdk`)
+- Node 18+ / npm (`brew install node`)
+- Podman inkl. laufender Machine (`brew install podman && podman machine init && podman machine start`) — nur für den MongoDB-Container
+- Xcode + iOS-Simulator (aus dem App Store) für den iOS-Lauf
+
+> Es wird **kein** lokales .NET-SDK oder Node für das Cluster-Deployment (Windows/Linux)
+> benötigt — alle Builds laufen in Containern. Für die lokale Mobile-Entwicklung, Tests
+> und den macOS-Pfad braucht es Node 18+ bzw. das .NET-10-SDK.
 
 ## Schnellstart — Windows (Podman + Kind)
 
@@ -138,6 +144,64 @@ Falls `devedu.localhost` nicht auflöst, als Administrator in
 ```
 
 Nach dem Deploy ist die App unter **http://devedu.localhost** erreichbar.
+
+## Schnellstart — macOS (nativ + iOS-Simulator)
+
+Auf macOS läuft die Umgebung **ohne Kubernetes**: MongoDB als Podman-Container,
+das Backend nativ via `dotnet run` (Port 8080), die App im iOS-Simulator. Der
+iOS-Simulator teilt sich das Host-Loopback, daher erreicht die App das Backend
+direkt unter `http://localhost:8080` — der Default aus `mobile/src/config/env.ts`,
+es ist **keine** zusätzliche Konfiguration nötig.
+
+```bash
+./dev-macos.sh up        # MongoDB-Container + Backend starten (erster Build 1-2 Min)
+./dev-macos.sh ios       # Expo im iOS-Simulator öffnen
+./dev-macos.sh status    # zeigt, was läuft
+./dev-macos.sh logs      # folgt dem Backend-Log
+./dev-macos.sh down      # Backend stoppen + Mongo anhalten (Daten bleiben im Volume)
+```
+
+Danach ist die **Backend-API** unter **http://localhost:8080/api** erreichbar. Für die
+Web-App stattdessen `cd mobile && npx expo start --web`.
+
+### Echtes iOS-Gerät (`--lan`)
+
+Für ein echtes iPhone (statt Simulator) `localhost` durch die **LAN-IP** des Macs
+ersetzen — dafür gibt es den `--lan`-Modus. Er bindet das Backend an `0.0.0.0:8080`
+(im WLAN erreichbar) und schreibt die LAN-IP automatisch nach `mobile/.env.local`:
+
+```bash
+./dev-macos.sh up --lan     # Backend im WLAN erreichbar + .env.local setzen
+./dev-macos.sh ios --lan    # Expo starten → QR-Code mit der iPhone-Kamera scannen
+```
+
+Voraussetzungen: Mac + iPhone im **selben WLAN**, macOS-Firewall lässt Port 8080 zu.
+Für alle Native-Module (z. B. Push via `expo-notifications`) statt Expo Go einen
+Dev-Build aufs Gerät: `cd mobile && npx expo run:ios --device <HW-UDID>` (Xcode + Apple-ID-Signierung).
+
+> **Dev-Build auf echtem Gerät unter Xcode 26 — zwei Fallstricke der Expo-CLI:**
+> 1. **UDID:** `--device` erwartet die **Hardware-UDID** (Format `00008150-…`, via
+>    `xcrun xctrace list devices`), *nicht* die CoreDevice-ID aus `xcrun devicectl list devices`.
+> 2. **Installation:** Der Build endet mit `** BUILD SUCCEEDED **`, aber Expos Auto-Install
+>    kann mit `Error: null` (devicectl) abbrechen. Dann die fertige App direkt installieren:
+>    ```bash
+>    APP=$(find ~/Library/Developer/Xcode/DerivedData/education-*/Build/Products/Debug-iphoneos -name education.app | head -1)
+>    xcrun devicectl device install app --device <HW-UDID> "$APP"
+>    xcrun devicectl device process launch --device <HW-UDID> com.developereducation.education
+>    ```
+>
+> Weiter nötig: **Developer Mode** am iPhone (Einstellungen → Datenschutz & Sicherheit → Reboot),
+> Signing-Team mit Capabilities **Push** + **Sign In with Apple** (einmal in Xcode „Signing &
+> Capabilities" auflösen lassen), und **kein** paralleler Xcode-Build (sonst `build.db locked`).
+
+> **Android-Emulator** statt iOS: Der Emulator erreicht den Host nicht über
+> `localhost`. In `mobile/.env.local` (`cp mobile/.env.example mobile/.env.local`)
+> `EXPO_PUBLIC_API_BASE_URL=http://10.0.2.2:8080` setzen.
+>
+> **Code-Sandbox (F7)** ist auf diesem Pfad nicht verfügbar: Das native Backend
+> erreicht den Podman-Socket in der VM nicht — Code-Aufgaben schlagen fehl, der Rest
+> der App funktioniert. Für die vollständige Sandbox den Cluster-Pfad (Windows/Linux)
+> nutzen.
 
 ## Mobile App (React Native / Expo)
 
@@ -240,6 +304,7 @@ tests/           DevEdu.Api.Tests (xUnit Unit + Integration)
 course-content/  Repo-verwaltete Kursinhalte + Übersetzungen (Overlay)
 deploy-kind.ps1  Windows-Deployment: Podman + Kind
 deploy.sh        Linux-Deployment: Docker + k3s
+dev-macos.sh     macOS-Dev: Mongo (Podman) + Backend (nativ) + iOS-Simulator
 ```
 
 ## Scripts
@@ -248,6 +313,7 @@ deploy.sh        Linux-Deployment: Docker + k3s
 |---|---|---|
 | `deploy-kind.ps1` | Windows | Images bauen → Registry → Kind-Cluster → Manifeste. Flags: `-NoBuild`, `-BuildOnly`, `-DeleteCluster`, `-Forward` |
 | `deploy.sh` | Linux | Images bauen → Registry → `k8s/` anwenden → Rollout. Flags: `--no-build`, `--build-only` |
+| `dev-macos.sh` | macOS | Nativ (ohne k8s): Mongo-Container + `dotnet run` + iOS-Simulator. Befehle: `up`, `ios`, `status`, `logs`, `down`. Flag `--lan` = Backend im WLAN + `.env.local` für echtes Gerät |
 | `setup-registry.sh` | Linux | Einmalig: Registry `localhost:5000` + k3s `registries.yaml` |
 | `test-e2e.sh` | – | Playwright + Clerk gegen Expo-Web. Setup: `e2e/README.md`. Override: `BASE_URL=…` |
 | `apply-course-content.ps1` | Windows | Repo-verwaltete DE/EN-Übersetzungen + Zusatzkapitel (idempotent, lokal) |
